@@ -2,7 +2,6 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { OtpModel, type OTP_PURPOSES } from "../models/otp.model.js";
 import { ApiError } from "./api-error.js";
-import { isProduction } from "../config/env.js";
 
 const OTP_TTL_MINUTES = 5;
 const RESEND_COOLDOWN_SECONDS = 30;
@@ -39,9 +38,12 @@ export async function requestOtp(mobile: string, purpose: OtpPurpose) {
   await OtpModel.create({ mobile, purpose, otpHash, expiresAt });
 
   // Real SMS delivery is a documented pending integration (see README/report) —
-  // in non-production environments the OTP is returned directly so the flow
-  // is fully testable without a paid SMS provider.
-  return { expiresAt, devOtp: isProduction ? undefined : code };
+  // no SMS/WhatsApp provider is wired up yet, in production or otherwise, so
+  // the OTP is returned directly in the response for every environment.
+  // TODO: once a real provider (Twilio/MSG91/Gupshup) is purchased and wired
+  // in, gate this behind isProduction again so the code stops being exposed
+  // in the API response.
+  return { expiresAt, devOtp: code };
 }
 
 export async function consumeOtp(mobile: string, purpose: OtpPurpose, code: string) {
