@@ -1,4 +1,4 @@
-import Astronomy from "astronomy-engine";
+import * as Astronomy from "astronomy-engine";
 import type { AstroTime } from "astronomy-engine";
 import { getLahiriAyanamsaDegrees, normalizeDegrees } from "./ayanamsa.js";
 import { getNakshatra, getRashi } from "./zodiac.js";

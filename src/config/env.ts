@@ -23,12 +23,13 @@ const envSchema = z.object({
   PAYU_MODE: z.enum(["test", "live"]).default("test"),
   PAYU_MERCHANT_KEY: z.string().default("gtKFFx"),
   PAYU_MERCHANT_SALT: z.string().default("eCwWELxi"),
-  // Media Library uploads (pooja/festival/product/blog/pandit images) go to this
-  // Google Cloud Storage bucket when set. GOOGLE_APPLICATION_CREDENTIALS (the
-  // GCP SDK's own standard env var — path to a service-account JSON key) must
-  // also be set. Falls back to local disk storage under /uploads when unset,
-  // so the Media Library keeps working in dev without any cloud account.
-  GCS_BUCKET_NAME: z.string().optional(),
+  // Media Library uploads (pooja/festival/product/blog/pandit images) go to
+  // Cloudinary when all three vars below are set. Falls back to local disk
+  // storage under /uploads when unset, so the Media Library keeps working in
+  // dev without any cloud account.
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

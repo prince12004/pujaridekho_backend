@@ -2,18 +2,27 @@ import fs from "fs";
 import fsPromises from "fs/promises";
 import path from "path";
 import crypto from "crypto";
-import { Storage } from "@google-cloud/storage";
+import { v2 as cloudinary } from "cloudinary";
 import { env } from "../config/env.js";
 
 export const LOCAL_UPLOAD_DIR = path.join(process.cwd(), "uploads");
 
-const gcsStorage = env.GCS_BUCKET_NAME ? new Storage() : null;
-const bucket = gcsStorage?.bucket(env.GCS_BUCKET_NAME!);
+const CLOUDINARY_FOLDER = "pujari-media";
 
-if (!gcsStorage) {
+const cloudinaryConfigured = Boolean(
+  env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET,
+);
+
+if (cloudinaryConfigured) {
+  cloudinary.config({
+    cloud_name: env.CLOUDINARY_CLOUD_NAME,
+    api_key: env.CLOUDINARY_API_KEY,
+    api_secret: env.CLOUDINARY_API_SECRET,
+  });
+} else {
   console.warn(
-    "[cloud-storage] GCS_BUCKET_NAME is not set — Media Library uploads will be saved to local disk instead of " +
-      "Google Cloud Storage. Set GCS_BUCKET_NAME and GOOGLE_APPLICATION_CREDENTIALS to enable real cloud storage.",
+    "[cloud-storage] CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET are not all set — " +
+      "Media Library uploads will be saved to local disk instead of Cloudinary. Set all three to enable it.",
   );
   if (!fs.existsSync(LOCAL_UPLOAD_DIR)) fs.mkdirSync(LOCAL_UPLOAD_DIR, { recursive: true });
 }
@@ -32,10 +41,13 @@ export interface SavedFile {
 export async function saveFile(buffer: Buffer, originalName: string, mimeType: string): Promise<SavedFile> {
   const filename = generateFilename(originalName);
 
-  if (bucket) {
-    const blob = bucket.file(filename);
-    await blob.save(buffer, { contentType: mimeType, resumable: false });
-    return { filename, url: `https://storage.googleapis.com/${env.GCS_BUCKET_NAME}/${filename}` };
+  if (cloudinaryConfigured) {
+    const publicId = `${CLOUDINARY_FOLDER}/${path.parse(filename).name}`;
+    const result = await cloudinary.uploader.upload(`data:${mimeType};base64,${buffer.toString("base64")}`, {
+      public_id: publicId,
+      resource_type: "image",
+    });
+    return { filename: result.public_id, url: result.secure_url };
   }
 
   await fsPromises.writeFile(path.join(LOCAL_UPLOAD_DIR, filename), buffer);
@@ -43,8 +55,8 @@ export async function saveFile(buffer: Buffer, originalName: string, mimeType: s
 }
 
 export async function deleteFile(filename: string): Promise<void> {
-  if (bucket) {
-    await bucket.file(filename).delete({ ignoreNotFound: true });
+  if (cloudinaryConfigured) {
+    await cloudinary.uploader.destroy(filename, { resource_type: "image" });
     return;
   }
   await fsPromises.unlink(path.join(LOCAL_UPLOAD_DIR, filename)).catch(() => undefined);
