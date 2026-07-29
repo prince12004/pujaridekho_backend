@@ -1,0 +1,16 @@
+export const BOOKING_STATUS_LABELS: Record<string, string> = {
+  pending_payment: "Pending Payment",
+  payment_received: "Payment Received",
+  booking_confirmed: "Booking Confirmed",
+  pandit_assignment_pending: "Pandit Assignment Pending",
+  pandit_assigned: "Pandit Assigned",
+  pandit_accepted: "Pandit Accepted",
+  pandit_on_the_way: "Pandit On The Way",
+  pooja_started: "Pooja Started",
+  pooja_completed: "Pooja Completed",
+  closed: "Closed",
+  cancelled: "Cancelled",
+  refund_requested: "Refund Requested",
+  refunded: "Refunded",
+  rescheduled: "Rescheduled",
+};
