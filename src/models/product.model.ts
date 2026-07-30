@@ -15,7 +15,7 @@ const productSchema = new Schema(
     inStock: { type: Boolean, default: true },
     tags: { type: [String], default: [] },
     featured: { type: Boolean, default: false },
-    status: { type: String, enum: ["draft", "published", "archived"], default: "draft" },
+    status: { type: String, enum: ["draft", "Published", "archived"], default: "draft" },
     sortOrder: { type: Number, default: 0 },
     seo: {
       title: { type: String },

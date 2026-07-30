@@ -5,7 +5,7 @@ import { CityModel } from "../../models/city.model.js";
 import { PanditModel } from "../../models/pandit.model.js";
 
 export const getPublicCities = asyncHandler(async (_req: Request, res: Response) => {
-  const cities = await CityModel.find({ status: "published", isServiceable: true }).sort({ sortOrder: 1, name: 1 });
+  const cities = await CityModel.find({ status: "Published", isServiceable: true }).sort({ sortOrder: 1, name: 1 });
 
   const counts = await PanditModel.aggregate([
     { $match: { accountStatus: "active", verificationStatus: "verified" } },

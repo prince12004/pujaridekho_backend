@@ -19,7 +19,7 @@ const productSchema = z.object({
   inStock: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
   featured: z.boolean().optional(),
-  status: z.enum(["draft", "published", "archived"]).optional(),
+  status: z.enum(["draft", "Published", "archived"]).optional(),
   sortOrder: z.number().optional(),
 });
 

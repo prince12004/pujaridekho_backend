@@ -12,7 +12,7 @@ export async function listPublicFestivals(query: PublicListFestivalsQuery) {
   const page = query.page && query.page > 0 ? query.page : 1;
   const limit = query.limit && query.limit > 0 ? query.limit : 20;
 
-  const filter: Record<string, unknown> = { status: "published" };
+  const filter: Record<string, unknown> = { status: "Published" };
   if (query.search) filter.name = { $regex: query.search, $options: "i" };
   if (query.featured) filter.featured = true;
 
@@ -28,7 +28,7 @@ export async function listPublicFestivals(query: PublicListFestivalsQuery) {
 }
 
 export async function getPublicFestivalBySlug(slug: string) {
-  const festival = await FestivalModel.findOne({ slug, status: "published" });
+  const festival = await FestivalModel.findOne({ slug, status: "Published" });
   if (!festival) throw ApiError.notFound("Festival not found");
   return festival;
 }

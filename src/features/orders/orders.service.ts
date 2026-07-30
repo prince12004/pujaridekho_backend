@@ -3,7 +3,6 @@ import { createNotification } from "../../lib/notify.js";
 import { notifyCustomer } from "../../lib/notify-customer.js";
 import { OrderModel } from "../../models/order.model.js";
 import { ProductModel } from "../../models/product.model.js";
-import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
 import { computeCouponDiscount, redeemCoupon } from "../coupons/coupons.service.js";
 
 export const FREE_DELIVERY_THRESHOLD = 299;
@@ -23,15 +22,13 @@ export interface CreateOrderInput {
   couponCode?: string;
 }
 
-export async function createPublicOrder(input: CreateOrderInput) {
+export async function createPublicOrder(input: CreateOrderInput, customerId: string) {
   if (input.items.length === 0) throw ApiError.badRequest("Order must contain at least one item");
-
-  const customer = await findOrCreateCustomerByMobile(input.customer);
 
   const items = [];
   let subtotal = 0;
   for (const item of input.items) {
-    const product = await ProductModel.findOne({ slug: item.productSlug, status: "published" });
+    const product = await ProductModel.findOne({ slug: item.productSlug, status: "Published" });
     if (!product) throw ApiError.badRequest(`Product "${item.productSlug}" is not available`);
     items.push({ product: product._id, name: product.name, price: product.sellingPrice, quantity: item.quantity });
     subtotal += product.sellingPrice * item.quantity;
@@ -45,8 +42,8 @@ export async function createPublicOrder(input: CreateOrderInput) {
 
   const order = await OrderModel.create({
     orderId,
-    customer: customer._id,
-    customerSnapshot: { name: customer.name, mobile: customer.mobile, email: customer.email },
+    customer: customerId,
+    customerSnapshot: { name: input.customer.name, mobile: input.customer.mobile, email: input.customer.email },
     items,
     shippingAddress: input.shippingAddress,
     subtotal,
@@ -63,12 +60,12 @@ export async function createPublicOrder(input: CreateOrderInput) {
   await createNotification({
     type: "order",
     title: "New order placed",
-    message: `${customer.name} placed order ${order.orderId} for ₹${total.toLocaleString("en-IN")}`,
+    message: `${input.customer.name} placed order ${order.orderId} for ₹${total.toLocaleString("en-IN")}`,
     link: `/admin/orders`,
   });
 
   await notifyCustomer({
-    customer: customer._id.toString(),
+    customer: customerId,
     type: "order",
     title: "Order placed",
     message: `Your order ${order.orderId} for ₹${total.toLocaleString("en-IN")} has been placed.`,

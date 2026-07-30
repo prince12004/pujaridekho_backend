@@ -5,7 +5,6 @@ import { BookingModel } from "../../models/booking.model.js";
 import { PoojaModel } from "../../models/pooja.model.js";
 import { FestivalModel } from "../../models/festival.model.js";
 import { MuhuratModel } from "../../models/muhurat.model.js";
-import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
 
 async function generateBookingId() {
   const year = new Date().getFullYear();
@@ -66,7 +65,7 @@ async function reserveMuhuratSlot(poojaId: unknown, poojaDate: Date, slotId: str
   return { muhuratId: muhurat._id, slotId: slot._id, timeRange: formatSlotTimeRange(slot.startTime, slot.endTime) };
 }
 
-export async function createPublicBooking(input: CreatePublicBookingInput) {
+export async function createPublicBooking(input: CreatePublicBookingInput, customerId: string) {
   const serviceType = input.serviceType ?? "pooja";
 
   // Festivals and poojas are separate collections that both offer optional
@@ -75,8 +74,8 @@ export async function createPublicBooking(input: CreatePublicBookingInput) {
   // looked up in the Pooja collection and always failing).
   const service =
     serviceType === "festival"
-      ? await FestivalModel.findOne({ slug: input.poojaSlug, status: "published" })
-      : await PoojaModel.findOne({ slug: input.poojaSlug, status: "published" });
+      ? await FestivalModel.findOne({ slug: input.poojaSlug, status: "Published" })
+      : await PoojaModel.findOne({ slug: input.poojaSlug, status: "Published" });
   if (!service) throw ApiError.badRequest(`Selected ${serviceType} is not available`);
 
   // Recompute samagri pricing server-side from the service's own catalogue —
@@ -96,13 +95,12 @@ export async function createPublicBooking(input: CreatePublicBookingInput) {
     muhuratSlot = { muhurat: reserved.muhuratId, slotId: reserved.slotId };
   }
 
-  const customer = await findOrCreateCustomerByMobile(input.customer);
   const bookingId = await generateBookingId();
 
   const booking = await BookingModel.create({
     bookingId,
-    customer: customer._id,
-    customerSnapshot: { name: customer.name, mobile: customer.mobile, email: customer.email },
+    customer: customerId,
+    customerSnapshot: { name: input.customer.name, mobile: input.customer.mobile, email: input.customer.email },
     serviceType,
     pooja: serviceType === "pooja" ? service._id : undefined,
     festival: serviceType === "festival" ? service._id : undefined,
@@ -123,12 +121,12 @@ export async function createPublicBooking(input: CreatePublicBookingInput) {
   await createNotification({
     type: "booking",
     title: "New booking created",
-    message: `${customer.name} booked "${service.name}" for ₹${finalAmount.toLocaleString("en-IN")}`,
+    message: `${input.customer.name} booked "${service.name}" for ₹${finalAmount.toLocaleString("en-IN")}`,
     link: `/admin/bookings/${booking._id}`,
   });
 
   await notifyCustomer({
-    customer: customer._id.toString(),
+    customer: customerId,
     type: "booking",
     title: "Booking created",
     message: `Your booking for "${service.name}" (${booking.bookingId}) has been created. Complete payment to confirm.`,

@@ -3,11 +3,12 @@ import { z } from "zod";
 import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
 import { createPublicBooking } from "./bookings.service.js";
+import { mobileSchema } from "../../lib/validators.js";
 
 const bookingSchema = z.object({
   customer: z.object({
     name: z.string().min(1),
-    mobile: z.string().min(10),
+    mobile: mobileSchema,
     email: z.string().email().optional().or(z.literal("")),
   }),
   serviceType: z.enum(["pooja", "festival"]).optional(),
@@ -22,6 +23,6 @@ const bookingSchema = z.object({
 
 export const postBooking = asyncHandler(async (req: Request, res: Response) => {
   const input = bookingSchema.parse(req.body);
-  const booking = await createPublicBooking(input);
+  const booking = await createPublicBooking(input, req.customer!.id);
   sendSuccess(res, booking, "Booking created", 201);
 });

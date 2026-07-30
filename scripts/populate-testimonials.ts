@@ -71,7 +71,7 @@ async function main() {
   for (const data of testimonialsData) {
     const doc = await TestimonialModel.findOneAndUpdate(
       { name: data.name, quote: data.quote },
-      { ...data, status: "published" },
+      { ...data, status: "Published" },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
     console.log(`Upserted testimonial: ${doc.name}`);

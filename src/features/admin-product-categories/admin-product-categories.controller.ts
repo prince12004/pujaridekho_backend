@@ -16,7 +16,7 @@ const categorySchema = z.object({
   slug: z.string().min(1),
   image: z.string().optional(),
   description: z.string().optional(),
-  status: z.enum(["draft", "published"]).optional(),
+  status: z.enum(["draft", "Published"]).optional(),
   sortOrder: z.number().optional(),
 });
 

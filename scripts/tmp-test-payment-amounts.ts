@@ -8,8 +8,8 @@ import { CustomerModel } from "../src/models/customer.model.js";
 async function main() {
   await mongoose.connect(env.MONGODB_URI);
 
-  const pooja = await PoojaModel.findOne({ status: "published" });
-  if (!pooja) throw new Error("No published pooja found to test with");
+  const pooja = await PoojaModel.findOne({ status: "Published" });
+  if (!pooja) throw new Error("No Published pooja found to test with");
 
   const bookingRes = await fetch("http://localhost:4000/api/v1/bookings", {
     method: "POST",

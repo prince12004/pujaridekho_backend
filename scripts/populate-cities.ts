@@ -24,7 +24,7 @@ async function main() {
   for (const data of citiesData) {
     const doc = await CityModel.findOneAndUpdate(
       { slug: data.slug },
-      { ...data, isServiceable: true, status: "published" },
+      { ...data, isServiceable: true, status: "Published" },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
     console.log(`Upserted city: ${doc.name}`);

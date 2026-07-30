@@ -8,7 +8,7 @@ const citySchema = new Schema(
     image: { type: String },
     isServiceable: { type: Boolean, default: true },
     sortOrder: { type: Number, default: 0 },
-    status: { type: String, enum: ["draft", "published"], default: "published" },
+    status: { type: String, enum: ["draft", "Published"], default: "Published" },
   },
   { timestamps: true },
 );

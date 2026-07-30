@@ -4,6 +4,7 @@ import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
 import { env } from "../../config/env.js";
 import { handlePayUCallback, initiatePayUPayment } from "./payments.service.js";
+import { mobileSchema } from "../../lib/validators.js";
 
 const initiateSchema = z.object({
   entityType: z.enum(["booking", "order", "consultation"]),
@@ -11,7 +12,7 @@ const initiateSchema = z.object({
   amount: z.number().min(1),
   name: z.string().min(1),
   email: z.string().email(),
-  phone: z.string().min(10),
+  phone: mobileSchema,
 });
 
 export const postInitiatePayment = asyncHandler(async (req: Request, res: Response) => {

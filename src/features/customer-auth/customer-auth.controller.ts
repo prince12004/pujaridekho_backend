@@ -9,9 +9,10 @@ import {
   verifyChangeMobileOtp,
   verifyLoginOtp,
 } from "./customer-auth.service.js";
+import { mobileSchema as mobileFieldSchema } from "../../lib/validators.js";
 
-const mobileSchema = z.object({ mobile: z.string().min(10).max(15) });
-const verifySchema = z.object({ mobile: z.string().min(10).max(15), otp: z.string().min(4).max(6) });
+const mobileSchema = z.object({ mobile: mobileFieldSchema });
+const verifySchema = z.object({ mobile: mobileFieldSchema, otp: z.string().min(4).max(6) });
 const refreshSchema = z.object({ refreshToken: z.string().min(1) });
 
 export const postSendOtp = asyncHandler(async (req: Request, res: Response) => {
@@ -51,8 +52,8 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
   sendSuccess(res, { customer: req.customer });
 });
 
-const changeMobileRequestSchema = z.object({ newMobile: z.string().min(10).max(15) });
-const changeMobileVerifySchema = z.object({ newMobile: z.string().min(10).max(15), otp: z.string().min(4).max(6) });
+const changeMobileRequestSchema = z.object({ newMobile: mobileFieldSchema });
+const changeMobileVerifySchema = z.object({ newMobile: mobileFieldSchema, otp: z.string().min(4).max(6) });
 
 export const postChangeMobileSendOtp = asyncHandler(async (req: Request, res: Response) => {
   const { newMobile } = changeMobileRequestSchema.parse(req.body);

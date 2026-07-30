@@ -17,7 +17,7 @@ const testimonialSchema = z.object({
   quote: z.string().min(1),
   photo: z.string().optional(),
   featured: z.boolean().optional(),
-  status: z.enum(["draft", "published"]).optional(),
+  status: z.enum(["draft", "Published"]).optional(),
   sortOrder: z.number().optional(),
 });
 

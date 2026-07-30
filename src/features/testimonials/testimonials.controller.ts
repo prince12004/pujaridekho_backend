@@ -4,6 +4,6 @@ import { sendSuccess } from "../../lib/api-response.js";
 import { TestimonialModel } from "../../models/testimonial.model.js";
 
 export const getPublicTestimonials = asyncHandler(async (_req: Request, res: Response) => {
-  const testimonials = await TestimonialModel.find({ status: "published" }).sort({ sortOrder: 1, createdAt: -1 });
+  const testimonials = await TestimonialModel.find({ status: "Published" }).sort({ sortOrder: 1, createdAt: -1 });
   sendSuccess(res, testimonials);
 });

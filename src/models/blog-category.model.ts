@@ -5,7 +5,7 @@ const blogCategorySchema = new Schema(
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     description: { type: String },
-    status: { type: String, enum: ["draft", "published"], default: "draft" },
+    status: { type: String, enum: ["draft", "Published"], default: "draft" },
   },
   { timestamps: true },
 );

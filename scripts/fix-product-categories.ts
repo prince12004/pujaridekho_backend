@@ -44,7 +44,7 @@ async function main() {
   for (const cat of categories) {
     const doc = await ProductCategoryModel.findOneAndUpdate(
       { slug: cat.slug },
-      { $setOnInsert: { ...cat, status: "published" } },
+      { $setOnInsert: { ...cat, status: "Published" } },
       { upsert: true, new: true },
     );
     slugToId.set(cat.slug, doc._id);

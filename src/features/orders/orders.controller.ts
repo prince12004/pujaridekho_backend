@@ -3,17 +3,18 @@ import { z } from "zod";
 import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
 import { createPublicOrder, getPublicOrderById } from "./orders.service.js";
+import { mobileSchema } from "../../lib/validators.js";
 
 const orderSchema = z.object({
   customer: z.object({
     name: z.string().min(1),
-    mobile: z.string().min(10),
+    mobile: mobileSchema,
     email: z.string().email().optional().or(z.literal("")),
   }),
   items: z.array(z.object({ productSlug: z.string().min(1), quantity: z.number().min(1) })).min(1),
   shippingAddress: z.object({
     name: z.string().min(1),
-    phone: z.string().min(10),
+    phone: mobileSchema,
     address: z.string().min(1),
     city: z.string().min(1),
     pincode: z.string().min(1),
@@ -23,7 +24,7 @@ const orderSchema = z.object({
 
 export const postOrder = asyncHandler(async (req: Request, res: Response) => {
   const input = orderSchema.parse(req.body);
-  const order = await createPublicOrder(input);
+  const order = await createPublicOrder(input, req.customer!.id);
   sendSuccess(res, order, "Order placed", 201);
 });
 

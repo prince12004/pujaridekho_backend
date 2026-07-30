@@ -3,10 +3,11 @@ import { z } from "zod";
 import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
 import { addMyAddress, deleteMyAddress, listMyAddresses, updateMyAddress } from "./account-addresses.service.js";
+import { mobileSchema } from "../../lib/validators.js";
 
 const addressSchema = z.object({
   fullName: z.string().min(1),
-  mobile: z.string().min(10),
+  mobile: mobileSchema,
   addressLine1: z.string().min(1),
   addressLine2: z.string().optional(),
   landmark: z.string().optional(),

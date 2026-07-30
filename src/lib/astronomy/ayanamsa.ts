@@ -1,5 +1,5 @@
 // Lahiri (Chitrapaksha) ayanamsa, linear approximation anchored to its
-// published 1900.0 epoch value and the IAU precession rate. Accurate to
+// Published 1900.0 epoch value and the IAU precession rate. Accurate to
 // within a few arcminutes — enough to place a longitude in the correct
 // 30°-wide rashi or 13°20'-wide nakshatra, which is all a Panchang/Kundli
 // needs; it is not a substitute for a full nutation-aware ephemeris.

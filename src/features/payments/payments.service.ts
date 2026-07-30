@@ -28,7 +28,10 @@ async function assertValidAmount(entityType: PaymentEntityType, entityId: string
   if (entityType === "booking") {
     const booking = await BookingModel.findById(entityId);
     if (!booking) throw ApiError.notFound("booking not found");
-    fullAmount = booking.pricing?.finalAmount ?? 0;
+    // The checkout summary itemizes a fixed ₹{ADVANCE_AMOUNT} platform fee on
+    // top of the pooja/samagri price — the "full amount" a customer can pay
+    // upfront is that total, not just booking.pricing.finalAmount.
+    fullAmount = (booking.pricing?.finalAmount ?? 0) + ADVANCE_AMOUNT;
   } else if (entityType === "order") {
     const order = await OrderModel.findById(entityId);
     if (!order) throw ApiError.notFound("order not found");

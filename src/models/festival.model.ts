@@ -45,7 +45,7 @@ const festivalSchema = new Schema(
     faq: { type: [faqSchema], default: [] },
     citiesAvailable: { type: [String], default: [] },
     featured: { type: Boolean, default: false },
-    status: { type: String, enum: ["draft", "published", "archived"], default: "draft" },
+    status: { type: String, enum: ["draft", "Published", "archived"], default: "draft" },
     sortOrder: { type: Number, default: 0 },
     seo: { title: { type: String }, description: { type: String } },
     createdBy: { type: Schema.Types.ObjectId, ref: "AdminUser" },

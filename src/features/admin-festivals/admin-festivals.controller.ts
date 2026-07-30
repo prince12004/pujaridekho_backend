@@ -48,7 +48,7 @@ const festivalSchema = z.object({
   faq: z.array(faqSchema).optional(),
   citiesAvailable: z.array(z.string()).optional(),
   featured: z.boolean().optional(),
-  status: z.enum(["draft", "published", "archived"]).optional(),
+  status: z.enum(["draft", "Published", "archived"]).optional(),
   sortOrder: z.number().optional(),
 });
 

@@ -387,7 +387,7 @@ async function main() {
         ...rest,
         faq,
         citiesAvailable: CITIES,
-        status: "published",
+        status: "Published",
       },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );

@@ -15,7 +15,7 @@ const categorySchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
   description: z.string().optional(),
-  status: z.enum(["draft", "published"]).optional(),
+  status: z.enum(["draft", "Published"]).optional(),
 });
 
 export const getBlogCategories = asyncHandler(async (_req: Request, res: Response) => {

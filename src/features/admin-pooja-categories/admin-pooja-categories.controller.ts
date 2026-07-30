@@ -17,7 +17,7 @@ const categorySchema = z.object({
   image: z.string().optional(),
   description: z.string().optional(),
   seo: z.object({ title: z.string().optional(), description: z.string().optional() }).optional(),
-  status: z.enum(["draft", "published"]).optional(),
+  status: z.enum(["draft", "Published"]).optional(),
   sortOrder: z.number().optional(),
 });
 
