@@ -1,9 +1,7 @@
-// A namespace import (`import * as Astronomy`) resolves to an incomplete
-// object under this project's ESM/tsx runtime — cjs-module-lexer's static
-// analysis of astronomy-engine's CJS build misses several named exports
-// (MakeTime included), so calls silently become "is not a function". The
-// default import gets the whole CJS module.exports object intact.
-import Astronomy from "astronomy-engine";
+// astronomy-engine's ESM build has no default export; a default import
+// crashes under Node's native ESM loader in production ("does not provide
+// an export named 'default'"). Use the namespace import instead.
+import * as Astronomy from "astronomy-engine";
 import type { AstroTime } from "astronomy-engine";
 import { getLahiriAyanamsaDegrees, normalizeDegrees } from "./ayanamsa.js";
 import { getNakshatra, getRashi } from "./zodiac.js";
