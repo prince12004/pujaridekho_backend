@@ -65,7 +65,7 @@ export async function listBookings(query: ListBookingsQuery) {
 
 export async function getBookingById(id: string) {
   const booking = await BookingModel.findById(id)
-    .populate("pooja", "name slug packages samagri")
+    .populate({ path: "pooja", select: "name slug packages samagriTemplate", populate: { path: "samagriTemplate" } })
     .populate("festival", "name slug packages samagri")
     .populate("pandit", "fullName mobile")
     .populate("customer", "name mobile email");

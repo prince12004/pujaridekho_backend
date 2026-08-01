@@ -1,15 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
-const samagriItemSchema = new Schema(
-  {
-    name: { type: String, required: true },
-    description: { type: String },
-    price: { type: Number, required: true, min: 0 },
-    includedByDefault: { type: Boolean, default: false },
-  },
-  { _id: false },
-);
-
 const packageSchema = new Schema(
   {
     name: { type: String, required: true },
@@ -47,10 +37,11 @@ const poojaSchema = new Schema(
     importance: { type: String },
     whoShouldPerform: { type: String },
     vidhiSteps: { type: [vidhiStepSchema], default: [] },
-    // Optional, user-selectable samagri add-ons — NOT bundled into the price
-    // by default; `includedByDefault` only marks packages/customer defaults,
-    // the customer explicitly opts in per item on the booking flow.
-    samagri: { type: [samagriItemSchema], default: [] },
+    // Structured samagri (ritual materials) template — includedItems marked
+    // `required: false` are still customer-toggleable add-ons priced into the
+    // booking total (see SamagriTemplate model); `required: true` items are
+    // always-included, non-toggleable display items.
+    samagriTemplate: { type: Schema.Types.ObjectId, ref: "SamagriTemplate" },
     packages: { type: [packageSchema], default: [] },
     faq: { type: [faqSchema], default: [] },
     relatedPoojas: { type: [Schema.Types.ObjectId], ref: "Pooja", default: [] },

@@ -35,7 +35,9 @@ export async function listPublicPoojas(query: PublicListPoojasQuery) {
 }
 
 export async function getPublicPoojaBySlug(slug: string) {
-    const pooja = await PoojaModel.findOne({ slug, status: "Published" }).populate("category", "name slug");
+    const pooja = await PoojaModel.findOne({ slug, status: "Published" })
+        .populate("category", "name slug")
+        .populate("samagriTemplate");
     if (!pooja) throw ApiError.notFound("Pooja not found");
     return pooja;
 }

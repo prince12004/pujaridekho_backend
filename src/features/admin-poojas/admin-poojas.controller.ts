@@ -5,13 +5,6 @@ import { sendSuccess } from "../../lib/api-response.js";
 import { recordAuditLog } from "../../lib/audit.js";
 import { createPooja, deletePooja, getPoojaById, listPoojas, updatePooja } from "./admin-poojas.service.js";
 
-const samagriItemSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  price: z.number().min(0),
-  includedByDefault: z.boolean().optional(),
-});
-
 const packageSchema = z.object({
   name: z.string().min(1),
   price: z.number().min(0),
@@ -45,7 +38,7 @@ const poojaSchema = z.object({
   importance: z.string().optional(),
   whoShouldPerform: z.string().optional(),
   vidhiSteps: z.array(vidhiStepSchema).optional(),
-  samagri: z.array(samagriItemSchema).optional(),
+  samagriTemplate: z.string().optional(),
   packages: z.array(packageSchema).optional(),
   faq: z.array(faqSchema).optional(),
   relatedPoojas: z.array(z.string()).optional(),

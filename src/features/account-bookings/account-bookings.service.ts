@@ -37,7 +37,11 @@ export async function listMyBookings(customerId: string, tab: string | undefined
 
 export async function getMyBookingById(customerId: string, bookingId: string) {
   const booking = await BookingModel.findById(bookingId)
-    .populate("pooja", "name slug featuredImage packages samagri")
+    .populate({
+      path: "pooja",
+      select: "name slug featuredImage packages samagriTemplate",
+      populate: { path: "samagriTemplate" },
+    })
     .populate("festival", "name slug featuredImage packages samagri")
     .populate("pandit", "fullName mobile photo verificationStatus experienceYears languages specializations rating");
   if (!booking) throw ApiError.notFound("Booking not found");

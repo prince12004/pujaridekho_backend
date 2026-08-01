@@ -4,7 +4,7 @@ import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
 import { recordAuditLog } from "../../lib/audit.js";
 import { ORDER_STATUSES } from "../../models/order.model.js";
-import { getOrderById, listOrders, updateOrderStatus } from "./admin-orders.service.js";
+import { deleteOrder, getOrderById, listOrders, updateOrderStatus } from "./admin-orders.service.js";
 
 const listQuerySchema = z.object({
   page: z.coerce.number().optional(),
@@ -34,4 +34,16 @@ export const patchOrderStatus = asyncHandler(async (req: Request, res: Response)
     description: `Order ${order.orderId} status changed to ${status}`,
   });
   sendSuccess(res, order, "Order updated");
+});
+
+export const removeOrder = asyncHandler(async (req: Request, res: Response) => {
+  const order = await getOrderById(req.params.id);
+  await deleteOrder(req.params.id);
+  await recordAuditLog(req, req.admin!, {
+    action: "delete",
+    entityType: "Order",
+    entityId: req.params.id,
+    description: `Deleted order ${order.orderId}`,
+  });
+  sendSuccess(res, null, "Order deleted");
 });

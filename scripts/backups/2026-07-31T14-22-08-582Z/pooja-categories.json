@@ -1,0 +1,72 @@
+[
+  {
+    "_id": "6a673ec2c45b1eb057afb34d",
+    "slug": "home-poojas",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:19:30.272Z",
+    "name": "Home Poojas",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:19:30.272Z"
+  },
+  {
+    "_id": "6a673ec2c45b1eb057afb34e",
+    "slug": "griha-pravesh-and-vastu",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:19:30.531Z",
+    "name": "Griha Pravesh & Vastu",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:19:30.531Z"
+  },
+  {
+    "_id": "6a673ec2c45b1eb057afb34f",
+    "slug": "astrology-and-graha-shanti",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:19:30.648Z",
+    "name": "Astrology & Graha Shanti",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:19:30.648Z"
+  },
+  {
+    "_id": "6a673ec2c45b1eb057afb350",
+    "slug": "wealth-and-prosperity",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:19:30.699Z",
+    "name": "Wealth & Prosperity",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:19:30.699Z"
+  },
+  {
+    "_id": "6a673ec2c45b1eb057afb351",
+    "slug": "ganpati-poojas",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:19:30.729Z",
+    "name": "Ganpati Poojas",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:19:30.729Z"
+  },
+  {
+    "_id": "6a673ec2c45b1eb057afb352",
+    "slug": "marriage-and-life-events",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:19:30.761Z",
+    "name": "Marriage & Life Events",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:19:30.761Z"
+  },
+  {
+    "_id": "6a673ec2c45b1eb057afb353",
+    "slug": "vehicle-and-business",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:19:30.790Z",
+    "name": "Vehicle & Business",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:19:30.790Z"
+  }
+]

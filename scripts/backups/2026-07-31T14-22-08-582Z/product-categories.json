@@ -1,0 +1,82 @@
+[
+  {
+    "_id": "6a673ec4c45b1eb057afb355",
+    "slug": "puja-kits",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:19:32.057Z",
+    "name": "Puja Kits",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:37:34.705Z"
+  },
+  {
+    "_id": "6a6742ffc45b1eb057afb4e0",
+    "slug": "incense-dhoop",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:37:35.423Z",
+    "name": "Incense & Dhoop",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:37:35.423Z"
+  },
+  {
+    "_id": "6a6742ffc45b1eb057afb4e1",
+    "slug": "murti-idols",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:37:35.454Z",
+    "name": "Murti & Idols",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:37:35.454Z"
+  },
+  {
+    "_id": "6a6742ffc45b1eb057afb4e2",
+    "slug": "sacred-books",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:37:35.486Z",
+    "name": "Sacred Books",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:37:35.486Z"
+  },
+  {
+    "_id": "6a6742ffc45b1eb057afb4e3",
+    "slug": "yantra",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:37:35.517Z",
+    "name": "Yantra",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:37:35.517Z"
+  },
+  {
+    "_id": "6a6742ffc45b1eb057afb4e4",
+    "slug": "rudraksha",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:37:35.552Z",
+    "name": "Rudraksha",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:37:35.552Z"
+  },
+  {
+    "_id": "6a6742ffc45b1eb057afb4e5",
+    "slug": "mala-japa-beads",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:37:35.582Z",
+    "name": "Mala & Japa Beads",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:37:35.582Z"
+  },
+  {
+    "_id": "6a6742ffc45b1eb057afb4e6",
+    "slug": "havan-samagri",
+    "__v": 0,
+    "createdAt": "2026-07-27T11:37:35.634Z",
+    "name": "Havan Samagri",
+    "sortOrder": 0,
+    "status": "published",
+    "updatedAt": "2026-07-27T11:37:35.634Z"
+  }
+]

@@ -5,8 +5,8 @@ import { OrderModel } from "../../models/order.model.js";
 import { ProductModel } from "../../models/product.model.js";
 import { computeCouponDiscount, redeemCoupon } from "../coupons/coupons.service.js";
 
-export const FREE_DELIVERY_THRESHOLD = 299;
-export const DELIVERY_CHARGE = 49;
+export const FREE_DELIVERY_THRESHOLD = 0;
+export const DELIVERY_CHARGE = 0;
 
 async function generateOrderId() {
   const year = new Date().getFullYear();

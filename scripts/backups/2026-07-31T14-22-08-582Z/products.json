@@ -1,0 +1,222 @@
+[
+  {
+    "_id": "6a673ec454107b51129080a4",
+    "name": "Premium Puja Thali Set (Brass)",
+    "slug": "puja-thali-set",
+    "category": "6a673ec4c45b1eb057afb355",
+    "shortDescription": "A complete brass puja thali with diya, bell, kumkum holder and incense stand — everything needed for daily aarti.",
+    "description": "A complete brass puja thali with diya, bell, kumkum holder and incense stand — everything needed for daily aarti.",
+    "images": [
+      "https://images.unsplash.com/photo-1523613002-bbcd22be7f02?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 1299,
+    "marketPrice": 1599,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.222Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec454107b51129080a7",
+    "name": "Panchmukhi Rudraksha Mala",
+    "slug": "panchmukhi-rudraksha-mala",
+    "category": "6a6742ffc45b1eb057afb4e4",
+    "shortDescription": "108-bead Panchmukhi Rudraksha mala, suitable for daily japa and general wellbeing.",
+    "description": "108-bead Panchmukhi Rudraksha mala, suitable for daily japa and general wellbeing.",
+    "images": [
+      "https://images.unsplash.com/photo-1605292356183-a77d0a9c9d1d?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 899,
+    "marketPrice": 1199,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.282Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec454107b51129080aa",
+    "name": "Brass Ganesh Murti (6 inch)",
+    "slug": "brass-ganesh-murti",
+    "category": "6a6742ffc45b1eb057afb4e1",
+    "shortDescription": "Hand-finished 6-inch brass Ganesh murti, ideal for home mandirs and new beginnings.",
+    "description": "Hand-finished 6-inch brass Ganesh murti, ideal for home mandirs and new beginnings.",
+    "images": [
+      "https://images.unsplash.com/photo-1759674885815-14f62ee2802b?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 1650,
+    "marketPrice": 2100,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.338Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec454107b51129080ad",
+    "name": "Havan Kund with Full Samagri",
+    "slug": "havan-kund-samagri",
+    "category": "6a6742ffc45b1eb057afb4e6",
+    "shortDescription": "Pyramid-shaped havan kund bundled with a complete havan samagri pack.",
+    "description": "Pyramid-shaped havan kund bundled with a complete havan samagri pack.",
+    "images": [
+      "https://images.unsplash.com/photo-1662720868850-e60cefb03201?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 749,
+    "marketPrice": 999,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.395Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec454107b51129080b0",
+    "name": "Sri Yantra (Pure Copper)",
+    "slug": "sri-yantra-copper",
+    "category": "6a6742ffc45b1eb057afb4e3",
+    "shortDescription": "Pure copper Sri Yantra for prosperity and positive energy in the home or workplace.",
+    "description": "Pure copper Sri Yantra for prosperity and positive energy in the home or workplace.",
+    "images": [
+      "https://images.unsplash.com/photo-1605378229010-11aedbb01b24?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 599,
+    "marketPrice": 799,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.452Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec454107b51129080b3",
+    "name": "Sandalwood Dhoop & Incense Pack",
+    "slug": "sandalwood-dhoop-pack",
+    "category": "6a6742ffc45b1eb057afb4e0",
+    "shortDescription": "Natural sandalwood dhoop sticks and incense cones, hand-rolled in small batches.",
+    "description": "Natural sandalwood dhoop sticks and incense cones, hand-rolled in small batches.",
+    "images": [
+      "https://images.unsplash.com/photo-1758903846845-e8ae224a5047?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 299,
+    "marketPrice": 399,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.511Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec454107b51129080b6",
+    "name": "Panchpatra & Achmani Set (Silver-Plated)",
+    "slug": "panchpatra-achmani-set",
+    "category": "6a673ec4c45b1eb057afb355",
+    "shortDescription": "Traditional silver-plated panchpatra and achmani set used for daily sankalpa and abhishek.",
+    "description": "Traditional silver-plated panchpatra and achmani set used for daily sankalpa and abhishek.",
+    "images": [
+      "https://images.unsplash.com/photo-1551077095-ba46221b51ee?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 899,
+    "marketPrice": 1099,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.569Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec454107b51129080b9",
+    "name": "Cotton Bati / Wicks Pack (500 pcs)",
+    "slug": "cotton-wicks-pack",
+    "category": "6a6742ffc45b1eb057afb4e0",
+    "shortDescription": "Hand-rolled cotton wicks for diyas — a pack of 500, enough for months of daily aarti.",
+    "description": "Hand-rolled cotton wicks for diyas — a pack of 500, enough for months of daily aarti.",
+    "images": [
+      "https://images.unsplash.com/photo-1575989762363-c7ce0137427a?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 149,
+    "marketPrice": 199,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.635Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec454107b51129080bc",
+    "name": "Copper Kalash with Coconut Stand",
+    "slug": "copper-kalash-coconut-stand",
+    "category": "6a673ec4c45b1eb057afb355",
+    "shortDescription": "Pure copper kalash with a matching coconut stand, essential for Griha Pravesh and Vastu poojas.",
+    "description": "Pure copper kalash with a matching coconut stand, essential for Griha Pravesh and Vastu poojas.",
+    "images": [
+      "https://images.unsplash.com/photo-1636737512034-518389c47764?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 999,
+    "marketPrice": 1299,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.687Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec454107b51129080bf",
+    "name": "Ashtagandha & Chandan Tika Pack",
+    "slug": "ashtagandha-chandan-pack",
+    "category": "6a6742ffc45b1eb057afb4e0",
+    "shortDescription": "Ashtagandha and sandalwood tika paste pack for daily tilak and puja rituals.",
+    "description": "Ashtagandha and sandalwood tika paste pack for daily tilak and puja rituals.",
+    "images": [
+      "https://images.unsplash.com/photo-1574266742257-41460b7992ee?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "sellingPrice": 249,
+    "marketPrice": 329,
+    "stockQuantity": 50,
+    "inStock": true,
+    "tags": [],
+    "featured": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:32.746Z",
+    "updatedAt": "2026-07-30T11:01:39.263Z",
+    "__v": 0
+  }
+]

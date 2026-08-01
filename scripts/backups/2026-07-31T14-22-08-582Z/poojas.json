@@ -1,0 +1,967 @@
+[
+  {
+    "_id": "6a673ec254107b5112908064",
+    "name": "Satyanarayan Puja",
+    "slug": "satyanarayan-puja",
+    "shortDescription": "Satyanarayan Puja honours Lord Vishnu in his form as Satyanarayan — \"the embodiment of truth.",
+    "fullDescription": "Satyanarayan Puja honours Lord Vishnu in his form as Satyanarayan — \"the embodiment of truth.\" It's one of the most frequently performed home poojas, typically done on full moon days or to mark a happy occasion, resolve a difficulty, or simply as a periodic act of gratitude.",
+    "featuredImage": "https://images.unsplash.com/photo-1551077095-ba46221b51ee?w=1600&q=80&auto=format&fit=crop",
+    "heroBanner": "https://images.unsplash.com/photo-1551077095-ba46221b51ee?w=1600&q=80&auto=format&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1605292356183-a77d0a9c9d1d?w=1600&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1602305361939-806b254e9f47?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "category": "6a673ec2c45b1eb057afb34d",
+    "tags": [],
+    "duration": "2–3 hrs",
+    "startingPrice": 2100,
+    "marketPrice": 2800,
+    "benefits": [
+      "Invokes prosperity, harmony and truthfulness within the household",
+      "Traditionally performed to mark the successful completion of an important task",
+      "Strengthens family bonds through a shared ritual and the Satyanarayan Katha (story)"
+    ],
+    "importance": "The puja is centred around the Satyanarayan Katha, a story illustrating the rewards of truth and devotion, and the consequences of breaking a vow made to the divine. It's considered auspicious enough to be repeated at any life stage.",
+    "whoShouldPerform": "Any householder can sponsor this puja — no specific eligibility is required. It's commonly performed by the head of the family, with the full household present for the katha and prasad.",
+    "vidhiSteps": [
+      {
+        "title": "Sankalpa",
+        "description": "The householder takes a formal vow (sankalpa) stating the intention behind the puja."
+      },
+      {
+        "title": "Ganesh & Kalash Puja",
+        "description": "Lord Ganesh is invoked first, followed by installation and worship of the kalash."
+      },
+      {
+        "title": "Satyanarayan Katha",
+        "description": "The pandit narrates the five chapters of the Satyanarayan Katha aloud to those present."
+      },
+      {
+        "title": "Aarti & Prasad",
+        "description": "The puja concludes with aarti and distribution of the sheera prasad to all attendees."
+      }
+    ],
+    "samagri": [
+      {
+        "name": "Panchamrit (milk, curd, honey, ghee, sugar) and fresh fruits",
+        "price": 120,
+        "includedByDefault": false
+      },
+      {
+        "name": "Banana leaves/stalks for the mandap",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Turmeric, kumkum, akshat and betel nuts",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Ghee, cotton wicks and a brass diya",
+        "price": 350,
+        "includedByDefault": false
+      },
+      {
+        "name": "Wheat flour and jaggery for the prasad (sheera)",
+        "price": 80,
+        "includedByDefault": false
+      }
+    ],
+    "packages": [
+      {
+        "name": "Essential",
+        "price": 2100,
+        "duration": "2 hrs",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Pandit + full samagri",
+          "Satyanarayan Katha",
+          "Prasad for up to 10 people"
+        ],
+        "recommended": false
+      },
+      {
+        "name": "Complete",
+        "price": 3200,
+        "duration": "3 hrs",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Everything in Essential",
+          "Havan included",
+          "Prasad for up to 25 people"
+        ],
+        "recommended": false
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can this puja be done in the evening?",
+        "answer": "Yes, it's commonly performed in the evening, especially on Purnima (full moon)."
+      },
+      {
+        "question": "Is samagri really included, or do I need to buy anything?",
+        "answer": "Samagri is not bundled into the price by default — on the pooja page you can see the price with and without samagri, and select exactly which items you'd like us to arrange."
+      },
+      {
+        "question": "What if I need to reschedule?",
+        "answer": "Free rescheduling up to 24 hours before the scheduled time, per our Refund Policy."
+      }
+    ],
+    "relatedPoojas": [],
+    "relatedBlogSlugs": [],
+    "relatedProductSlugs": [],
+    "citiesAvailable": [],
+    "featured": true,
+    "popular": true,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:30.868Z",
+    "updatedAt": "2026-07-30T11:01:38.938Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec254107b5112908068",
+    "name": "Griha Pravesh Puja",
+    "slug": "griha-pravesh",
+    "shortDescription": "Griha Pravesh — \"entering the house\" — is the ceremony performed before a family moves into a new home.",
+    "fullDescription": "Griha Pravesh — \"entering the house\" — is the ceremony performed before a family moves into a new home. It invokes Vastu Purusha, neutralises residual negative energy from construction, and sets an auspicious tone for the years ahead.",
+    "featuredImage": "https://images.unsplash.com/photo-1635192592106-77a5aacbe1a3?w=1600&q=80&auto=format&fit=crop",
+    "heroBanner": "https://images.unsplash.com/photo-1635192592106-77a5aacbe1a3?w=1600&q=80&auto=format&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1636619773834-c7e0762ddfe1?w=1600&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1700403455026-3559b076ff03?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "category": "6a673ec2c45b1eb057afb34e",
+    "tags": [],
+    "duration": "3–4 hrs",
+    "startingPrice": 3500,
+    "marketPrice": 4500,
+    "benefits": [
+      "Ritually purifies and consecrates a new or previously-owned home before you move in",
+      "Pacifies Vastu Purusha, the presiding energy of the dwelling",
+      "Marks a clear, auspicious beginning for the household in its new home"
+    ],
+    "importance": "There are three recognised types — Apoorva (a newly built home, first entry), Sapoorva (returning after a long absence) and Dwandwah (a previously-owned home) — each with small variations your pandit will confirm at booking.",
+    "whoShouldPerform": "The family moving into the home should be present throughout, particularly the head of household and whoever will cross the threshold first (traditionally the woman of the house, carrying a kalash).",
+    "vidhiSteps": [
+      {
+        "title": "Ganesh Puja",
+        "description": "Removes obstacles before the main ceremony begins."
+      },
+      {
+        "title": "Vastu Shanti Puja",
+        "description": "Invokes and pacifies Vastu Purusha at the Brahmasthan (centre) of the home."
+      },
+      {
+        "title": "Navagraha Puja",
+        "description": "The nine planetary deities are worshipped for planetary harmony."
+      },
+      {
+        "title": "Milk-Boiling & Threshold Entry",
+        "description": "Milk is boiled over as the family enters, right foot forward, carrying a kalash."
+      },
+      {
+        "title": "Havan",
+        "description": "A closing fire ceremony with offerings for prosperity and protection."
+      }
+    ],
+    "samagri": [
+      {
+        "name": "Kalash, coconut, mango leaves and a copper vessel",
+        "price": 350,
+        "includedByDefault": false
+      },
+      {
+        "name": "Raw rice, turmeric, kumkum and akshat",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Ghee, cotton wicks and a brass diya",
+        "price": 350,
+        "includedByDefault": false
+      },
+      {
+        "name": "Fresh milk for the traditional boiling-over ritual",
+        "price": 120,
+        "includedByDefault": false
+      },
+      {
+        "name": "Havan samagri and a Ganesh idol for sthapana",
+        "price": 350,
+        "includedByDefault": false
+      }
+    ],
+    "packages": [
+      {
+        "name": "Essential",
+        "price": 3500,
+        "duration": "3 hrs",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Pandit + full samagri",
+          "Vastu Shanti + Navagraha Puja",
+          "Milk-boiling & threshold ritual"
+        ],
+        "recommended": false
+      },
+      {
+        "name": "Complete",
+        "price": 4800,
+        "duration": "4 hrs",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Everything in Essential",
+          "Extended havan",
+          "Satyanarayan Katha included"
+        ],
+        "recommended": false
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can Griha Pravesh be performed at night?",
+        "answer": "It's traditionally performed in the morning or early afternoon, aligned with an auspicious muhurat."
+      },
+      {
+        "question": "Is samagri really included, or do I need to buy anything?",
+        "answer": "Samagri is not bundled into the price by default — on the pooja page you can see the price with and without samagri, and select exactly which items you'd like us to arrange."
+      },
+      {
+        "question": "What if I need to reschedule?",
+        "answer": "Free rescheduling up to 24 hours before the scheduled time, per our Refund Policy."
+      }
+    ],
+    "relatedPoojas": [],
+    "relatedBlogSlugs": [],
+    "relatedProductSlugs": [],
+    "citiesAvailable": [],
+    "featured": true,
+    "popular": true,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:30.938Z",
+    "updatedAt": "2026-07-30T11:01:38.938Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec254107b511290806b",
+    "name": "Vastu Shanti Puja",
+    "slug": "vastu-shanti",
+    "shortDescription": "Vastu Shanti Puja pacifies Vastu Purusha — the deity believed to preside over a plot of land or dwelling — to neutralise structural or directional imbalances and restore harmony to the home.",
+    "fullDescription": "Vastu Shanti Puja pacifies Vastu Purusha — the deity believed to preside over a plot of land or dwelling — to neutralise structural or directional imbalances and restore harmony to the home.",
+    "featuredImage": "https://images.unsplash.com/photo-1662720868850-e60cefb03201?w=1600&q=80&auto=format&fit=crop",
+    "heroBanner": "https://images.unsplash.com/photo-1662720868850-e60cefb03201?w=1600&q=80&auto=format&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1636266513371-acdf50931253?w=1600&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1605378229010-11aedbb01b24?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "category": "6a673ec2c45b1eb057afb34e",
+    "tags": [],
+    "duration": "2 hrs",
+    "startingPrice": 2800,
+    "marketPrice": 3600,
+    "benefits": [
+      "Addresses Vastu-related concerns without structural renovation",
+      "Recommended after purchasing a previously-owned home",
+      "Often performed alongside Griha Pravesh, but can be done independently"
+    ],
+    "importance": "Even homes that are structurally sound per Vastu principles benefit from this puja as a periodic reset — many families perform it every few years or after any major renovation.",
+    "whoShouldPerform": "Any resident of the home, ideally the person who holds the property title, with as many household members present as possible.",
+    "vidhiSteps": [
+      {
+        "title": "Sankalpa",
+        "description": "A formal vow stating the intention to pacify Vastu Purusha."
+      },
+      {
+        "title": "Vastu Purusha Puja",
+        "description": "Worship performed at the Brahmasthan (centre) of the home."
+      },
+      {
+        "title": "Havan",
+        "description": "A concluding fire ceremony for protection and balance."
+      }
+    ],
+    "samagri": [
+      {
+        "name": "Kalash and copper vessel",
+        "price": 350,
+        "includedByDefault": false
+      },
+      {
+        "name": "Nine-coloured cloth (Navagraha), rice and turmeric",
+        "price": 200,
+        "includedByDefault": false
+      },
+      {
+        "name": "Ghee, cotton wicks and diya",
+        "price": 120,
+        "includedByDefault": false
+      },
+      {
+        "name": "Havan samagri",
+        "price": 300,
+        "includedByDefault": false
+      }
+    ],
+    "packages": [
+      {
+        "name": "Essential",
+        "price": 2800,
+        "duration": "2 hrs",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Pandit + full samagri",
+          "Vastu Purusha Puja",
+          "Havan included"
+        ],
+        "recommended": false
+      }
+    ],
+    "faq": [
+      {
+        "question": "Is samagri really included, or do I need to buy anything?",
+        "answer": "Samagri is not bundled into the price by default — on the pooja page you can see the price with and without samagri, and select exactly which items you'd like us to arrange."
+      },
+      {
+        "question": "What if I need to reschedule?",
+        "answer": "Free rescheduling up to 24 hours before the scheduled time, per our Refund Policy."
+      }
+    ],
+    "relatedPoojas": [],
+    "relatedBlogSlugs": [],
+    "relatedProductSlugs": [],
+    "citiesAvailable": [],
+    "featured": false,
+    "popular": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:31.003Z",
+    "updatedAt": "2026-07-30T11:01:38.938Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec354107b511290806e",
+    "name": "Navgraha Shanti Puja",
+    "slug": "navgraha-shanti",
+    "shortDescription": "Navgraha Shanti Puja pacifies the nine celestial bodies of Vedic astrology — Surya, Chandra, Mangal, Budh, Guru, Shukra, Shani, Rahu and Ketu — each believed to influence different life areas through your birth chart.",
+    "fullDescription": "Navgraha Shanti Puja pacifies the nine celestial bodies of Vedic astrology — Surya, Chandra, Mangal, Budh, Guru, Shukra, Shani, Rahu and Ketu — each believed to influence different life areas through your birth chart.",
+    "featuredImage": "https://images.unsplash.com/photo-1605378229010-11aedbb01b24?w=1600&q=80&auto=format&fit=crop",
+    "heroBanner": "https://images.unsplash.com/photo-1605378229010-11aedbb01b24?w=1600&q=80&auto=format&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1636737512034-518389c47764?w=1600&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1756661921244-35636963e096?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "category": "6a673ec2c45b1eb057afb34f",
+    "tags": [],
+    "duration": "2–3 hrs",
+    "startingPrice": 3100,
+    "marketPrice": 4000,
+    "benefits": [
+      "Recommended before a difficult planetary period (dasha)",
+      "Often performed ahead of marriage or a major business decision",
+      "Complements a Kundli reading when specific doshas are diagnosed"
+    ],
+    "importance": "This isn't a puja for every minor setback — it's most meaningful when grounded in an actual birth chart reading, not a generic recommendation.",
+    "whoShouldPerform": "The individual whose chart shows the relevant planetary period, ideally after reviewing a real Kundli to confirm it's actually indicated.",
+    "vidhiSteps": [
+      {
+        "title": "Kundli Review",
+        "description": "Confirming which planetary placements need pacification."
+      },
+      {
+        "title": "Navagraha Sthapana",
+        "description": "Installing representations of all nine planets for worship."
+      },
+      {
+        "title": "Individual Graha Puja",
+        "description": "Targeted mantras and offerings for the specific afflicted planet(s)."
+      },
+      {
+        "title": "Havan",
+        "description": "A closing fire ceremony sealing the remedial offerings."
+      }
+    ],
+    "samagri": [
+      {
+        "name": "Nine-grain mix (navadhanya)",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Nine-coloured cloth for each planet",
+        "price": 200,
+        "includedByDefault": false
+      },
+      {
+        "name": "Ghee, cotton wicks and diya",
+        "price": 120,
+        "includedByDefault": false
+      },
+      {
+        "name": "Havan samagri specific to afflicted planets",
+        "price": 300,
+        "includedByDefault": false
+      }
+    ],
+    "packages": [
+      {
+        "name": "Essential",
+        "price": 3100,
+        "duration": "2.5 hrs",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Pandit + full samagri",
+          "All nine planets worshipped",
+          "Havan included"
+        ],
+        "recommended": false
+      }
+    ],
+    "faq": [
+      {
+        "question": "How long does Navgraha Shanti take?",
+        "answer": "Typically 2–3 hours depending on how many planets require specific remedial offerings."
+      },
+      {
+        "question": "Is samagri really included, or do I need to buy anything?",
+        "answer": "Samagri is not bundled into the price by default — on the pooja page you can see the price with and without samagri, and select exactly which items you'd like us to arrange."
+      },
+      {
+        "question": "What if I need to reschedule?",
+        "answer": "Free rescheduling up to 24 hours before the scheduled time, per our Refund Policy."
+      }
+    ],
+    "relatedPoojas": [],
+    "relatedBlogSlugs": [],
+    "relatedProductSlugs": [],
+    "citiesAvailable": [],
+    "featured": false,
+    "popular": true,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:31.065Z",
+    "updatedAt": "2026-07-30T11:01:38.938Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec354107b5112908071",
+    "name": "Lakshmi Puja",
+    "slug": "lakshmi-puja",
+    "shortDescription": "Lakshmi Puja invokes Goddess Lakshmi, the deity of wealth and prosperity.",
+    "fullDescription": "Lakshmi Puja invokes Goddess Lakshmi, the deity of wealth and prosperity. It's performed on Fridays, during Diwali, or whenever a family wants to invite abundance into a home or new venture.",
+    "featuredImage": "https://images.unsplash.com/photo-1602305361939-806b254e9f47?w=1600&q=80&auto=format&fit=crop",
+    "heroBanner": "https://images.unsplash.com/photo-1602305361939-806b254e9f47?w=1600&q=80&auto=format&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1636737512034-518389c47764?w=1600&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1551077095-ba46221b51ee?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "category": "6a673ec2c45b1eb057afb350",
+    "tags": [],
+    "duration": "1–2 hrs",
+    "startingPrice": 1800,
+    "marketPrice": 2400,
+    "benefits": [
+      "Traditionally performed when starting a new business or financial year",
+      "A central ritual during Diwali across most Hindu households",
+      "Believed to remove obstacles to financial stability"
+    ],
+    "importance": "During Diwali specifically, Lakshmi Puja is performed during Pradosh Kaal — the two hours following sunset — considered the most auspicious window of the year for this puja.",
+    "whoShouldPerform": "Any household member, though it's traditionally led by the woman of the house alongside the family priest.",
+    "vidhiSteps": [
+      {
+        "title": "Ganesh Puja",
+        "description": "Invoked first, as with most household poojas."
+      },
+      {
+        "title": "Lakshmi Avahan",
+        "description": "Formal invocation of Goddess Lakshmi into the home."
+      },
+      {
+        "title": "Aarti & Prasad",
+        "description": "Closing aarti with prasad distributed to the household."
+      }
+    ],
+    "samagri": [
+      {
+        "name": "Lakshmi and Ganesh idols/images",
+        "price": 350,
+        "includedByDefault": false
+      },
+      {
+        "name": "Lotus flowers and marigold",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Coins, rice and kumkum",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Ghee diyas and cotton wicks",
+        "price": 120,
+        "includedByDefault": false
+      }
+    ],
+    "packages": [
+      {
+        "name": "Essential",
+        "price": 1800,
+        "duration": "1.5 hrs",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Pandit + full samagri",
+          "Lakshmi & Ganesh Puja",
+          "Aarti included"
+        ],
+        "recommended": false
+      }
+    ],
+    "faq": [
+      {
+        "question": "Is samagri really included, or do I need to buy anything?",
+        "answer": "Samagri is not bundled into the price by default — on the pooja page you can see the price with and without samagri, and select exactly which items you'd like us to arrange."
+      },
+      {
+        "question": "What if I need to reschedule?",
+        "answer": "Free rescheduling up to 24 hours before the scheduled time, per our Refund Policy."
+      }
+    ],
+    "relatedPoojas": [],
+    "relatedBlogSlugs": [],
+    "relatedProductSlugs": [],
+    "citiesAvailable": [],
+    "featured": false,
+    "popular": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:31.126Z",
+    "updatedAt": "2026-07-30T11:01:38.938Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec354107b5112908074",
+    "name": "Ganesh Puja",
+    "slug": "ganesh-puja",
+    "shortDescription": "Ganesh Puja invokes Lord Ganesh, the remover of obstacles, and is traditionally performed before any new beginning — a new home, business, vehicle, or another puja itself.",
+    "fullDescription": "Ganesh Puja invokes Lord Ganesh, the remover of obstacles, and is traditionally performed before any new beginning — a new home, business, vehicle, or another puja itself.",
+    "featuredImage": "https://images.unsplash.com/photo-1759674885815-14f62ee2802b?w=1600&q=80&auto=format&fit=crop",
+    "heroBanner": "https://images.unsplash.com/photo-1759674885815-14f62ee2802b?w=1600&q=80&auto=format&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1636619773834-c7e0762ddfe1?w=1600&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1523613002-bbcd22be7f02?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "category": "6a673ec2c45b1eb057afb351",
+    "tags": [],
+    "duration": "1–2 hrs",
+    "startingPrice": 1500,
+    "marketPrice": 2000,
+    "benefits": [
+      "Clears obstacles before starting something new",
+      "A short, accessible ritual suitable for any occasion",
+      "Often the opening ritual within a larger ceremony"
+    ],
+    "importance": "Nearly every Hindu ritual opens with an invocation to Ganesh — this standalone version is for occasions where a full Ganesh Chaturthi-style sthapana isn't needed.",
+    "whoShouldPerform": "Anyone marking a new beginning — no specific eligibility required.",
+    "vidhiSteps": [
+      {
+        "title": "Sankalpa",
+        "description": "Stating the intention behind the puja."
+      },
+      {
+        "title": "Ganesh Avahan",
+        "description": "Invocation and worship of Lord Ganesh."
+      },
+      {
+        "title": "Aarti & Prasad",
+        "description": "Closing aarti with modak prasad."
+      }
+    ],
+    "samagri": [
+      {
+        "name": "Ganesh idol or image",
+        "price": 350,
+        "includedByDefault": false
+      },
+      {
+        "name": "Modak or ladoo for prasad",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Durva grass and red flowers",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Ghee diya and incense",
+        "price": 120,
+        "includedByDefault": false
+      }
+    ],
+    "packages": [
+      {
+        "name": "Essential",
+        "price": 1500,
+        "duration": "1.5 hrs",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Pandit + full samagri",
+          "Ganesh Avahan & Aarti",
+          "Modak prasad included"
+        ],
+        "recommended": false
+      }
+    ],
+    "faq": [
+      {
+        "question": "Is samagri really included, or do I need to buy anything?",
+        "answer": "Samagri is not bundled into the price by default — on the pooja page you can see the price with and without samagri, and select exactly which items you'd like us to arrange."
+      },
+      {
+        "question": "What if I need to reschedule?",
+        "answer": "Free rescheduling up to 24 hours before the scheduled time, per our Refund Policy."
+      }
+    ],
+    "relatedPoojas": [],
+    "relatedBlogSlugs": [],
+    "relatedProductSlugs": [],
+    "citiesAvailable": [],
+    "featured": true,
+    "popular": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:31.188Z",
+    "updatedAt": "2026-07-30T11:01:38.938Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec354107b5112908077",
+    "name": "Vivah (Marriage) Puja",
+    "slug": "marriage-puja",
+    "shortDescription": "A traditional Vedic wedding ceremony, conducted per the specific rituals of the families' region and tradition — from the initial Ganesh Puja through Kanyadaan, Saptapadi and Sindoor Daan.",
+    "fullDescription": "A traditional Vedic wedding ceremony, conducted per the specific rituals of the families' region and tradition — from the initial Ganesh Puja through Kanyadaan, Saptapadi and Sindoor Daan.",
+    "featuredImage": "https://images.unsplash.com/photo-1700403455026-3559b076ff03?w=1600&q=80&auto=format&fit=crop",
+    "heroBanner": "https://images.unsplash.com/photo-1700403455026-3559b076ff03?w=1600&q=80&auto=format&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1605292356183-a77d0a9c9d1d?w=1600&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1574267498814-ebfb802ec01e?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "category": "6a673ec2c45b1eb057afb352",
+    "tags": [],
+    "duration": "Full Day",
+    "startingPrice": 15000,
+    "marketPrice": 19000,
+    "benefits": [
+      "A fully guided, correctly-sequenced ceremony for one of life's most important rituals",
+      "The pandit coordinates directly with your families ahead of the date",
+      "Available across common regional traditions found in Delhi NCR"
+    ],
+    "importance": "Muhurat (the exact auspicious time) matters more for this ceremony than almost any other — we strongly recommend booking a consultation to confirm timing well before the wedding date.",
+    "whoShouldPerform": "The couple, with both families present for the relevant rituals.",
+    "vidhiSteps": [
+      {
+        "title": "Ganesh Puja & Mandap Muhurat",
+        "description": "Opens the ceremony and consecrates the wedding mandap."
+      },
+      {
+        "title": "Kanyadaan",
+        "description": "The formal giving away of the bride by her family."
+      },
+      {
+        "title": "Saptapadi",
+        "description": "Seven steps taken together, each with a specific vow."
+      },
+      {
+        "title": "Sindoor Daan & Mangalsutra",
+        "description": "The concluding rituals marking the couple as married."
+      }
+    ],
+    "samagri": [
+      {
+        "name": "Complete havan and mandap samagri",
+        "price": 300,
+        "includedByDefault": false
+      },
+      {
+        "name": "Mangalsutra and sindoor (if not separately arranged)",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Rice, turmeric and kumkum for all rituals",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Seven-step Saptapadi materials",
+        "price": 80,
+        "includedByDefault": false
+      }
+    ],
+    "packages": [
+      {
+        "name": "Ceremony Only",
+        "price": 15000,
+        "duration": "Full Day",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Pandit + full samagri",
+          "Complete Vedic ceremony",
+          "Coordination call before the date"
+        ],
+        "recommended": false
+      },
+      {
+        "name": "Ceremony + Pre-Wedding Poojas",
+        "price": 22000,
+        "duration": "2 Days",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Everything in Ceremony Only",
+          "Haldi & Mehendi puja",
+          "Griha Pravesh for the new couple (optional)"
+        ],
+        "recommended": false
+      }
+    ],
+    "faq": [
+      {
+        "question": "Can the pandit travel outside Delhi NCR for a destination wedding?",
+        "answer": "In some cases yes — contact support with your venue location and we'll confirm availability and travel charges."
+      },
+      {
+        "question": "Is samagri really included, or do I need to buy anything?",
+        "answer": "Samagri is not bundled into the price by default — on the pooja page you can see the price with and without samagri, and select exactly which items you'd like us to arrange."
+      },
+      {
+        "question": "What if I need to reschedule?",
+        "answer": "Free rescheduling up to 24 hours before the scheduled time, per our Refund Policy."
+      }
+    ],
+    "relatedPoojas": [],
+    "relatedBlogSlugs": [],
+    "relatedProductSlugs": [],
+    "citiesAvailable": [],
+    "featured": false,
+    "popular": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:31.249Z",
+    "updatedAt": "2026-07-30T11:01:38.938Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec354107b511290807a",
+    "name": "Vehicle Puja",
+    "slug": "vehicle-puja",
+    "shortDescription": "A short blessing ceremony for a new (or newly purchased used) vehicle, invoking safety and good fortune for its journeys ahead.",
+    "fullDescription": "A short blessing ceremony for a new (or newly purchased used) vehicle, invoking safety and good fortune for its journeys ahead.",
+    "featuredImage": "https://images.unsplash.com/photo-1575989762363-c7ce0137427a?w=1600&q=80&auto=format&fit=crop",
+    "heroBanner": "https://images.unsplash.com/photo-1575989762363-c7ce0137427a?w=1600&q=80&auto=format&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1636266513371-acdf50931253?w=1600&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1589829973523-e4ddcbbd40e7?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "category": "6a673ec2c45b1eb057afb353",
+    "tags": [],
+    "duration": "30–45 min",
+    "startingPrice": 800,
+    "marketPrice": 1100,
+    "benefits": [
+      "Quick, focused ritual specifically for vehicle safety",
+      "Can be performed at home or at the showroom on delivery day",
+      "Suitable for cars, two-wheelers and commercial vehicles"
+    ],
+    "importance": "A small but widely observed ritual — most families perform this before a new vehicle's first drive.",
+    "whoShouldPerform": "The vehicle's owner, ideally present for the puja and the first drive afterward.",
+    "vidhiSteps": [
+      {
+        "title": "Vehicle Tilak",
+        "description": "A kumkum tilak applied to the vehicle."
+      },
+      {
+        "title": "Aarti",
+        "description": "A short aarti performed around the vehicle."
+      },
+      {
+        "title": "Lemon Ritual",
+        "description": "A lemon placed under the front wheel, traditionally driven over for the first start."
+      }
+    ],
+    "samagri": [
+      {
+        "name": "Coconut, lemon and flowers",
+        "price": 200,
+        "includedByDefault": false
+      },
+      {
+        "name": "Kumkum and rice for the tilak",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Ghee diya and incense",
+        "price": 120,
+        "includedByDefault": false
+      }
+    ],
+    "packages": [
+      {
+        "name": "Essential",
+        "price": 800,
+        "duration": "30 min",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Pandit + full samagri",
+          "Tilak & Aarti",
+          "Suitable for showroom delivery"
+        ],
+        "recommended": false
+      }
+    ],
+    "faq": [
+      {
+        "question": "Is samagri really included, or do I need to buy anything?",
+        "answer": "Samagri is not bundled into the price by default — on the pooja page you can see the price with and without samagri, and select exactly which items you'd like us to arrange."
+      },
+      {
+        "question": "What if I need to reschedule?",
+        "answer": "Free rescheduling up to 24 hours before the scheduled time, per our Refund Policy."
+      }
+    ],
+    "relatedPoojas": [],
+    "relatedBlogSlugs": [],
+    "relatedProductSlugs": [],
+    "citiesAvailable": [],
+    "featured": false,
+    "popular": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:31.313Z",
+    "updatedAt": "2026-07-30T11:01:38.938Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a673ec354107b511290807d",
+    "name": "Office / Shop Opening Puja",
+    "slug": "office-puja",
+    "shortDescription": "A puja performed before opening a new office, shop or commercial space — combining Ganesh Puja, Vastu Shanti and Lakshmi Puja to bless the venture from day one.",
+    "fullDescription": "A puja performed before opening a new office, shop or commercial space — combining Ganesh Puja, Vastu Shanti and Lakshmi Puja to bless the venture from day one.",
+    "featuredImage": "https://images.unsplash.com/photo-1574266742257-41460b7992ee?w=1600&q=80&auto=format&fit=crop",
+    "heroBanner": "https://images.unsplash.com/photo-1574266742257-41460b7992ee?w=1600&q=80&auto=format&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1662720868850-e60cefb03201?w=1600&q=80&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1758903846845-e8ae224a5047?w=1600&q=80&auto=format&fit=crop"
+    ],
+    "category": "6a673ec2c45b1eb057afb353",
+    "tags": [],
+    "duration": "1–2 hrs",
+    "startingPrice": 2200,
+    "marketPrice": 2900,
+    "benefits": [
+      "Sets an auspicious tone for a new business venture",
+      "Combines obstacle removal, Vastu balance and prosperity invocation in one visit",
+      "Suitable for offices, retail shops and warehouses"
+    ],
+    "importance": "Commonly performed on the day of possession or the first official day of business, ideally at a muhurat confirmed in advance.",
+    "whoShouldPerform": "The business owner or a senior partner, with staff welcome to attend.",
+    "vidhiSteps": [
+      {
+        "title": "Ganesh Puja",
+        "description": "Removes obstacles before the venture begins."
+      },
+      {
+        "title": "Vastu Shanti",
+        "description": "Balances the energy of the commercial space."
+      },
+      {
+        "title": "Lakshmi Puja",
+        "description": "Invokes prosperity for the new business."
+      }
+    ],
+    "samagri": [
+      {
+        "name": "Ganesh and Lakshmi idols/images",
+        "price": 350,
+        "includedByDefault": false
+      },
+      {
+        "name": "Kalash and coconut",
+        "price": 350,
+        "includedByDefault": false
+      },
+      {
+        "name": "Rice, turmeric and kumkum",
+        "price": 80,
+        "includedByDefault": false
+      },
+      {
+        "name": "Ghee diya and havan samagri",
+        "price": 300,
+        "includedByDefault": false
+      }
+    ],
+    "packages": [
+      {
+        "name": "Essential",
+        "price": 2200,
+        "duration": "1.5 hrs",
+        "panditCount": 1,
+        "samagriIncluded": false,
+        "dakshinaIncluded": false,
+        "features": [
+          "Pandit + full samagri",
+          "Ganesh, Vastu & Lakshmi Puja",
+          "Suitable for shops & offices"
+        ],
+        "recommended": false
+      }
+    ],
+    "faq": [
+      {
+        "question": "Is samagri really included, or do I need to buy anything?",
+        "answer": "Samagri is not bundled into the price by default — on the pooja page you can see the price with and without samagri, and select exactly which items you'd like us to arrange."
+      },
+      {
+        "question": "What if I need to reschedule?",
+        "answer": "Free rescheduling up to 24 hours before the scheduled time, per our Refund Policy."
+      }
+    ],
+    "relatedPoojas": [],
+    "relatedBlogSlugs": [],
+    "relatedProductSlugs": [],
+    "citiesAvailable": [],
+    "featured": false,
+    "popular": false,
+    "status": "Published",
+    "sortOrder": 0,
+    "createdAt": "2026-07-27T11:19:31.373Z",
+    "updatedAt": "2026-07-30T11:01:38.938Z",
+    "__v": 0
+  }
+]

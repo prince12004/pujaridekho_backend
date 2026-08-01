@@ -47,3 +47,8 @@ export async function updateOrderStatus(id: string, status: string, note?: strin
   await order.save();
   return order;
 }
+
+export async function deleteOrder(id: string) {
+  const order = await getOrderById(id);
+  await order.deleteOne();
+}

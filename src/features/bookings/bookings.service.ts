@@ -5,6 +5,7 @@ import { BookingModel } from "../../models/booking.model.js";
 import { PoojaModel } from "../../models/pooja.model.js";
 import { FestivalModel } from "../../models/festival.model.js";
 import { MuhuratModel } from "../../models/muhurat.model.js";
+import type { SamagriTemplateDocument } from "../../models/samagri-template.model.js";
 
 async function generateBookingId() {
   const year = new Date().getFullYear();
@@ -75,15 +76,28 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
   const service =
     serviceType === "festival"
       ? await FestivalModel.findOne({ slug: input.poojaSlug, status: "Published" })
-      : await PoojaModel.findOne({ slug: input.poojaSlug, status: "Published" });
+      : await PoojaModel.findOne({ slug: input.poojaSlug, status: "Published" }).populate<{
+          samagriTemplate: SamagriTemplateDocument | null;
+        }>("samagriTemplate");
   if (!service) throw ApiError.badRequest(`Selected ${serviceType} is not available`);
 
   // Recompute samagri pricing server-side from the service's own catalogue —
-  // never trust a price sent by the client.
+  // never trust a price sent by the client. Festivals still carry their own
+  // embedded `samagri` array; Poojas price from their linked SamagriTemplate
+  // (only `includedItems` are ever selectable/priced — `customerArrangeItems`
+  // are informational-only and never contribute to price).
+  const samagriCatalogue: { name: string; price: number }[] =
+    serviceType === "festival"
+      ? (service as { samagri: { name: string; price: number }[] }).samagri.map((item) => ({
+          name: item.name,
+          price: item.price,
+        }))
+      : ((service as { samagriTemplate: SamagriTemplateDocument | null }).samagriTemplate?.includedItems ?? []).map(
+          (item) => ({ name: item.itemName, price: item.estimatedPrice }),
+        );
+
   const requestedNames = new Set((input.selectedSamagri ?? []).map((item) => item.name));
-  const selectedSamagri = service.samagri
-    .filter((item) => requestedNames.has(item.name))
-    .map((item) => ({ name: item.name, price: item.price }));
+  const selectedSamagri = samagriCatalogue.filter((item) => requestedNames.has(item.name));
   const samagriCharges = selectedSamagri.reduce((sum, item) => sum + item.price, 0);
   const finalAmount = service.startingPrice + samagriCharges;
 
