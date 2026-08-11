@@ -36,6 +36,7 @@ export function generatePayURequestHash(params: PayURequestParams): string {
     "",
     "",
     "",
+    "",
     env.PAYU_MERCHANT_SALT,
   ].join("|");
   return sha512(hashString);
@@ -59,6 +60,8 @@ export function verifyPayUResponseHash(fields: PayUResponseFields): boolean {
   const reverseHashString = [
     env.PAYU_MERCHANT_SALT,
     status,
+    "",
+    "",
     "",
     "",
     "",
