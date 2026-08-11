@@ -67,6 +67,7 @@ export function verifyPayUResponseHash(fields: PayUResponseFields): boolean {
     "",
     "",
     "",
+    "",
     udf2,
     udf1,
     email,
