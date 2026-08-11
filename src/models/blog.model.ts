@@ -10,8 +10,8 @@ const blogSchema = new Schema(
     coverImage: { type: String },
     author: { type: String, default: "PujariDekho Team" },
     tags: { type: [String], default: [] },
-    status: { type: String, enum: ["draft", "Published"], default: "draft" },
-    PublishedAt: { type: Date },
+    status: { type: String, enum: ["draft", "published"], default: "draft" },
+    publishedAt: { type: Date },
     seo: {
       title: { type: String },
       description: { type: String },
@@ -22,7 +22,7 @@ const blogSchema = new Schema(
   { timestamps: true },
 );
 
-blogSchema.index({ status: 1, PublishedAt: -1 });
+blogSchema.index({ status: 1, publishedAt: -1 });
 
 export type BlogDocument = InferSchemaType<typeof blogSchema>;
 export const BlogModel = model("Blog", blogSchema);

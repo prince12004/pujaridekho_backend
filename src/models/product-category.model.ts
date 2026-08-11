@@ -6,7 +6,7 @@ const productCategorySchema = new Schema(
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     image: { type: String },
     description: { type: String },
-    status: { type: String, enum: ["draft", "Published"], default: "draft" },
+    status: { type: String, enum: ["draft", "published"], default: "draft" },
     sortOrder: { type: Number, default: 0 },
   },
   { timestamps: true },

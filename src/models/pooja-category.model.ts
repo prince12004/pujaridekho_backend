@@ -10,7 +10,7 @@ const poojaCategorySchema = new Schema(
       title: { type: String },
       description: { type: String },
     },
-    status: { type: String, enum: ["draft", "Published"], default: "draft" },
+    status: { type: String, enum: ["draft", "published"], default: "draft" },
     sortOrder: { type: Number, default: 0 },
   },
   { timestamps: true },

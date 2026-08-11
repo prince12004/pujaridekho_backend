@@ -8,7 +8,7 @@ const testimonialSchema = new Schema(
     quote: { type: String, required: true },
     photo: { type: String },
     featured: { type: Boolean, default: false },
-    status: { type: String, enum: ["draft", "Published"], default: "draft" },
+    status: { type: String, enum: ["draft", "published"], default: "draft" },
     sortOrder: { type: Number, default: 0 },
   },
   { timestamps: true },

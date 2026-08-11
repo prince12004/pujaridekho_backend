@@ -14,7 +14,7 @@ const blogSchema = z.object({
   coverImage: z.string().optional(),
   author: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  status: z.enum(["draft", "Published"]).optional(),
+  status: z.enum(["draft", "published"]).optional(),
   seo: z.object({ title: z.string().optional(), description: z.string().optional() }).optional(),
 });
 

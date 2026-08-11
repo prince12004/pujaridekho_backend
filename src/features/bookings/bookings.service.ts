@@ -75,8 +75,8 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
   // looked up in the Pooja collection and always failing).
   const service =
     serviceType === "festival"
-      ? await FestivalModel.findOne({ slug: input.poojaSlug, status: "Published" })
-      : await PoojaModel.findOne({ slug: input.poojaSlug, status: "Published" }).populate<{
+      ? await FestivalModel.findOne({ slug: input.poojaSlug, status: "published" })
+      : await PoojaModel.findOne({ slug: input.poojaSlug, status: "published" }).populate<{
           samagriTemplate: SamagriTemplateDocument | null;
         }>("samagriTemplate");
   if (!service) throw ApiError.badRequest(`Selected ${serviceType} is not available`);

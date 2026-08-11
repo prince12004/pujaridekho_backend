@@ -12,7 +12,7 @@ const citySchema = z.object({
   image: z.string().optional(),
   isServiceable: z.boolean().optional(),
   sortOrder: z.number().optional(),
-  status: z.enum(["draft", "Published"]).optional(),
+  status: z.enum(["draft", "published"]).optional(),
 });
 
 export const getCities = asyncHandler(async (_req: Request, res: Response) => {

@@ -7,7 +7,7 @@ const pageSchema = new Schema(
     content: { type: String, default: "" },
     metaTitle: { type: String },
     metaDescription: { type: String },
-    status: { type: String, enum: ["draft", "Published"], default: "draft" },
+    status: { type: String, enum: ["draft", "published"], default: "draft" },
   },
   { timestamps: true },
 );

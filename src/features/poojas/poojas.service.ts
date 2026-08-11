@@ -13,7 +13,7 @@ export async function listPublicPoojas(query: PublicListPoojasQuery) {
     const page = query.page && query.page > 0 ? query.page : 1;
     const limit = query.limit && query.limit > 0 ? query.limit : 20;
 
-    const filter: Record<string, unknown> = { status: "Published" };
+    const filter: Record<string, unknown> = { status: "published" };
     if (query.search) filter.name = { $regex: query.search, $options: "i" };
     if (query.featured) filter.featured = true;
 
@@ -35,7 +35,7 @@ export async function listPublicPoojas(query: PublicListPoojasQuery) {
 }
 
 export async function getPublicPoojaBySlug(slug: string) {
-    const pooja = await PoojaModel.findOne({ slug, status: "Published" })
+    const pooja = await PoojaModel.findOne({ slug, status: "published" })
         .populate("category", "name slug")
         .populate("samagriTemplate");
     if (!pooja) throw ApiError.notFound("Pooja not found");

@@ -28,7 +28,7 @@ export async function createPublicOrder(input: CreateOrderInput, customerId: str
   const items = [];
   let subtotal = 0;
   for (const item of input.items) {
-    const product = await ProductModel.findOne({ slug: item.productSlug, status: "Published" });
+    const product = await ProductModel.findOne({ slug: item.productSlug, status: "published" });
     if (!product) throw ApiError.badRequest(`Product "${item.productSlug}" is not available`);
     items.push({ product: product._id, name: product.name, price: product.sellingPrice, quantity: item.quantity });
     subtotal += product.sellingPrice * item.quantity;

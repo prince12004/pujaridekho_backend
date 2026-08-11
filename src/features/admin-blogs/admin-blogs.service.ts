@@ -38,7 +38,7 @@ export async function createBlog(input: Record<string, unknown>, adminId: string
   const existing = await BlogModel.findOne({ slug: input.slug });
   if (existing) throw ApiError.conflict("A blog post with this slug already exists");
   const payload = { ...input, createdBy: adminId, updatedBy: adminId } as Record<string, unknown>;
-  if (payload.status === "Published" && !payload.PublishedAt) payload.PublishedAt = new Date();
+  if (payload.status === "published" && !payload.publishedAt) payload.publishedAt = new Date();
   return BlogModel.create(payload);
 }
 
@@ -48,8 +48,8 @@ export async function updateBlog(id: string, input: Record<string, unknown>, adm
     const existing = await BlogModel.findOne({ slug: input.slug, _id: { $ne: id } });
     if (existing) throw ApiError.conflict("A blog post with this slug already exists");
   }
-  if (input.status === "Published" && !blog.PublishedAt) {
-    (input as Record<string, unknown>).PublishedAt = new Date();
+  if (input.status === "published" && !blog.publishedAt) {
+    (input as Record<string, unknown>).publishedAt = new Date();
   }
   Object.assign(blog, input, { updatedBy: adminId });
   await blog.save();

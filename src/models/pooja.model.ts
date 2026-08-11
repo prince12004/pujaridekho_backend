@@ -50,7 +50,7 @@ const poojaSchema = new Schema(
     citiesAvailable: { type: [String], default: [] },
     featured: { type: Boolean, default: false },
     popular: { type: Boolean, default: false },
-    status: { type: String, enum: ["draft", "Published", "archived"], default: "draft" },
+    status: { type: String, enum: ["draft", "published", "archived"], default: "draft" },
     sortOrder: { type: Number, default: 0 },
     seo: {
       title: { type: String },

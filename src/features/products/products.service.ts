@@ -14,7 +14,7 @@ export async function listPublicProducts(query: PublicListProductsQuery) {
   const page = query.page && query.page > 0 ? query.page : 1;
   const limit = query.limit && query.limit > 0 ? query.limit : 20;
 
-  const filter: Record<string, unknown> = { status: "Published" };
+  const filter: Record<string, unknown> = { status: "published" };
   if (query.search) filter.name = { $regex: query.search, $options: "i" };
   if (query.featured) filter.featured = true;
 
@@ -36,15 +36,15 @@ export async function listPublicProducts(query: PublicListProductsQuery) {
 }
 
 export async function getPublicProductBySlug(slug: string) {
-  const product = await ProductModel.findOne({ slug, status: "Published" }).populate("category", "name slug");
+  const product = await ProductModel.findOne({ slug, status: "published" }).populate("category", "name slug");
   if (!product) throw ApiError.notFound("Product not found");
   return product;
 }
 
 export async function listPublicProductCategories() {
-  const categories = await ProductCategoryModel.find({ status: "Published" }).sort({ sortOrder: 1, name: 1 });
+  const categories = await ProductCategoryModel.find({ status: "published" }).sort({ sortOrder: 1, name: 1 });
   const counts = await ProductModel.aggregate([
-    { $match: { status: "Published" } },
+    { $match: { status: "published" } },
     { $group: { _id: "$category", count: { $sum: 1 } } },
   ]);
   const countByCategory = new Map(counts.map((c) => [String(c._id), c.count as number]));

@@ -47,7 +47,7 @@ const poojaSchema = z.object({
   citiesAvailable: z.array(z.string()).optional(),
   featured: z.boolean().optional(),
   popular: z.boolean().optional(),
-  status: z.enum(["draft", "Published", "archived"]).optional(),
+  status: z.enum(["draft", "published", "archived"]).optional(),
   sortOrder: z.number().optional(),
   seo: z
     .object({

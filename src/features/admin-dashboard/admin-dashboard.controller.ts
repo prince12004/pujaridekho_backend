@@ -39,7 +39,7 @@ export const getDashboardStats = asyncHandler(async (_req: Request, res: Respons
     PanditModel.countDocuments(),
     PanditModel.countDocuments({ verificationStatus: "verified" }),
     PanditApplicationModel.countDocuments({ status: "pending" }),
-    PoojaModel.countDocuments({ status: "Published" }),
+    PoojaModel.countDocuments({ status: "published" }),
     BookingModel.aggregate([
       { $unwind: "$payments" },
       { $match: { "payments.status": "success" } },

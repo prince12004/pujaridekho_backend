@@ -11,7 +11,7 @@ const pageSchema = z.object({
   content: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
-  status: z.enum(["draft", "Published"]).optional(),
+  status: z.enum(["draft", "published"]).optional(),
 });
 
 export const getPages = asyncHandler(async (_req: Request, res: Response) => {
