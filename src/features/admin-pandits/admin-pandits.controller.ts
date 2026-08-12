@@ -48,6 +48,8 @@ const panditSchema = z.object({
   accountStatus: z.enum(["active", "inactive"]).optional(),
   featured: z.boolean().optional(),
   adminNotes: z.string().optional(),
+  rating: z.number().min(0).max(5).optional(),
+  completedPoojas: z.number().min(0).optional(),
 });
 
 const listQuerySchema = z.object({
