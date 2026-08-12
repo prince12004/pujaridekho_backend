@@ -1,7 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
-// Muhurat timings are managed per Pooja + Date (not a global pool) — each
-// document is the full set of slots offered for one pooja on one date.
 const muhuratTimeSlotSchema = new Schema(
   {
     startTime: { type: String, required: true }, // "HH:mm", 24h

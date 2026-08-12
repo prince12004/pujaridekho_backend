@@ -3,6 +3,7 @@ import { z } from "zod";
 import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
 import { env } from "../../config/env.js";
+import { logger } from "../../config/logger.js";
 import { handlePayUCallback, initiatePayUPayment } from "./payments.service.js";
 import { mobileSchema } from "../../lib/validators.js";
 
@@ -31,7 +32,23 @@ export const postPayUCallback = asyncHandler(async (req: Request, res: Response)
       entityId: result.entityId ?? "",
     });
     res.redirect(302, `${clientUrl}/payment/result?${query.toString()}`);
-  } catch {
-    res.redirect(302, `${clientUrl}/payment/result?status=error`);
+  } catch (err) {
+    // Swallowing this silently is what made past PayU integration bugs (e.g.
+    // a wrong hash formula) invisible in production — always log the cause.
+    logger.error("PayU callback failed", {
+      message: err instanceof Error ? err.message : err,
+      txnid: req.body?.txnid,
+      entityType: req.body?.udf1,
+      entityId: req.body?.udf2,
+    });
+    // Still route back to the right entity when we can identify it, even
+    // though the payment couldn't be confirmed — the customer isn't left
+    // stranded on a dead end and can check their booking/contact support.
+    const query = new URLSearchParams({
+      status: "error",
+      entityType: typeof req.body?.udf1 === "string" ? req.body.udf1 : "",
+      entityId: typeof req.body?.udf2 === "string" ? req.body.udf2 : "",
+    });
+    res.redirect(302, `${clientUrl}/payment/result?${query.toString()}`);
   }
 });

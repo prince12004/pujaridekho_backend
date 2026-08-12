@@ -14,10 +14,6 @@ export function createApp() {
   app.use(helmet());
   app.use(
     cors({
-      // In dev, Next.js silently bumps to :3001/:3002/etc. whenever the
-      // configured port is already taken by another running instance — reflect
-      // any localhost origin so that doesn't get blocked. Production stays
-      // locked to the single configured CLIENT_URL.
       origin: isProduction
         ? env.CLIENT_URL
         : (origin, callback) => callback(null, !origin || /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)),

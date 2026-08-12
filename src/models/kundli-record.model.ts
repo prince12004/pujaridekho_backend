@@ -1,8 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
-// Stores the exact output of the real astronomy-engine computation (see
-// src/lib/astronomy/kundli.ts) so a saved Kundli renders identically on
-// revisit — never recomputed/faked from a summary.
 const planetPositionSchema = new Schema(
   { planet: String, rashi: String, nakshatra: String, pada: Number, siderealLongitude: Number },
   { _id: false },

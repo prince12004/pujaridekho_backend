@@ -6,9 +6,6 @@ import { BookingModel } from "../../models/booking.model.js";
 import { OrderModel } from "../../models/order.model.js";
 import { ConsultationModel, CONSULTATION_FEE } from "../../models/consultation.model.js";
 
-// Customers may pay either this fixed token/advance amount now (balance
-// collected later) or the full amount up front — enforced server-side so a
-// client can never request an arbitrary charge.
 export const ADVANCE_AMOUNT = 99;
 
 export type PaymentEntityType = "booking" | "order" | "consultation";
@@ -28,10 +25,6 @@ async function assertValidAmount(entityType: PaymentEntityType, entityId: string
   if (entityType === "booking") {
     const booking = await BookingModel.findById(entityId);
     if (!booking) throw ApiError.notFound("booking not found");
-    // The checkout summary itemizes a fixed ₹{ADVANCE_AMOUNT} platform fee on
-    // top of the pooja/samagri price — the "full amount" a customer can pay
-    // upfront is that total, not just booking.pricing.finalAmount. Distance
-    // charge is shown struck-through/waived, so it's never actually charged.
     fullAmount = (booking.pricing?.finalAmount ?? 0) + ADVANCE_AMOUNT;
   } else if (entityType === "order") {
     const order = await OrderModel.findById(entityId);

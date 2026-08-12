@@ -6,13 +6,7 @@ const reviewSchema = new Schema(
   {
     entityType: { type: String, enum: REVIEW_ENTITY_TYPES, required: true },
     entityId: { type: Schema.Types.ObjectId, required: true },
-    // Nullable — reviews created before customer accounts existed (or by admin
-    // on a customer's behalf) may not have one; new customer-submitted reviews
-    // always set it, and it's what proves a review isn't fabricated.
     customer: { type: Schema.Types.ObjectId, ref: "Customer", default: null },
-    // The booking/order this review is eligible against — required for new
-    // customer-submitted reviews so a customer can only review something they
-    // actually completed, never posted as anonymous/fake feedback.
     booking: { type: Schema.Types.ObjectId, ref: "Booking", default: null },
     order: { type: Schema.Types.ObjectId, ref: "Order", default: null },
     customerName: { type: String, required: true },

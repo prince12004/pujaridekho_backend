@@ -14,8 +14,6 @@ const otpSchema = new Schema(
   { timestamps: true },
 );
 
-// TTL index — Mongo auto-deletes the document once expiresAt passes, so OTP
-// records never pile up and never outlive their validity window.
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 otpSchema.index({ mobile: 1, purpose: 1, createdAt: -1 });
 
