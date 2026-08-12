@@ -1,9 +1,6 @@
 import { config } from "dotenv";
 import { z } from "zod";
 
-// override: true so the checked-in .env is authoritative over any stray
-// NODE_ENV inherited from the parent shell (otherwise a leftover
-// NODE_ENV=production silently disables devOtp and other dev-only behavior).
 config({ override: true });
 
 const envSchema = z.object({
