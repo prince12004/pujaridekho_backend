@@ -1,15 +1,4 @@
-/**
- * One-time data fix: some Pooja/Festival/Product/Blog/City documents ended
- * up with a lowercase "published" status (likely from a raw DB restore/
- * import that bypassed Mongoose validation) instead of the "Published"
- * value every model's schema and every public-facing query actually
- * expects. Those documents were valid, complete, admin-visible content —
- * just invisible on the public site because of the casing mismatch.
- *
- * Idempotent: only touches documents whose status is the lowercase variant.
- *
- * Usage: pnpm exec tsx scripts/fix-status-casing.ts
- */
+
 import mongoose from "mongoose";
 import { env } from "../src/config/env.js";
 import { PoojaModel } from "../src/models/pooja.model.js";

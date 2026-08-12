@@ -1,10 +1,4 @@
-/**
- * One-off fix: realign ProductCategory slugs with the public mega-menu's
- * existing category slugs (features/home/data.ts shopCategories), which were
- * defined independently and didn't match the categories the initial content
- * population script created. Re-run safe: upserts by slug, reassigns product
- * category refs by product slug.
- */
+
 import mongoose from "mongoose";
 import { env } from "../src/config/env.js";
 import { ProductCategoryModel } from "../src/models/product-category.model.js";

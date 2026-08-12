@@ -1,12 +1,4 @@
-/**
- * One-off: corrects "Supari" from 10pcs/₹20 to 20pcs/₹4-per-pc (₹80 total)
- * across every samagri template that includes it. Per explicit instruction,
- * the pooja's overall Estimated Samagri Cost must NOT change — the +₹60
- * delta is absorbed by reducing "Brass Plate" (present in nearly every
- * template) by the same amount, or the template's own "Special Items"
- * filler item where Brass Plate isn't present. Idempotent: skips templates
- * where Supari is already priced at ₹80.
- */
+
 import "dotenv/config";
 import mongoose from "mongoose";
 import { env } from "../src/config/env.js";
