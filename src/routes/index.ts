@@ -22,6 +22,7 @@ import { adminTestimonialsRouter } from "../features/admin-testimonials/admin-te
 import { adminCitiesRouter } from "../features/admin-cities/admin-cities.routes.js";
 import { adminCouponsRouter } from "../features/admin-coupons/admin-coupons.routes.js";
 import { adminMuhuratsRouter } from "../features/admin-muhurats/admin-muhurats.routes.js";
+import { crmRouter } from "../features/crm/crm.routes.js";
 import { muhuratsRouter } from "../features/muhurats/muhurats.routes.js";
 import { poojasRouter } from "../features/poojas/poojas.routes.js";
 import { panditsRouter } from "../features/pandits/pandits.routes.js";
@@ -105,6 +106,9 @@ apiRouter.use("/admin/reports", adminReportsRouter);
 apiRouter.use("/admin/notifications", adminNotificationsRouter);
 apiRouter.use("/admin/search", adminSearchRouter);
 apiRouter.use("/admin/newsletter-subscribers", adminNewsletterRouter);
+
+// External CRM app integration — website API key auth, not admin JWT.
+apiRouter.use("/crm", crmRouter);
 
 // Customer-facing public APIs.
 apiRouter.use("/poojas", poojasRouter);

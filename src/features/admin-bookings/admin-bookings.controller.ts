@@ -16,6 +16,7 @@ import {
   createOfflineBooking,
   getBookingById,
   listBookings,
+  listConfirmedBookings,
   updateBookingDetails,
   updateBookingStatus,
 } from "./admin-bookings.service.js";
@@ -38,6 +39,20 @@ export const getBookings = asyncHandler(async (req: Request, res: Response) => {
 export const getBooking = asyncHandler(async (req: Request, res: Response) => {
   const booking = await getBookingById(req.params.id);
   sendSuccess(res, booking);
+});
+
+const confirmedQuerySchema = z.object({
+  page: z.coerce.number().optional(),
+  limit: z.coerce.number().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  search: z.string().optional(),
+});
+
+export const getConfirmedBookings = asyncHandler(async (req: Request, res: Response) => {
+  const query = confirmedQuerySchema.parse(req.query);
+  const result = await listConfirmedBookings(query);
+  sendSuccess(res, result);
 });
 
 const offlineBookingSchema = z.object({

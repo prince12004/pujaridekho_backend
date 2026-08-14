@@ -6,9 +6,6 @@ import { PoojaModel } from "../../models/pooja.model.js";
 import { FestivalModel } from "../../models/festival.model.js";
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
 
-// Populate() replaces `booking.customer` with the populated document at
-// runtime, but the static Mongoose type still says ObjectId — this reads the
-// real id either way without fighting that mismatch.
 function customerIdOf(booking: { customer: unknown }): string {
   const value = booking.customer as { _id?: { toString(): string } } | { toString(): string };
   if (value && typeof value === "object" && "_id" in value && value._id) return value._id.toString();
@@ -55,6 +52,46 @@ export async function listBookings(query: ListBookingsQuery) {
       .populate("festival", "name slug")
       .populate("pandit", "fullName mobile")
       .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    BookingModel.countDocuments(filter),
+  ]);
+
+  return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
+}
+
+export interface ConfirmedBookingsQuery {
+  page?: number;
+  limit?: number;
+  from?: string;
+  to?: string;
+  search?: string;
+}
+
+export async function listConfirmedBookings(query: ConfirmedBookingsQuery) {
+  const page = query.page && query.page > 0 ? query.page : 1;
+  const limit = query.limit && query.limit > 0 ? query.limit : 20;
+
+  const filter: Record<string, unknown> = { status: "booking_confirmed" };
+  const dateRange: Record<string, Date> = {};
+  if (query.from) dateRange.$gte = new Date(query.from);
+  if (query.to) dateRange.$lte = new Date(query.to);
+  if (Object.keys(dateRange).length > 0) filter.poojaDate = dateRange;
+  if (query.search) {
+    filter.$or = [
+      { bookingId: { $regex: query.search, $options: "i" } },
+      { "customerSnapshot.name": { $regex: query.search, $options: "i" } },
+      { "customerSnapshot.mobile": { $regex: query.search, $options: "i" } },
+    ];
+  }
+
+  const [items, total] = await Promise.all([
+    BookingModel.find(filter)
+      .populate("customer", "name mobile email")
+      .populate("pooja", "name slug")
+      .populate("festival", "name slug")
+      .populate("pandit", "fullName mobile")
+      .sort({ poojaDate: 1 })
       .skip((page - 1) * limit)
       .limit(limit),
     BookingModel.countDocuments(filter),

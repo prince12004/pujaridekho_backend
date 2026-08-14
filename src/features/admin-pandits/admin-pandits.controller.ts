@@ -12,6 +12,7 @@ import {
   getPanditById,
   listPandits,
   listPanditApplications,
+  listPanditBookings,
   updatePandit,
   updatePanditApplication,
 } from "./admin-pandits.service.js";
@@ -111,6 +112,19 @@ export const removePandit = asyncHandler(async (req: Request, res: Response) => 
     before: pandit,
   });
   sendSuccess(res, null, "Pandit deleted");
+});
+
+const panditBookingsQuerySchema = z.object({
+  from: z.string().optional(),
+  to: z.string().optional(),
+  page: z.coerce.number().optional(),
+  limit: z.coerce.number().optional(),
+});
+
+export const getPanditBookings = asyncHandler(async (req: Request, res: Response) => {
+  const query = panditBookingsQuerySchema.parse(req.query);
+  const result = await listPanditBookings(req.params.panditId, query);
+  sendSuccess(res, result);
 });
 
 export const getApplications = asyncHandler(async (req: Request, res: Response) => {

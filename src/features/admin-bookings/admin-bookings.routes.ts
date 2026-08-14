@@ -4,6 +4,7 @@ import { PERMISSIONS } from "../../lib/permissions.js";
 import {
   getBookings,
   getBooking,
+  getConfirmedBookings,
   postOfflineBooking,
   patchBookingStatus,
   patchBookingDetails,
@@ -17,6 +18,7 @@ export const adminBookingsRouter = Router();
 adminBookingsRouter.use(requireAdminAuth);
 
 adminBookingsRouter.get("/", requirePermission(PERMISSIONS.BOOKINGS_VIEW), getBookings);
+adminBookingsRouter.get("/confirmed", requirePermission(PERMISSIONS.BOOKINGS_VIEW), getConfirmedBookings);
 adminBookingsRouter.get("/:id", requirePermission(PERMISSIONS.BOOKINGS_VIEW), getBooking);
 adminBookingsRouter.post("/offline", requirePermission(PERMISSIONS.BOOKINGS_CREATE), postOfflineBooking);
 adminBookingsRouter.patch("/:id/status", requirePermission(PERMISSIONS.BOOKINGS_EDIT), patchBookingStatus);

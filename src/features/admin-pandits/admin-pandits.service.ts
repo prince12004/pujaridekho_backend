@@ -1,6 +1,7 @@
 import { ApiError } from "../../lib/api-error.js";
 import { PanditModel } from "../../models/pandit.model.js";
 import { PanditApplicationModel } from "../../models/pandit-application.model.js";
+import { BookingModel } from "../../models/booking.model.js";
 
 export interface ListPanditsQuery {
   page?: number;
@@ -50,6 +51,47 @@ export async function updatePandit(id: string, input: Record<string, unknown>) {
 export async function deletePandit(id: string) {
   const pandit = await getPanditById(id);
   await pandit.deleteOne();
+}
+
+export interface PanditBookingsQuery {
+  from?: string;
+  to?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Bookings/refunds don't represent real jobs on a pandit's schedule, so a
+// pandit's date-wise "booked jobs" excludes those two statuses; every other
+// status (including pending states) is still a real job on their plate.
+const PANDIT_SCHEDULE_EXCLUDED_STATUSES = ["cancelled", "refunded"];
+
+export async function listPanditBookings(panditId: string, query: PanditBookingsQuery) {
+  await getPanditById(panditId);
+
+  const page = query.page && query.page > 0 ? query.page : 1;
+  const limit = query.limit && query.limit > 0 ? query.limit : 50;
+
+  const filter: Record<string, unknown> = {
+    pandit: panditId,
+    status: { $nin: PANDIT_SCHEDULE_EXCLUDED_STATUSES },
+  };
+  const dateRange: Record<string, Date> = {};
+  if (query.from) dateRange.$gte = new Date(query.from);
+  if (query.to) dateRange.$lte = new Date(query.to);
+  if (Object.keys(dateRange).length > 0) filter.poojaDate = dateRange;
+
+  const [items, total] = await Promise.all([
+    BookingModel.find(filter)
+      .populate("customer", "name mobile email")
+      .populate("pooja", "name slug")
+      .populate("pandit", "fullName mobile")
+      .sort({ poojaDate: 1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    BookingModel.countDocuments(filter),
+  ]);
+
+  return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
 }
 
 export async function listPanditApplications(status?: string) {
