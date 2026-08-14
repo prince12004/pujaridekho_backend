@@ -36,9 +36,6 @@ function formatSlotTimeRange(startTime: string, endTime: string): string {
   return `${format(startTime)} - ${format(endTime)}`;
 }
 
-// Reserves the requested Muhurat slot atomically — the `bookedCount` filter
-// is re-checked by MongoDB against the live document at update time, so two
-// concurrent bookings for the last open spot can't both succeed.
 async function reserveMuhuratSlot(poojaId: unknown, poojaDate: Date, slotId: string) {
   const dayStart = new Date(poojaDate);
   dayStart.setHours(0, 0, 0, 0);
@@ -49,10 +46,6 @@ async function reserveMuhuratSlot(poojaId: unknown, poojaDate: Date, slotId: str
   const slot = muhurat.slots.find((s) => s._id?.toString() === slotId);
   if (!slot || !slot.isActive) throw ApiError.badRequest("This Muhurat slot is not available");
 
-  // $elemMatch ensures the _id and capacity checks apply to the SAME array
-  // element — two separate top-level "slots.x" dot-paths would each match
-  // against any element independently, letting an unrelated open slot's
-  // bookedCount satisfy the capacity check for a full one.
   const elemMatch: Record<string, unknown> = { _id: slot._id };
   if (slot.capacity != null) elemMatch.bookedCount = { $lt: slot.capacity };
 
@@ -81,11 +74,6 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
         }>("samagriTemplate");
   if (!service) throw ApiError.badRequest(`Selected ${serviceType} is not available`);
 
-  // Recompute samagri pricing server-side from the service's own catalogue —
-  // never trust a price sent by the client. Festivals still carry their own
-  // embedded `samagri` array; Poojas price from their linked SamagriTemplate
-  // (only `includedItems` are ever selectable/priced — `customerArrangeItems`
-  // are informational-only and never contribute to price).
   const samagriCatalogue: { name: string; price: number }[] =
     serviceType === "festival"
       ? (service as { samagri: { name: string; price: number }[] }).samagri.map((item) => ({

@@ -13,10 +13,6 @@ export interface UnifiedPaymentEntry {
   status: string;
 }
 
-// No dedicated Payment collection exists — Booking already carries a real
-// payments[] ledger and Order/Consultation carry their own payment fields.
-// This aggregates all three into one chronological view rather than
-// duplicating that data into a new model.
 export async function listMyPayments(customerId: string): Promise<UnifiedPaymentEntry[]> {
   const [bookings, orders, consultations] = await Promise.all([
     BookingModel.find({ customer: customerId, "payments.0": { $exists: true } }).select("bookingId payments"),

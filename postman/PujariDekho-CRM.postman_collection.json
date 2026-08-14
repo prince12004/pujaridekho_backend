@@ -1,0 +1,80 @@
+{
+  "info": {
+    "name": "PujariDekho CRM APIs",
+    "description": "External CRM integration endpoints. Auth: Authorization: Bearer {{website_api_key}} on every request (not admin JWT).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{website_api_key}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:4000/api/v1", "type": "string" },
+    { "key": "website_api_key", "value": "", "type": "string" },
+    { "key": "pandit_id", "value": "", "type": "string" },
+    { "key": "booking_ref", "value": "CRM-123", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Pandit List",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{base_url}}/crm/pandits", "host": ["{{base_url}}"], "path": ["crm", "pandits"] }
+      }
+    },
+    {
+      "name": "Pandit Availability",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/crm/pandits/availability?date=2026-08-25",
+          "host": ["{{base_url}}"],
+          "path": ["crm", "pandits", "availability"],
+          "query": [{ "key": "date", "value": "2026-08-25" }]
+        }
+      }
+    },
+    {
+      "name": "Reserve Pandit Slot",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "{{base_url}}/crm/pandits/{{pandit_id}}/bookings",
+          "host": ["{{base_url}}"],
+          "path": ["crm", "pandits", "{{pandit_id}}", "bookings"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"date\": \"2026-08-25\",\n  \"slot\": \"12-3\",\n  \"ref\": \"{{booking_ref}}\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Release Pandit Slot",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{base_url}}/crm/pandits/{{pandit_id}}/bookings/{{booking_ref}}",
+          "host": ["{{base_url}}"],
+          "path": ["crm", "pandits", "{{pandit_id}}", "bookings", "{{booking_ref}}"]
+        }
+      }
+    },
+    {
+      "name": "Confirmed Bookings",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/crm/bookings?status=confirmed",
+          "host": ["{{base_url}}"],
+          "path": ["crm", "bookings"],
+          "query": [
+            { "key": "status", "value": "confirmed" },
+            { "key": "since", "value": "2026-08-01T00:00:00Z", "disabled": true }
+          ]
+        }
+      }
+    }
+  ]
+}
