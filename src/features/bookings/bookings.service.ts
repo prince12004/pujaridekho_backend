@@ -6,6 +6,8 @@ import { PoojaModel } from "../../models/pooja.model.js";
 import { FestivalModel } from "../../models/festival.model.js";
 import { MuhuratModel } from "../../models/muhurat.model.js";
 import type { SamagriTemplateDocument } from "../../models/samagri-template.model.js";
+import { ADVANCE_AMOUNT } from "../payments/payments.service.js";
+import { resolvePackagePrice } from "../../lib/pooja-pricing.js";
 
 async function generateBookingId() {
   const year = new Date().getFullYear();
@@ -24,6 +26,12 @@ export interface CreatePublicBookingInput {
   poojaTime?: string;
   muhuratSlotId?: string;
   selectedSamagri?: { name: string }[];
+  // Name of the package the customer picked on the pooja/festival detail
+  // page (e.g. "Rudrabhishek (2 Pandits)") — its price is re-resolved here
+  // server-side (with the city override applied) rather than trusting
+  // whatever price the client last saw, since that's the only way the
+  // charge can't be tampered with in the browser.
+  packageName?: string;
 }
 
 function formatSlotTimeRange(startTime: string, endTime: string): string {
@@ -87,7 +95,20 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
   const requestedNames = new Set((input.selectedSamagri ?? []).map((item) => item.name));
   const selectedSamagri = samagriCatalogue.filter((item) => requestedNames.has(item.name));
   const samagriCharges = selectedSamagri.reduce((sum, item) => sum + item.price, 0);
-  const finalAmount = service.startingPrice + samagriCharges;
+
+  // If the customer picked a package, its price (with any city-specific
+  // override for input.city applied) is what they're actually charged —
+  // falls back to startingPrice for services with no packages, same as before.
+  const packages = (service as { packages?: { name: string; price: number; salePrice?: number; samagriIncluded?: boolean; dakshinaIncluded?: boolean; cityPrices?: { city: string; price: number }[] }[] }).packages ?? [];
+  const selectedPackage = input.packageName ? packages.find((p) => p.name === input.packageName) : undefined;
+  const packagePrice = selectedPackage ? resolvePackagePrice(selectedPackage, input.city) : service.startingPrice;
+
+  // Mirrors the checkout page's "Total Amount" (pooja price + samagri +
+  // platform fee) so the amount stored here — and shown back in the
+  // dashboard/invoice — doesn't undercut what the customer was actually
+  // quoted by the ₹99 platform fee.
+  const platformFee = ADVANCE_AMOUNT;
+  const finalAmount = packagePrice + samagriCharges + platformFee;
 
   let poojaTime = input.poojaTime;
   let muhuratSlot: { muhurat: unknown; slotId: unknown } | undefined;
@@ -106,6 +127,15 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
     serviceType,
     pooja: serviceType === "pooja" ? service._id : undefined,
     festival: serviceType === "festival" ? service._id : undefined,
+    package: selectedPackage
+      ? {
+          name: selectedPackage.name,
+          price: packagePrice,
+          salePrice: selectedPackage.salePrice,
+          samagriIncluded: selectedPackage.samagriIncluded,
+          dakshinaIncluded: selectedPackage.dakshinaIncluded,
+        }
+      : undefined,
     city: input.city,
     address: input.address,
     poojaDate: input.poojaDate,
@@ -113,7 +143,13 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
     muhuratSlot,
     status: "pending_payment",
     selectedSamagri,
-    pricing: { packagePrice: service.startingPrice, marketPrice: service.marketPrice, samagriCharges, finalAmount },
+    pricing: {
+      packagePrice,
+      marketPrice: service.marketPrice,
+      samagriCharges,
+      additionalCharges: platformFee,
+      finalAmount,
+    },
     paymentStatus: "unpaid",
     bookingChannel: "online",
     bookingSource: "website",

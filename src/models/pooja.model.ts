@@ -1,5 +1,10 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
+const cityPriceSchema = new Schema(
+  { city: { type: String, required: true }, price: { type: Number, required: true, min: 0 } },
+  { _id: false },
+);
+
 const packageSchema = new Schema(
   {
     name: { type: String, required: true },
@@ -12,6 +17,10 @@ const packageSchema = new Schema(
     features: { type: [String], default: [] },
     description: { type: String },
     recommended: { type: Boolean, default: false },
+    // Per-city price overrides — e.g. the same package can cost more in
+    // Gurgaon than in Noida. Falls back to `price` for any city with no
+    // matching entry here (see lib/pooja-pricing.ts).
+    cityPrices: { type: [cityPriceSchema], default: [] },
   },
   { _id: false },
 );

@@ -9,6 +9,7 @@ import {
   listCrmPandits,
   releasePanditSlot,
   reservePanditSlot,
+  updateBookingFromCrm,
 } from "./crm.service.js";
 
 export const getPandits = asyncHandler(async (_req: Request, res: Response) => {
@@ -57,4 +58,26 @@ export const getConfirmedBookings = asyncHandler(async (req: Request, res: Respo
   const query = confirmedBookingsQuerySchema.parse(req.query);
   const bookings = await listConfirmedBookingsForCrm({ since: query.since });
   sendSuccess(res, bookings);
+});
+
+const updateBookingSchema = z.object({
+  clientName: z.string().min(1).optional(),
+  phone: z.string().min(1).optional(),
+  pujaName: z.string().min(1).optional(),
+  pujaDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "pujaDate must be YYYY-MM-DD").optional(),
+  pujaTime: z.string().optional(),
+  totalAmount: z.number().min(0).optional(),
+  tokenAmount: z.number().min(0).optional(),
+  tokenStatus: z.enum(["pending", "received"]).optional(),
+  totalAmountStatus: z.enum(["pending", "received"]).optional(),
+  transactionId: z.string().nullable().optional(),
+  address: z.string().min(1).optional(),
+  notes: z.string().optional(),
+  status: z.enum(["confirmed", "notConverted"]).optional(),
+});
+
+export const putBooking = asyncHandler(async (req: Request, res: Response) => {
+  const input = updateBookingSchema.parse(req.body);
+  await updateBookingFromCrm(req.params.websiteBookingId, input);
+  sendSuccess(res, null, "Booking updated");
 });

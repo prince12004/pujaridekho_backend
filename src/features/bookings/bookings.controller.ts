@@ -19,6 +19,7 @@ const bookingSchema = z.object({
   poojaTime: z.string().optional(),
   muhuratSlotId: z.string().optional(),
   selectedSamagri: z.array(z.object({ name: z.string() })).optional(),
+  packageName: z.string().optional(),
 });
 
 export const postBooking = asyncHandler(async (req: Request, res: Response) => {

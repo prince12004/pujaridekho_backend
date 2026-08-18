@@ -4,8 +4,11 @@ export interface CrmBookingPayload {
   phone: string;
   pujaName: string;
   pujaDate: string;
-  pujaTime?: string;
+  pujaTime: string;
   totalAmount: number;
+  tokenAmount: number;
+  tokenStatus: "pending" | "received";
+  totalAmountStatus: "pending" | "received";
   address?: string;
   createdAt: string;
 }
@@ -18,7 +21,12 @@ interface BookingLike {
   serviceType: string;
   poojaDate: Date;
   poojaTime?: string | null;
-  pricing?: { finalAmount?: number | null } | null;
+  pricing?: {
+    finalAmount?: number | null;
+    advanceAmount?: number | null;
+    tokenStatus?: "pending" | "received" | null;
+    totalAmountStatus?: "pending" | "received" | null;
+  } | null;
   address?: string | null;
   createdAt: Date;
 }
@@ -32,8 +40,11 @@ export function toCrmBookingPayload(booking: BookingLike): CrmBookingPayload {
     phone: booking.customerSnapshot?.mobile ?? "",
     pujaName: booking.pooja?.name ?? booking.festival?.name ?? booking.serviceType,
     pujaDate: new Date(booking.poojaDate).toISOString().slice(0, 10),
-    pujaTime: booking.poojaTime ?? undefined,
+    pujaTime: booking.poojaTime ?? "",
     totalAmount: booking.pricing?.finalAmount ?? 0,
+    tokenAmount: booking.pricing?.advanceAmount ?? 0,
+    tokenStatus: booking.pricing?.tokenStatus ?? "pending",
+    totalAmountStatus: booking.pricing?.totalAmountStatus ?? "pending",
     address: booking.address ?? undefined,
     createdAt: new Date(booking.createdAt).toISOString(),
   };

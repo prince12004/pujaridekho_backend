@@ -5,6 +5,11 @@ import { sendSuccess } from "../../lib/api-response.js";
 import { recordAuditLog } from "../../lib/audit.js";
 import { createPooja, deletePooja, getPoojaById, listPoojas, updatePooja } from "./admin-poojas.service.js";
 
+const cityPriceSchema = z.object({
+  city: z.string().min(1),
+  price: z.number().min(0),
+});
+
 const packageSchema = z.object({
   name: z.string().min(1),
   price: z.number().min(0),
@@ -16,6 +21,7 @@ const packageSchema = z.object({
   features: z.array(z.string()).optional(),
   description: z.string().optional(),
   recommended: z.boolean().optional(),
+  cityPrices: z.array(cityPriceSchema).optional(),
 });
 
 const vidhiStepSchema = z.object({ title: z.string().optional(), description: z.string().optional() });

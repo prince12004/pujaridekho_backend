@@ -3,6 +3,8 @@ import { ApiError } from "../../lib/api-error.js";
 import { toCrmBookingPayload, type CrmBookingPayload } from "../../lib/crm-booking-payload.js";
 import { PanditModel } from "../../models/pandit.model.js";
 import { BookingModel } from "../../models/booking.model.js";
+import { PoojaModel } from "../../models/pooja.model.js";
+import { FestivalModel } from "../../models/festival.model.js";
 import { CRM_FIXED_SLOTS, PanditSlotReservationModel } from "../../models/pandit-slot-reservation.model.js";
 import { getPanditById } from "../admin-pandits/admin-pandits.service.js";
 
@@ -160,4 +162,73 @@ export async function listConfirmedBookingsForCrm(query: ConfirmedBookingsForCrm
     .sort({ createdAt: -1 });
 
   return bookings.map((b) => toCrmBookingPayload(b as never));
+}
+
+export interface CrmBookingUpdateInput {
+  clientName?: string;
+  phone?: string;
+  pujaName?: string;
+  pujaDate?: string;
+  pujaTime?: string;
+  totalAmount?: number;
+  tokenAmount?: number;
+  tokenStatus?: "pending" | "received";
+  totalAmountStatus?: "pending" | "received";
+  transactionId?: string | null;
+  address?: string;
+  notes?: string;
+  status?: "confirmed" | "notConverted";
+}
+
+// A field only takes effect when the caller actually sent it — undefined
+// (omitted) always means "no change," never "clear it," per the CRM's own
+// one-way-authoritative sync contract (see PUT /crm/bookings/:id docs).
+export async function updateBookingFromCrm(websiteBookingId: string, input: CrmBookingUpdateInput) {
+  const booking = await BookingModel.findOne({ bookingId: websiteBookingId });
+  if (!booking) throw ApiError.notFound(`No booking found with id "${websiteBookingId}"`);
+
+  if ("clientName" in input) booking.customerSnapshot!.name = input.clientName;
+  if ("phone" in input) booking.customerSnapshot!.mobile = input.phone;
+  if ("address" in input) booking.address = input.address;
+  if ("pujaDate" in input) booking.poojaDate = new Date(input.pujaDate!);
+  if ("pujaTime" in input) booking.poojaTime = input.pujaTime;
+
+  if ("pujaName" in input && input.pujaName) {
+    // Best-effort — the booking stays linked to its original Pooja/Festival
+    // if nothing matches, rather than risk repointing it at the wrong
+    // service (which would silently change its pricing/samagri too).
+    const match =
+      booking.serviceType === "festival"
+        ? await FestivalModel.findOne({ name: new RegExp(`^${input.pujaName}$`, "i") })
+        : await PoojaModel.findOne({ name: new RegExp(`^${input.pujaName}$`, "i") });
+    if (match) {
+      if (booking.serviceType === "festival") booking.festival = match._id as never;
+      else booking.pooja = match._id as never;
+    }
+  }
+
+  if ("totalAmount" in input) booking.pricing!.finalAmount = input.totalAmount!;
+  if ("tokenAmount" in input) booking.pricing!.advanceAmount = input.tokenAmount!;
+  if ("tokenStatus" in input) booking.pricing!.tokenStatus = input.tokenStatus!;
+  if ("totalAmountStatus" in input) booking.pricing!.totalAmountStatus = input.totalAmountStatus!;
+  if ("transactionId" in input) booking.pricing!.transactionId = input.transactionId;
+
+  if ("notes" in input && input.notes) {
+    booking.internalNotes.push({ note: input.notes, addedAt: new Date() } as never);
+  }
+
+  if ("status" in input) {
+    const nextStatus = input.status === "notConverted" ? "cancelled" : "booking_confirmed";
+    if (booking.status !== nextStatus) {
+      booking.status = nextStatus;
+      booking.timeline.push({
+        status: nextStatus,
+        note: `Status updated via CRM (${input.status})`,
+        changedAt: new Date(),
+      });
+    }
+  }
+
+  await booking.save();
+  return booking;
 }

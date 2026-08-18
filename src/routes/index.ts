@@ -53,7 +53,9 @@ import { adminReportsRouter } from "../features/admin-reports/admin-reports.rout
 import { adminNotificationsRouter } from "../features/admin-notifications/admin-notifications.routes.js";
 import { adminSearchRouter } from "../features/admin-search/admin-search.routes.js";
 import { newsletterRouter } from "../features/newsletter/newsletter.routes.js";
+import { leadsRouter } from "../features/leads/leads.routes.js";
 import { adminNewsletterRouter } from "../features/admin-newsletter/admin-newsletter.routes.js";
+import { adminLeadsRouter } from "../features/admin-leads/admin-leads.routes.js";
 import { customerAuthRouter } from "../features/customer-auth/customer-auth.routes.js";
 import { accountDashboardRouter } from "../features/account-dashboard/account-dashboard.routes.js";
 import { accountBookingsRouter } from "../features/account-bookings/account-bookings.routes.js";
@@ -106,6 +108,7 @@ apiRouter.use("/admin/reports", adminReportsRouter);
 apiRouter.use("/admin/notifications", adminNotificationsRouter);
 apiRouter.use("/admin/search", adminSearchRouter);
 apiRouter.use("/admin/newsletter-subscribers", adminNewsletterRouter);
+apiRouter.use("/admin/leads", adminLeadsRouter);
 
 // External CRM app integration — website API key auth, not admin JWT.
 apiRouter.use("/crm", crmRouter);
@@ -132,6 +135,7 @@ apiRouter.use("/homepage-banner", homepageBannerRouter);
 apiRouter.use("/pages", pagesRouter);
 apiRouter.use("/seo", seoRouter);
 apiRouter.use("/newsletter", newsletterRouter);
+apiRouter.use("/leads", leadsRouter);
 apiRouter.use("/customer-auth", customerAuthRouter);
 
 // Customer Account (My Account dashboard) API — all protected by requireCustomerAuth

@@ -23,6 +23,14 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   WEBSITE_API_KEY: z.string().min(16, "WEBSITE_API_KEY must be at least 16 characters"),
+  // Sends the homepage "Book Your Puja" widget submissions to LEAD_NOTIFICATION_EMAIL.
+  // Leave unset to skip sending (logged instead) — fine for local dev.
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
+  LEAD_NOTIFICATION_EMAIL: z.string().email().default("pujaridekho@gmail.com"),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -12,7 +12,8 @@
     { "key": "base_url", "value": "http://localhost:4000/api/v1", "type": "string" },
     { "key": "website_api_key", "value": "", "type": "string" },
     { "key": "pandit_id", "value": "", "type": "string" },
-    { "key": "booking_ref", "value": "CRM-123", "type": "string" }
+    { "key": "booking_ref", "value": "CRM-123", "type": "string" },
+    { "key": "website_booking_id", "value": "PD-2026-000007", "type": "string" }
   ],
   "item": [
     {
@@ -74,6 +75,23 @@
             { "key": "since", "value": "2026-08-01T00:00:00Z", "disabled": true }
           ]
         }
+      }
+    },
+    {
+      "name": "Update Booking (Sync from CRM)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "{{base_url}}/crm/bookings/{{website_booking_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["crm", "bookings", "{{website_booking_id}}"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientName\": \"Tanishka Yadav\",\n  \"phone\": \"9711166513\",\n  \"pujaName\": \"Rudrabhishek Puja\",\n  \"pujaDate\": \"2026-08-19\",\n  \"pujaTime\": \"10:00\",\n  \"totalAmount\": 2600,\n  \"tokenAmount\": 99,\n  \"tokenStatus\": \"received\",\n  \"totalAmountStatus\": \"pending\",\n  \"transactionId\": \"UPI123456\",\n  \"address\": \"Flat 38, Richmond Park Society, Sector 6, Vasundhara, Ghaziabad\",\n  \"notes\": \"Customer confirmed via phone call\",\n  \"status\": \"confirmed\"\n}"
+        },
+        "description": "Every field is optional — only include what actually changed in the CRM. Omitted fields are left untouched on the website. `transactionId` accepts explicit `null` to clear it. `status` should only be sent on the one transition worth syncing: \"confirmed\" or \"notConverted\"."
       }
     }
   ]

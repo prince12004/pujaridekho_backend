@@ -77,6 +77,12 @@ const pricingSchema = new Schema(
     remainingAmount: { type: Number, default: 0 },
     priceChangedBy: { type: Schema.Types.ObjectId, ref: "AdminUser" },
     priceChangeReason: { type: String },
+    // Set by the CRM's own collection tracking (cash/UPI collected by the
+    // pandit or over the phone) — independent of `payments[]`, which only
+    // records actual PayU gateway transactions made on the website itself.
+    tokenStatus: { type: String, enum: ["pending", "received"], default: "pending" },
+    totalAmountStatus: { type: String, enum: ["pending", "received"], default: "pending" },
+    transactionId: { type: String, default: null },
   },
   { _id: false },
 );
