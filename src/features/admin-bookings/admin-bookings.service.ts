@@ -5,6 +5,22 @@ import { BookingModel } from "../../models/booking.model.js";
 import { PoojaModel } from "../../models/pooja.model.js";
 import { FestivalModel } from "../../models/festival.model.js";
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
+import { ADVANCE_AMOUNT } from "../payments/payments.service.js";
+
+function computeFinalAmount(pricing: {
+  packagePrice?: number;
+  samagriCharges?: number;
+  additionalCharges?: number;
+  discount?: number;
+  customDiscount?: number;
+}): number {
+  const packagePrice = pricing.packagePrice ?? 0;
+  const samagriCharges = pricing.samagriCharges ?? 0;
+  const additionalCharges = pricing.additionalCharges ?? 0;
+  const discount = pricing.discount ?? 0;
+  const customDiscount = pricing.customDiscount ?? 0;
+  return Math.max(packagePrice + samagriCharges + additionalCharges - discount - customDiscount + ADVANCE_AMOUNT, 0);
+}
 
 function customerIdOf(booking: { customer: unknown }): string {
   const value = booking.customer as { _id?: { toString(): string } } | { toString(): string };
@@ -150,7 +166,13 @@ export async function createOfflineBooking(input: OfflineBookingInput, adminId: 
     (sum, p) => sum + (typeof p.amount === "number" ? p.amount : 0),
     0,
   );
-  const finalAmount = typeof input.pricing?.finalAmount === "number" ? input.pricing.finalAmount : 0;
+  const finalAmount = computeFinalAmount(input.pricing ?? {});
+  const advanceAmount = typeof input.pricing?.advanceAmount === "number" ? input.pricing.advanceAmount : 0;
+  const pricing = {
+    ...input.pricing,
+    finalAmount,
+    remainingAmount: Math.max(finalAmount - advanceAmount, 0),
+  };
   const paymentStatus = totalPaid <= 0 ? "unpaid" : totalPaid >= finalAmount && finalAmount > 0 ? "paid" : "partially_paid";
 
   const booking = await BookingModel.create({
@@ -172,7 +194,7 @@ export async function createOfflineBooking(input: OfflineBookingInput, adminId: 
     poojaTime: input.poojaTime,
     pandit: input.pandit ?? null,
     status: input.pandit ? "pandit_assigned" : "booking_confirmed",
-    pricing: input.pricing ?? {},
+    pricing,
     payments: input.payments ?? [],
     paymentStatus,
     bookingChannel: "offline",
@@ -229,7 +251,14 @@ export async function updateBookingDetails(id: string, input: UpdateBookingDetai
 
   const { pricing, ...rest } = input;
   Object.assign(booking, rest);
-  if (pricing) Object.assign(booking.pricing, pricing);
+  if (pricing) {
+    Object.assign(booking.pricing, pricing);
+    booking.pricing.finalAmount = computeFinalAmount(booking.pricing);
+    booking.pricing.remainingAmount = Math.max(
+      booking.pricing.finalAmount - (booking.pricing.advanceAmount ?? 0),
+      0,
+    );
+  }
 
   booking.timeline.push({
     status: booking.status,

@@ -92,9 +92,7 @@ const offlineBookingSchema = z.object({
       discount: z.number().optional(),
       couponCode: z.string().optional(),
       customDiscount: z.number().optional(),
-      finalAmount: z.number().optional(),
       advanceAmount: z.number().optional(),
-      remainingAmount: z.number().optional(),
       priceChangeReason: z.string().optional(),
     })
     .optional(),
@@ -163,9 +161,7 @@ const bookingDetailsSchema = z.object({
       additionalCharges: z.number().optional(),
       discount: z.number().optional(),
       customDiscount: z.number().optional(),
-      finalAmount: z.number().optional(),
       advanceAmount: z.number().optional(),
-      remainingAmount: z.number().optional(),
     })
     .optional(),
 });
