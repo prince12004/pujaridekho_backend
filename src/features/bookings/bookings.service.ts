@@ -70,10 +70,6 @@ async function reserveMuhuratSlot(poojaId: unknown, poojaDate: Date, slotId: str
 export async function createPublicBooking(input: CreatePublicBookingInput, customerId: string) {
   const serviceType = input.serviceType ?? "pooja";
 
-  // Festivals and poojas are separate collections that both offer optional
-  // samagri add-ons — look the service up in the right one based on serviceType
-  // rather than always assuming "pooja" (a festival slug was previously being
-  // looked up in the Pooja collection and always failing).
   const service =
     serviceType === "festival"
       ? await FestivalModel.findOne({ slug: input.poojaSlug, status: "published" })

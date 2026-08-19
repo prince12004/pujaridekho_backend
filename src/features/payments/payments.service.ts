@@ -123,6 +123,11 @@ export async function handlePayUCallback(body: PayUCallbackBody) {
         const finalAmount = booking.pricing?.finalAmount ?? 0;
         booking.paymentStatus = totalPaid >= finalAmount && finalAmount > 0 ? "paid" : "partially_paid";
         if (booking.status === "pending_payment") booking.status = "payment_received";
+
+        const tokenCovered = Math.min(totalPaid, ADVANCE_AMOUNT);
+        booking.pricing!.advanceAmount = Math.max(booking.pricing?.advanceAmount ?? 0, tokenCovered);
+        if (booking.pricing!.advanceAmount >= ADVANCE_AMOUNT) booking.pricing!.tokenStatus = "received";
+        if (finalAmount > 0 && totalPaid >= finalAmount) booking.pricing!.totalAmountStatus = "received";
       }
       await booking.save();
 
