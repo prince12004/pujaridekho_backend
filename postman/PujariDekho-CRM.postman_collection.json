@@ -75,7 +75,26 @@
             { "key": "since", "value": "2026-08-01T00:00:00Z", "disabled": true }
           ]
         }
-      }
+      },
+      "response": [
+        {
+          "name": "200 OK — example",
+          "originalRequest": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm/bookings?status=confirmed",
+              "host": ["{{base_url}}"],
+              "path": ["crm", "bookings"],
+              "query": [{ "key": "status", "value": "confirmed" }]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"PD-2026-000007\",\n      \"clientName\": \"Tanishka Yadav\",\n      \"phone\": \"9711166513\",\n      \"pujaName\": \"Rudrabhishek Puja\",\n      \"pujaDate\": \"2026-08-19\",\n      \"pujaTime\": \"10:00\",\n      \"totalAmount\": 2600,\n      \"tokenAmount\": 99,\n      \"tokenStatus\": \"received\",\n      \"totalAmountStatus\": \"pending\",\n      \"address\": \"Flat 38, Richmond Park Society, Sector 6, Vasundhara, Ghaziabad\",\n      \"createdAt\": \"2026-08-16T08:06:56.043Z\"\n    },\n    {\n      \"id\": \"PD-2026-000005\",\n      \"clientName\": \"Radha Gupta\",\n      \"phone\": \"7705011283\",\n      \"pujaName\": \"Rudrabhishek Puja\",\n      \"pujaDate\": \"2026-08-22\",\n      \"pujaTime\": \"\",\n      \"totalAmount\": 1100,\n      \"tokenAmount\": 99,\n      \"tokenStatus\": \"received\",\n      \"totalAmountStatus\": \"pending\",\n      \"address\": \"Plot no A01, Third Floor, Nature valley, sector 70, Gurugram\",\n      \"createdAt\": \"2026-08-13T12:41:23.332Z\"\n    }\n  ]\n}"
+        }
+      ]
     },
     {
       "name": "Update Booking (Sync from CRM)",
