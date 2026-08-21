@@ -9,6 +9,7 @@ export interface CrmBookingPayload {
   tokenAmount: number;
   tokenStatus: "pending" | "received";
   totalAmountStatus: "pending" | "received";
+  samagriIncluded: boolean;
   address?: string;
   createdAt: string;
 }
@@ -27,6 +28,8 @@ interface BookingLike {
     tokenStatus?: "pending" | "received" | null;
     totalAmountStatus?: "pending" | "received" | null;
   } | null;
+  package?: { samagriIncluded?: boolean | null } | null;
+  selectedSamagri?: { name: string }[] | null;
   address?: string | null;
   createdAt: Date;
 }
@@ -45,6 +48,9 @@ export function toCrmBookingPayload(booking: BookingLike): CrmBookingPayload {
     tokenAmount: booking.pricing?.advanceAmount ?? 0,
     tokenStatus: booking.pricing?.tokenStatus ?? "pending",
     totalAmountStatus: booking.pricing?.totalAmountStatus ?? "pending",
+    // True either because the chosen package bundles samagri, or the
+    // customer separately picked samagri items in the samagri selector.
+    samagriIncluded: Boolean(booking.package?.samagriIncluded) || (booking.selectedSamagri?.length ?? 0) > 0,
     address: booking.address ?? undefined,
     createdAt: new Date(booking.createdAt).toISOString(),
   };
