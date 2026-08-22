@@ -175,14 +175,12 @@ export interface CrmBookingUpdateInput {
   tokenStatus?: "pending" | "received";
   totalAmountStatus?: "pending" | "received";
   transactionId?: string | null;
+  samagriIncluded?: boolean;
   address?: string;
   notes?: string;
   status?: "confirmed" | "notConverted";
 }
 
-// A field only takes effect when the caller actually sent it — undefined
-// (omitted) always means "no change," never "clear it," per the CRM's own
-// one-way-authoritative sync contract (see PUT /crm/bookings/:id docs).
 export async function updateBookingFromCrm(websiteBookingId: string, input: CrmBookingUpdateInput) {
   const booking = await BookingModel.findOne({ bookingId: websiteBookingId });
   if (!booking) throw ApiError.notFound(`No booking found with id "${websiteBookingId}"`);
@@ -212,6 +210,15 @@ export async function updateBookingFromCrm(websiteBookingId: string, input: CrmB
   if ("tokenStatus" in input) booking.pricing!.tokenStatus = input.tokenStatus!;
   if ("totalAmountStatus" in input) booking.pricing!.totalAmountStatus = input.totalAmountStatus!;
   if ("transactionId" in input) booking.pricing!.transactionId = input.transactionId;
+
+  if ("samagriIncluded" in input) {
+    // Only ever turns this ON with certainty — a customer's own itemized
+    // samagri selection (booking.selectedSamagri) is real, paid-for data, so
+    // a CRM edit here can't silently make it read as "not included" (see
+    // toCrmBookingPayload — the two sources are OR'd together on read).
+    booking.package = booking.package ?? ({} as never);
+    booking.package!.samagriIncluded = input.samagriIncluded;
+  }
 
   if ("notes" in input && input.notes) {
     booking.internalNotes.push({ note: input.notes, addedAt: new Date() } as never);

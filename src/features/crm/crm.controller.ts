@@ -71,6 +71,7 @@ const updateBookingSchema = z.object({
   tokenStatus: z.enum(["pending", "received"]).optional(),
   totalAmountStatus: z.enum(["pending", "received"]).optional(),
   transactionId: z.string().nullable().optional(),
+  samagriIncluded: z.boolean().optional(),
   address: z.string().min(1).optional(),
   notes: z.string().optional(),
   status: z.enum(["confirmed", "notConverted"]).optional(),
