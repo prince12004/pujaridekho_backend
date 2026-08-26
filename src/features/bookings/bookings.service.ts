@@ -92,17 +92,10 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
   const selectedSamagri = samagriCatalogue.filter((item) => requestedNames.has(item.name));
   const samagriCharges = selectedSamagri.reduce((sum, item) => sum + item.price, 0);
 
-  // If the customer picked a package, its price (with any city-specific
-  // override for input.city applied) is what they're actually charged —
-  // falls back to startingPrice for services with no packages, same as before.
   const packages = (service as { packages?: { name: string; price: number; salePrice?: number; samagriIncluded?: boolean; dakshinaIncluded?: boolean; cityPrices?: { city: string; price: number }[] }[] }).packages ?? [];
   const selectedPackage = input.packageName ? packages.find((p) => p.name === input.packageName) : undefined;
   const packagePrice = selectedPackage ? resolvePackagePrice(selectedPackage, input.city) : service.startingPrice;
 
-  // Mirrors the checkout page's "Total Amount" (pooja price + samagri +
-  // platform fee) so the amount stored here — and shown back in the
-  // dashboard/invoice — doesn't undercut what the customer was actually
-  // quoted by the ₹99 platform fee.
   const platformFee = ADVANCE_AMOUNT;
   const finalAmount = packagePrice + samagriCharges + platformFee;
 

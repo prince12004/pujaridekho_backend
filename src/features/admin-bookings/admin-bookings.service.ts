@@ -233,6 +233,7 @@ interface UpdateBookingDetailsInput {
   pincode?: string;
   gotra?: string;
   specialInstructions?: string;
+  selectedSamagri?: { name: string; price: number }[];
   pricing?: {
     packagePrice?: number;
     marketPrice?: number;
@@ -249,10 +250,21 @@ interface UpdateBookingDetailsInput {
 export async function updateBookingDetails(id: string, input: UpdateBookingDetailsInput, adminId: string) {
   const booking = await getBookingById(id);
 
-  const { pricing, ...rest } = input;
+  const { pricing, selectedSamagri, ...rest } = input;
   Object.assign(booking, rest);
-  if (pricing) {
-    Object.assign(booking.pricing, pricing);
+
+  if (selectedSamagri) {
+    booking.selectedSamagri = selectedSamagri as never;
+  }
+
+  if (pricing || selectedSamagri) {
+    // Whenever the admin changes which samagri items are attached, the
+    // charge for them is re-derived from the item list rather than trusted
+    // as a separately-entered number — keeps the two from drifting apart.
+    const samagriCharges = selectedSamagri
+      ? selectedSamagri.reduce((sum, item) => sum + item.price, 0)
+      : undefined;
+    Object.assign(booking.pricing, pricing, samagriCharges != null ? { samagriCharges } : {});
     booking.pricing.finalAmount = computeFinalAmount(booking.pricing);
     booking.pricing.remainingAmount = Math.max(
       booking.pricing.finalAmount - (booking.pricing.advanceAmount ?? 0),

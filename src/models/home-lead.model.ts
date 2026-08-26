@@ -1,8 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
-// A homepage "Book Your Puja" widget submission — captured here so it's
-// visible in the admin panel regardless of whether SMTP is configured to
-// also email it (see leads.service.ts).
 const homeLeadSchema = new Schema(
   {
     name: { type: String, required: true },

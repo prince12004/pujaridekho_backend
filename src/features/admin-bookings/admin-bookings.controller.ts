@@ -153,6 +153,7 @@ const bookingDetailsSchema = z.object({
   pincode: z.string().optional(),
   gotra: z.string().optional(),
   specialInstructions: z.string().optional(),
+  selectedSamagri: z.array(z.object({ name: z.string(), price: z.number().min(0) })).optional(),
   pricing: z
     .object({
       packagePrice: z.number().optional(),
