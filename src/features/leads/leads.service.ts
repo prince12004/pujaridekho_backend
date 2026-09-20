@@ -26,13 +26,15 @@ export async function sendHomeBookingLead(input: HomeBookingLeadInput) {
     link: "/admin/leads",
   });
 
-  try {
-    await sendMail({
-      to: env.LEAD_NOTIFICATION_EMAIL,
-      subject: `New Puja Enquiry — ${input.name} (${input.pooja})`,
-      html,
-    });
-  } catch (err) {
+  // Fire-and-forget — the lead is already saved and the admin already
+  // notified in-app above, so this must never hold up the HTTP response.
+  // A blocked/slow SMTP host (common on cheap VPS providers) would otherwise
+  // hang the request for as long as the connection takes to time out.
+  sendMail({
+    to: env.LEAD_NOTIFICATION_EMAIL,
+    subject: `New Puja Enquiry — ${input.name} (${input.pooja})`,
+    html,
+  }).catch((err) => {
     logger.error("Failed to email homepage lead", { message: err instanceof Error ? err.message : err });
-  }
+  });
 }

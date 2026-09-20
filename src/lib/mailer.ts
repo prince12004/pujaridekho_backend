@@ -8,6 +8,12 @@ const transporter =
         port: env.SMTP_PORT ?? 587,
         secure: env.SMTP_PORT === 465,
         auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
+        // Some hosts (many cheap VPS providers) block or heavily throttle
+        // outbound SMTP — without these, a blocked connection hangs the
+        // request for minutes instead of failing fast.
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 10_000,
       })
     : null;
 
