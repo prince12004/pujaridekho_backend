@@ -25,6 +25,8 @@ export const PERMISSIONS = {
   USERS_MANAGE: "users:manage",
   SETTINGS_MANAGE: "settings:manage",
   AUDIT_VIEW: "audit:view",
+  CRM_VIEW: "crm:view",
+  CRM_MANAGE: "crm:manage",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -60,6 +62,7 @@ export const DEFAULT_ROLES: { name: string; permissions: string[]; isSystem: boo
   { name: "Finance Manager", permissions: [PERMISSIONS.FINANCE_VIEW, PERMISSIONS.BOOKINGS_REFUND, PERMISSIONS.REPORTS_VIEW], isSystem: false },
   { name: "Support Manager", permissions: [PERMISSIONS.BOOKINGS_VIEW, PERMISSIONS.CUSTOMERS_VIEW, PERMISSIONS.REVIEWS_MANAGE], isSystem: false },
   { name: "SEO Manager", permissions: [PERMISSIONS.SEO_MANAGE], isSystem: false },
+  { name: "CRM Manager", permissions: [PERMISSIONS.CRM_MANAGE], isSystem: false },
 ];
 
 export function roleHasPermission(rolePermissions: string[], permission: string): boolean {
