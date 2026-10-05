@@ -1,6 +1,6 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
-export const OTP_PURPOSES = ["login", "change_mobile"] as const;
+export const OTP_PURPOSES = ["login", "change_mobile", "pandit_reset_password"] as const;
 
 const otpSchema = new Schema(
   {

@@ -13,6 +13,15 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(16, "JWT_ACCESS_SECRET must be at least 16 characters"),
   JWT_REFRESH_SECRET: z.string().min(16, "JWT_REFRESH_SECRET must be at least 16 characters"),
   ADMIN_JWT_SECRET: z.string().min(16, "ADMIN_JWT_SECRET must be at least 16 characters"),
+  // Pandit mobile app (pujaripandit_app) auth — its own secret, separate from
+  // ADMIN_JWT_SECRET/JWT_ACCESS_SECRET so a pandit token can never be replayed
+  // against admin or customer routes and vice versa. Defaulted (like
+  // CRM_JWT_SECRET) so existing local/.env setups don't break; override in
+  // production.
+  PANDIT_JWT_SECRET: z
+    .string()
+    .min(16, "PANDIT_JWT_SECRET must be at least 16 characters")
+    .default("pujari-dekho-pandit-app-jwt-secret-2024"),
   ADMIN_SEED_NAME: z.string().optional(),
   ADMIN_SEED_EMAIL: z.string().email().optional(),
   ADMIN_SEED_PASSWORD: z.string().min(8).optional(),

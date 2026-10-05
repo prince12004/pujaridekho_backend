@@ -62,6 +62,8 @@ import { leadsRouter } from "../features/leads/leads.routes.js";
 import { adminNewsletterRouter } from "../features/admin-newsletter/admin-newsletter.routes.js";
 import { adminLeadsRouter } from "../features/admin-leads/admin-leads.routes.js";
 import { customerAuthRouter } from "../features/customer-auth/customer-auth.routes.js";
+import { panditAuthRouter } from "../features/pandit-auth/pandit-auth.routes.js";
+import { panditAppRouter } from "../features/pandit-app/pandit-app.routes.js";
 import { accountDashboardRouter } from "../features/account-dashboard/account-dashboard.routes.js";
 import { accountBookingsRouter } from "../features/account-bookings/account-bookings.routes.js";
 import { accountOrdersRouter } from "../features/account-orders/account-orders.routes.js";
@@ -152,6 +154,13 @@ apiRouter.use("/seo", seoRouter);
 apiRouter.use("/newsletter", newsletterRouter);
 apiRouter.use("/leads", leadsRouter);
 apiRouter.use("/customer-auth", customerAuthRouter);
+
+// Pandit mobile app (pujaripandit_app) — its own JWT (PANDIT_JWT_SECRET),
+// separate from admin/customer/CRM auth. /pandit-auth/* mirrors the
+// customer-auth naming convention; /pandit/* matches the resource paths the
+// Flutter app's ApiEndpoints already hard-codes (profile, bookings, …).
+apiRouter.use("/pandit-auth", panditAuthRouter);
+apiRouter.use("/pandit", panditAppRouter);
 
 // Customer Account (My Account dashboard) API — all protected by requireCustomerAuth
 // inside each router, with ownership checks enforced server-side per resource.

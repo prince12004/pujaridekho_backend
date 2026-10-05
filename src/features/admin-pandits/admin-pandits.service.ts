@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { ApiError } from "../../lib/api-error.js";
 import { PanditModel } from "../../models/pandit.model.js";
 import { PanditApplicationModel } from "../../models/pandit-application.model.js";
@@ -51,6 +52,18 @@ export async function updatePandit(id: string, input: Record<string, unknown>) {
 export async function deletePandit(id: string) {
   const pandit = await getPanditById(id);
   await pandit.deleteOne();
+}
+
+// Bootstraps/resets a pandit's pujaripandit_app login credentials. The
+// Pandit model has no self-service signup — an admin sets the initial
+// password here (or resets it if the pandit loses access); the app's own
+// forgot-password OTP flow (pandit-auth feature) covers self-service resets
+// afterward.
+export async function setPanditPassword(id: string, password: string) {
+  const pandit = await getPanditById(id);
+  pandit.passwordHash = await bcrypt.hash(password, 10);
+  await pandit.save();
+  return pandit;
 }
 
 export interface PanditBookingsQuery {

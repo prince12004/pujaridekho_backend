@@ -12,6 +12,7 @@ import {
   patchApplication,
   postConvertApplication,
   getPanditBookings,
+  postPanditPassword,
 } from "./admin-pandits.controller.js";
 
 export const adminPanditsRouter = Router();
@@ -33,3 +34,4 @@ adminPanditsRouter.get("/:id", requirePermission(PERMISSIONS.PANDITS_VIEW), getP
 adminPanditsRouter.post("/", requirePermission(PERMISSIONS.PANDITS_MANAGE), postPandit);
 adminPanditsRouter.patch("/:id", requirePermission(PERMISSIONS.PANDITS_MANAGE), patchPandit);
 adminPanditsRouter.delete("/:id", requirePermission(PERMISSIONS.PANDITS_MANAGE), removePandit);
+adminPanditsRouter.post("/:id/password", requirePermission(PERMISSIONS.PANDITS_MANAGE), postPanditPassword);

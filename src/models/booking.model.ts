@@ -128,6 +128,72 @@ const timelineEventSchema = new Schema(
   { _id: false },
 );
 
+// ---- Pandit mobile app (pujaripandit_app) execution tracking ----
+// Additive, optional sub-state for the on-the-ground job lifecycle the
+// assigned pandit walks through from their phone: arriving (OTP-verified via
+// a code the customer reads out), starting, uploading completion photos,
+// recording what was actually collected, and — for cash — settling that
+// collection with the company as a "deposit". None of this replaces the
+// website/admin `status`/`pricing`/`payments` fields above; it lives
+// alongside them and is only ever written by the pandit-app endpoints.
+export const PANDIT_EXECUTION_PAYMENT_METHODS = ["cash", "online"] as const;
+export const PANDIT_EXECUTION_PAYMENT_STATUSES = ["pending", "submitted", "verified", "rejected"] as const;
+export const PANDIT_EXECUTION_DEPOSIT_STATUSES = ["not_applicable", "pending", "deposited"] as const;
+
+const panditExecutionExtraAssetSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    quantity: { type: Number, required: true, min: 1 },
+    unitPrice: { type: Number, required: true, min: 0 },
+    amount: { type: Number, required: true, min: 0 },
+  },
+  { _id: false },
+);
+
+const panditExecutionImageSchema = new Schema(
+  {
+    url: { type: String, required: true },
+    uploadedAt: { type: Date, default: Date.now },
+  },
+  { _id: false },
+);
+
+const panditExecutionSchema = new Schema(
+  {
+    // Hashed OTP the pandit asks the customer to read out, to prove they
+    // physically reached the venue — never exposed to the pandit app itself
+    // once consumed. No SMS provider is wired up yet (same documented gap as
+    // lib/otp.ts), so it is returned in the send-OTP response for now.
+    reachedOtpHash: { type: String, default: null },
+    reachedAt: { type: Date, default: null },
+    reachedLocation: {
+      type: new Schema({ lat: Number, lng: Number }, { _id: false }),
+      default: null,
+    },
+    reachedOtpVerified: { type: Boolean, default: false },
+    startedAt: { type: Date, default: null },
+    completedAt: { type: Date, default: null },
+
+    paymentMethod: { type: String, enum: PANDIT_EXECUTION_PAYMENT_METHODS, default: null },
+    paymentStatus: { type: String, enum: PANDIT_EXECUTION_PAYMENT_STATUSES, default: "pending" },
+    collectedAmount: { type: Number, default: 0 },
+
+    extraAmount: { type: Number, default: 0 },
+    extraAmountReason: { type: String, default: null },
+    extraAssets: { type: [panditExecutionExtraAssetSchema], default: [] },
+
+    // Cash the pandit holds for this booking and owes the company; zero for
+    // online payments, which land with the company directly.
+    companyDueAmount: { type: Number, default: 0 },
+    depositStatus: { type: String, enum: PANDIT_EXECUTION_DEPOSIT_STATUSES, default: "not_applicable" },
+    depositId: { type: Schema.Types.ObjectId, ref: "PanditDeposit", default: null },
+    depositedAt: { type: Date, default: null },
+
+    images: { type: [panditExecutionImageSchema], default: [] },
+  },
+  { _id: false },
+);
+
 export const REQUEST_STATUSES = ["requested", "approved", "rejected"] as const;
 
 const rescheduleRequestSchema = new Schema(
@@ -211,6 +277,8 @@ const bookingSchema = new Schema(
 
     rescheduleRequest: { type: rescheduleRequestSchema, default: null },
     cancelRequest: { type: cancelRequestSchema, default: null },
+
+    panditExecution: { type: panditExecutionSchema, default: () => ({}) },
   },
   { timestamps: true },
 );

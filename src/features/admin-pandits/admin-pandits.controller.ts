@@ -13,6 +13,7 @@ import {
   listPandits,
   listPanditApplications,
   listPanditBookings,
+  setPanditPassword,
   updatePandit,
   updatePanditApplication,
 } from "./admin-pandits.service.js";
@@ -112,6 +113,20 @@ export const removePandit = asyncHandler(async (req: Request, res: Response) => 
     before: pandit,
   });
   sendSuccess(res, null, "Pandit deleted");
+});
+
+const setPasswordSchema = z.object({ password: z.string().min(4) });
+
+export const postPanditPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { password } = setPasswordSchema.parse(req.body);
+  const pandit = await setPanditPassword(req.params.id, password);
+  await recordAuditLog(req, req.admin!, {
+    action: "update",
+    entityType: "Pandit",
+    entityId: pandit._id.toString(),
+    description: `Set pujaripandit_app login password for "${pandit.fullName}"`,
+  });
+  sendSuccess(res, null, "Pandit app password set");
 });
 
 const panditBookingsQuerySchema = z.object({

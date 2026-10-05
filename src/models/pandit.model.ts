@@ -52,6 +52,16 @@ const panditSchema = new Schema(
     adminNotes: { type: String },
     rating: { type: Number, default: 0, min: 0, max: 5 },
     completedPoojas: { type: Number, default: 0 },
+
+    // Pandit mobile app (pujaripandit_app) login — set by admin (or via the
+    // self-service forgot-password OTP flow) once a pandit is verified.
+    // select: false — never returned by a default find(); the auth service
+    // explicitly .select("+passwordHash") when checking it.
+    passwordHash: { type: String, select: false, default: null },
+    // Pandit-controlled toggle (mobile app home/profile screen) — whether
+    // they're currently accepting new assignments. Independent of
+    // accountStatus (admin-controlled, active/inactive).
+    isAvailable: { type: Boolean, default: true },
   },
   { timestamps: true },
 );
