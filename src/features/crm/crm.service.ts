@@ -74,6 +74,12 @@ export interface ReserveSlotInput {
   date: string;
   slot: CrmSlot;
   ref: string;
+  // The real website Booking.bookingId this CRM assignment should sync to,
+  // when it differs from `ref` (e.g. a CrmInquiry's own `id`, or a
+  // `${inquiryId}:${eventId}` composite for a multi-date inquiry — neither
+  // of which is ever a real Booking.bookingId). Falls back to `ref` so
+  // direct callers that already pass a real bookingId as `ref` keep working.
+  websiteBookingId?: string;
 }
 
 export async function reservePanditSlot(input: ReserveSlotInput) {
@@ -92,7 +98,7 @@ export async function reservePanditSlot(input: ReserveSlotInput) {
     throw ApiError.conflict("This pandit is already booked for this date and slot");
   }
 
-  const linkedBooking = await BookingModel.findOne({ bookingId: input.ref });
+  const linkedBooking = await BookingModel.findOne({ bookingId: input.websiteBookingId ?? input.ref });
   if (linkedBooking) {
     linkedBooking.pandit = input.panditId as never;
     linkedBooking.poojaDate = new Date(input.date);

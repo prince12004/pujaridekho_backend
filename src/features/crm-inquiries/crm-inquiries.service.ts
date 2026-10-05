@@ -11,12 +11,6 @@ import {
   reservePanditSlot,
 } from "../crm/crm.service.js";
 
-// Ported from pujaridekhocrm/backend/server.js. The one structural change
-// from the original: everywhere the old server.js called out to
-// websiteClient.js over HTTP (its own CRM backend hitting the website's API
-// as an external service), this now calls the equivalent apps/api
-// crm.service.ts functions directly, in-process — no HTTP round trip to
-// itself. See crm.service.ts for the pandit/booking side of that contract.
 
 type InquiryDoc = HydratedDocument<CrmInquiryDocument>;
 
@@ -251,6 +245,7 @@ export async function assignPandit(
     date: String(doc.pujaDate).slice(0, 10),
     slot: input.slot as never,
     ref: doc.id,
+    websiteBookingId: doc.websiteBookingId ?? undefined,
   });
 
   doc.panditId = input.panditId;
@@ -283,18 +278,23 @@ export async function assignPanditToEvent(
     await releasePanditSlot(event.panditId, ref).catch(() => undefined);
   }
 
+  event.panditId = input.panditId;
+  event.panditName = input.panditName;
+  event.assignedSlot = input.slot;
+
+  // A CrmInquiry can have several pujaEvents, but the single linked website
+  // Booking (if any) only has one `pandit` field — mirror whichever event is
+  // earliest, same as `doc.panditId` below, rather than letting every event
+  // assignment stomp on it.
+  const earliest = [...doc.pujaEvents].sort((a, b) => a.date.localeCompare(b.date))[0];
   await reservePanditSlot({
     panditId: input.panditId,
     date: String(event.date).slice(0, 10),
     slot: input.slot as never,
     ref,
+    websiteBookingId: event.id === earliest.id ? (doc.websiteBookingId ?? undefined) : undefined,
   });
 
-  event.panditId = input.panditId;
-  event.panditName = input.panditName;
-  event.assignedSlot = input.slot;
-
-  const earliest = [...doc.pujaEvents].sort((a, b) => a.date.localeCompare(b.date))[0];
   doc.panditId = earliest.panditId ?? null;
   doc.panditName = earliest.panditName ?? null;
   doc.assignedSlot = earliest.assignedSlot ?? null;
