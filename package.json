@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "seed:admin": "tsx scripts/seed-admin.ts",
-    "seed:import-blogs-sql": "tsx scripts/import-blogs-sql.ts"
+    "seed:import-blogs-sql": "tsx scripts/import-blogs-sql.ts",
+    "migrate:crm": "tsx scripts/migrate-crm-data.ts"
   },
   "dependencies": {
     "astronomy-engine": "^2.1.19",

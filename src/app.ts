@@ -20,7 +20,11 @@ export function createApp() {
       credentials: true,
     }),
   );
-  app.use(express.json());
+  // 12mb: default 100kb is too small once the CRM's activity-log voice
+  // notes (base64 audio, capped client-side at ~2 minutes — see
+  // crm-activity-log.model.ts) start posting through POST
+  // /crm-activity-logs. Ported limit from pujaridekhocrm/backend/server.js.
+  app.use(express.json({ limit: "12mb" }));
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan(isProduction ? "combined" : "dev"));
 

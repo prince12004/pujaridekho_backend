@@ -23,6 +23,11 @@ import { adminCitiesRouter } from "../features/admin-cities/admin-cities.routes.
 import { adminCouponsRouter } from "../features/admin-coupons/admin-coupons.routes.js";
 import { adminMuhuratsRouter } from "../features/admin-muhurats/admin-muhurats.routes.js";
 import { crmRouter } from "../features/crm/crm.routes.js";
+import { crmAuthRouter } from "../features/crm-auth/crm-auth.routes.js";
+import { crmSalespersonsRouter } from "../features/crm-salespersons/crm-salespersons.routes.js";
+import { crmInquiriesRouter } from "../features/crm-inquiries/crm-inquiries.routes.js";
+import { crmActivityLogRouter } from "../features/crm-activity-log/crm-activity-log.routes.js";
+import { crmWebhooksRouter } from "../features/crm-webhooks/crm-webhooks.routes.js";
 import { muhuratsRouter } from "../features/muhurats/muhurats.routes.js";
 import { poojasRouter } from "../features/poojas/poojas.routes.js";
 import { panditsRouter } from "../features/pandits/pandits.routes.js";
@@ -112,6 +117,16 @@ apiRouter.use("/admin/leads", adminLeadsRouter);
 
 // External CRM app integration — website API key auth, not admin JWT.
 apiRouter.use("/crm", crmRouter);
+
+// CRM backoffice (salespeople + CRM admin/superadmin) — merged in from the
+// standalone pujaridekhocrm/backend/server.js. Its own JWT (CRM_JWT_SECRET),
+// separate from both the admin panel's ADMIN_JWT_SECRET and the /crm
+// website-API-key router above. See middlewares/crm-auth.ts.
+apiRouter.use("/crm-auth", crmAuthRouter);
+apiRouter.use("/crm-salespeople", crmSalespersonsRouter);
+apiRouter.use("/crm-inquiries", crmInquiriesRouter);
+apiRouter.use("/crm-activity-logs", crmActivityLogRouter);
+apiRouter.use("/crm-webhooks", crmWebhooksRouter);
 
 // Customer-facing public APIs.
 apiRouter.use("/poojas", poojasRouter);

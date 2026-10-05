@@ -23,6 +23,21 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   WEBSITE_API_KEY: z.string().min(16, "WEBSITE_API_KEY must be at least 16 characters"),
+  // CRM backoffice (salespeople + admin/superadmin) JWT auth — ported from
+  // pujaridekhocrm/backend/server.js. Deliberately its own secret/env-var
+  // login, separate from ADMIN_JWT_SECRET (main admin panel) and
+  // WEBSITE_API_KEY (CRM app -> this API's pandit/booking proxy): the CRM's
+  // "admin"/"superadmin" roles are env-var logins, not AdminUserModel
+  // accounts, and mixing the two JWTs would let a CRM token's role claims
+  // be replayed against admin-only routes and vice versa.
+  CRM_JWT_SECRET: z.string().min(16, "CRM_JWT_SECRET must be at least 16 characters").default("pujari-dekho-jwt-secret-2024"),
+  CRM_ADMIN_USERNAME: z.string().default("admin"),
+  CRM_ADMIN_PASSWORD: z.string().default("admin@123"),
+  CRM_SUPERADMIN_USERNAME: z.string().default("owner"),
+  CRM_SUPERADMIN_PASSWORD: z.string().default("owner@123"),
+  META_WEBHOOK_VERIFY_TOKEN: z.string().default("pd-crm-verify-placeholder"),
+  WHATSAPP_APP_SECRET: z.string().optional(),
+  WEBSITE_WEBHOOK_VERIFY_TOKEN: z.string().optional(),
   // Sends the homepage "Book Your Puja" widget submissions to LEAD_NOTIFICATION_EMAIL.
   // Leave unset to skip sending (logged instead) — fine for local dev.
   SMTP_HOST: z.string().optional(),
