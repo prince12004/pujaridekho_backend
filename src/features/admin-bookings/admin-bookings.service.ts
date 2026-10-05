@@ -37,7 +37,7 @@ export interface ListBookingsQuery {
   serviceType?: string;
 }
 
-async function generateBookingId() {
+export async function generateBookingId() {
   const year = new Date().getFullYear();
   const prefix = `PD-${year}-`;
   // Not perfectly race-proof under heavy concurrent writes, but collisions are

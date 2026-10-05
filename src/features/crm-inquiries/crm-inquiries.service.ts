@@ -3,7 +3,10 @@ import crypto from "node:crypto";
 import type { HydratedDocument } from "mongoose";
 import { ApiError } from "../../lib/api-error.js";
 import { CrmInquiryModel, type CrmInquiryDocument } from "../../models/crm-inquiry.model.js";
+import { BookingModel } from "../../models/booking.model.js";
 import { crmHasFullAccess, crmOwnFilter, isCrmAdmin } from "../../middlewares/crm-auth.js";
+import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
+import { generateBookingId } from "../admin-bookings/admin-bookings.service.js";
 import {
   getCrmAvailability,
   listCrmPandits,
@@ -188,6 +191,15 @@ export async function updateInquiry(req: Request, id: string, body: Record<strin
       void importAndSyncBooking(doc.websiteBookingId, pickWebsiteSyncableFields(doc)).catch((err) =>
         console.error(`Website sync failed for ${doc.websiteBookingId}:`, (err as Error).message),
       );
+    } else if (doc.status === "confirmed") {
+      // A CRM-native inquiry (no linked website Booking) just got confirmed
+      // — give it a real Booking so it shows up in Admin Bookings and so a
+      // later pandit assignment can sync through to the pandit app, same as
+      // a website-originated booking. Best-effort for the same reason as
+      // the sync above.
+      void transferConfirmedInquiryToBooking(doc).catch((err) =>
+        console.error(`CRM->Booking transfer failed for inquiry ${doc.id}:`, (err as Error).message),
+      );
     }
     return { updated: true, version: doc.version, updatedAt: doc.updatedAt };
   }
@@ -211,6 +223,46 @@ export class InquiryConflictError extends ApiError {
   constructor(public readonly current: ReturnType<typeof toJson>) {
     super(409, "This inquiry has been updated by another user.");
   }
+}
+
+async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
+  if (!doc.pujaDate) return; // nothing to schedule yet — assignPandit already requires this before it'll proceed
+  const poojaDate = new Date(doc.pujaDate);
+  if (Number.isNaN(poojaDate.getTime())) return;
+
+  const stillUnlinked = await CrmInquiryModel.exists({ id: doc.id, websiteBookingId: { $exists: false } });
+  if (!stillUnlinked) return;
+
+  const customer = await findOrCreateCustomerByMobile({ name: doc.clientName, mobile: doc.phone });
+  const bookingId = await generateBookingId();
+  const finalAmount = doc.totalAmount ?? 0;
+  const advanceAmount = doc.tokenAmount ?? 0;
+  const paymentStatus =
+    doc.totalAmountStatus === "received" ? "paid" : doc.tokenStatus === "received" ? "partially_paid" : "unpaid";
+
+  await BookingModel.create({
+    bookingId,
+    customer: customer._id,
+    customerSnapshot: { name: customer.name, mobile: customer.mobile, email: customer.email },
+    serviceType: "pooja",
+    package: { name: doc.pujaName },
+    address: doc.address ?? undefined,
+    poojaDate,
+    poojaTime: doc.pujaTime ?? undefined,
+    status: "booking_confirmed",
+    pricing: {
+      finalAmount,
+      advanceAmount,
+      remainingAmount: Math.max(finalAmount - advanceAmount, 0),
+      transactionId: doc.transactionId ?? undefined,
+    },
+    paymentStatus,
+    bookingChannel: "offline",
+    bookingSource: "admin",
+    timeline: [{ status: "booking_confirmed", note: `Transferred from CRM inquiry ${doc.id}` }],
+  });
+
+  await CrmInquiryModel.updateOne({ id: doc.id }, { $set: { websiteBookingId: bookingId } });
 }
 
 // Lazily imported to avoid a require cycle at module-load time between
