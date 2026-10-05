@@ -143,6 +143,16 @@ export async function createInquiry(req: Request, body: Record<string, unknown>)
   payload.updatedAt = payload.createdAt || new Date().toISOString();
   if (!payload.websiteBookingId) delete payload.websiteBookingId;
   const doc = await CrmInquiryModel.create(payload);
+
+  // The CRM app lets a salesperson pick "Confirmed" while creating a brand
+  // new record (not just via a later edit/PATCH) — give it a real Booking
+  // right away too, same as the updateInquiry path below.
+  if (!doc.websiteBookingId && doc.status === "confirmed") {
+    void transferConfirmedInquiryToBooking(doc as InquiryDoc).catch((err) =>
+      console.error(`CRM->Booking transfer failed for inquiry ${doc.id}:`, (err as Error).message),
+    );
+  }
+
   return { id: doc.id, version: doc.version, updatedAt: doc.updatedAt };
 }
 
@@ -433,6 +443,25 @@ export async function bulkSync(req: Request, inquiries: Array<Record<string, unk
     };
   });
   if (ops.length > 0) await CrmInquiryModel.bulkWrite(ops);
+
+  // Same as createInquiry/updateInquiry: a record synced in from the CRM
+  // app's offline queue can land already "confirmed" (set locally while the
+  // device was offline) — catch it here too so it still gets a Booking.
+  const confirmedIds = items
+    .filter((item) => item.status === "confirmed" && !item.websiteBookingId)
+    .map((item) => item.id as string);
+  if (confirmedIds.length > 0) {
+    const confirmedDocs = (await CrmInquiryModel.find({
+      id: { $in: confirmedIds },
+      websiteBookingId: { $exists: false },
+    })) as InquiryDoc[];
+    for (const doc of confirmedDocs) {
+      void transferConfirmedInquiryToBooking(doc).catch((err) =>
+        console.error(`CRM->Booking transfer failed for inquiry ${doc.id}:`, (err as Error).message),
+      );
+    }
+  }
+
   return { synced: ops.length };
 }
 
