@@ -1,18 +1,42 @@
 {
   "info": {
     "name": "PujariDekho — CRM + Pandit App + Customer Auth (merged backend)",
-    "description": "Covers the endpoints added/merged into apps/api for: the CRM backoffice (salespeople + inquiries, migrated from the old standalone pujaridekhocrm/backend), the pujaripandit_app mobile backend, and customer auth used by pujariuser_app. All routes are mounted under {{base_url}} which should already include /api/v1, e.g. http://localhost:4000/api/v1 or https://api.pujaridekho.com/api/v1.\n\nTokens: run the relevant *Login* request first — each has a test script that saves the returned token into the matching collection variable (crm_token / pandit_token / customer_token) which every other request in that folder uses automatically via Bearer auth.",
+    "description": "Covers the endpoints added/merged into apps/api for: the CRM backoffice (salespeople + inquiries, migrated from the old standalone pujaridekhocrm/backend), the pujaripandit_app mobile backend, and customer auth used by pujariuser_app. All routes are mounted under {{base_url}} which should already include /api/v1, e.g. http://localhost:4000/api/v1 for local dev, or https://pujaridekho.com/api/v1 in production (served off the main domain at /api, reverse-proxied to apps/api — no separate subdomain).\n\nTokens: run the relevant *Login* request first — each has a test script that saves the returned token into the matching collection variable (crm_token / pandit_token / customer_token) which every other request in that folder uses automatically via Bearer auth.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:4000/api/v1" },
-    { "key": "crm_token", "value": "" },
-    { "key": "pandit_token", "value": "" },
-    { "key": "customer_token", "value": "" },
-    { "key": "customer_refresh_token", "value": "" },
-    { "key": "inquiry_id", "value": "" },
-    { "key": "booking_id", "value": "" },
-    { "key": "salesperson_id", "value": "" }
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000/api/v1"
+    },
+    {
+      "key": "crm_token",
+      "value": ""
+    },
+    {
+      "key": "pandit_token",
+      "value": ""
+    },
+    {
+      "key": "customer_token",
+      "value": ""
+    },
+    {
+      "key": "customer_refresh_token",
+      "value": ""
+    },
+    {
+      "key": "inquiry_id",
+      "value": ""
+    },
+    {
+      "key": "booking_id",
+      "value": ""
+    },
+    {
+      "key": "salesperson_id",
+      "value": ""
+    }
   ],
   "item": [
     {
@@ -22,17 +46,36 @@
           "name": "Login (admin / superadmin / salesperson)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"identifier\": \"admin\",\n  \"password\": \"admin@123\"\n}\n\n// For a salesperson, use their phone as identifier + their password.\n// For the read-only owner role, use the CRM_SUPERADMIN_USERNAME/PASSWORD."
             },
-            "url": { "raw": "{{base_url}}/crm-auth/login", "host": ["{{base_url}}"], "path": ["crm-auth", "login"] }
+            "url": {
+              "raw": "{{base_url}}/crm-auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-auth",
+                "login"
+              ]
+            }
           },
           "event": [
             {
               "listen": "test",
-              "script": { "exec": ["const d = pm.response.json();", "if (d && d.data && d.data.token) { pm.collectionVariables.set('crm_token', d.data.token); }"] }
+              "script": {
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (d && d.data && d.data.token) { pm.collectionVariables.set('crm_token', d.data.token); }"
+                ]
+              }
             }
           ]
         }
@@ -40,100 +83,447 @@
     },
     {
       "name": "CRM Salespeople",
-      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{crm_token}}" }] },
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{crm_token}}"
+          }
+        ]
+      },
       "item": [
-        { "name": "List salespeople", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-salespeople", "host": ["{{base_url}}"], "path": ["crm-salespeople"] } } },
+        {
+          "name": "List salespeople",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-salespeople",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-salespeople"
+              ]
+            }
+          }
+        },
         {
           "name": "Create salesperson",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Salesperson\",\n  \"phone\": \"9999999999\",\n  \"password\": \"changeme123\"\n}" },
-            "url": { "raw": "{{base_url}}/crm-salespeople", "host": ["{{base_url}}"], "path": ["crm-salespeople"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Salesperson\",\n  \"phone\": \"9999999999\",\n  \"password\": \"changeme123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-salespeople",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-salespeople"
+              ]
+            }
           }
         },
         {
           "name": "Update salesperson",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"active\": false\n}" },
-            "url": { "raw": "{{base_url}}/crm-salespeople/{{salesperson_id}}", "host": ["{{base_url}}"], "path": ["crm-salespeople", "{{salesperson_id}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-salespeople/{{salesperson_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-salespeople",
+                "{{salesperson_id}}"
+              ]
+            }
           }
         }
       ]
     },
     {
       "name": "CRM Inquiries",
-      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{crm_token}}" }] },
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{crm_token}}"
+          }
+        ]
+      },
       "item": [
-        { "name": "List inquiries", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-inquiries?page=1&limit=20", "host": ["{{base_url}}"], "path": ["crm-inquiries"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }, { "key": "status", "value": "", "disabled": true }, { "key": "assignedTo", "value": "", "disabled": true }, { "key": "search", "value": "", "disabled": true }] } } },
+        {
+          "name": "List inquiries",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries?page=1&limit=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "assignedTo",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
         {
           "name": "Create inquiry",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"customerName\": \"Test Customer\",\n  \"customerPhone\": \"9999999999\",\n  \"pujaName\": \"Griha Pravesh\",\n  \"city\": \"Gurgaon\"\n}" },
-            "url": { "raw": "{{base_url}}/crm-inquiries", "host": ["{{base_url}}"], "path": ["crm-inquiries"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Test Customer\",\n  \"customerPhone\": \"9999999999\",\n  \"pujaName\": \"Griha Pravesh\",\n  \"city\": \"Gurgaon\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries"
+              ]
+            }
           }
         },
-        { "name": "Get inquiry by id", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}", "host": ["{{base_url}}"], "path": ["crm-inquiries", "{{inquiry_id}}"] } } },
+        {
+          "name": "Get inquiry by id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "{{inquiry_id}}"
+              ]
+            }
+          }
+        },
         {
           "name": "Update inquiry (optimistic lock)",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"status\": \"contacted\",\n  \"version\": 0\n}\n\n// 409 response on a stale version includes the current doc under `current`." },
-            "url": { "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}", "host": ["{{base_url}}"], "path": ["crm-inquiries", "{{inquiry_id}}"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"contacted\",\n  \"version\": 0\n}\n\n// 409 response on a stale version includes the current doc under `current`."
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "{{inquiry_id}}"
+              ]
+            }
           }
         },
-        { "name": "Delete inquiry (admin only)", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}", "host": ["{{base_url}}"], "path": ["crm-inquiries", "{{inquiry_id}}"] } } },
+        {
+          "name": "Delete inquiry (admin only)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "{{inquiry_id}}"
+              ]
+            }
+          }
+        },
         {
           "name": "Assign pandit to inquiry",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"panditId\": \"<pandit_id>\",\n  \"panditName\": \"Pandit Name\"\n}" },
-            "url": { "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}/assign-pandit", "host": ["{{base_url}}"], "path": ["crm-inquiries", "{{inquiry_id}}", "assign-pandit"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"panditId\": \"<pandit_id>\",\n  \"panditName\": \"Pandit Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}/assign-pandit",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "{{inquiry_id}}",
+                "assign-pandit"
+              ]
+            }
           }
         },
         {
           "name": "Assign pandit to a specific event",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"panditId\": \"<pandit_id>\",\n  \"panditName\": \"Pandit Name\"\n}" },
-            "url": { "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}/events/<event_id>/assign-pandit", "host": ["{{base_url}}"], "path": ["crm-inquiries", "{{inquiry_id}}", "events", "<event_id>", "assign-pandit"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"panditId\": \"<pandit_id>\",\n  \"panditName\": \"Pandit Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/{{inquiry_id}}/events/<event_id>/assign-pandit",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "{{inquiry_id}}",
+                "events",
+                "<event_id>",
+                "assign-pandit"
+              ]
+            }
           }
         },
-        { "name": "List pandits (CRM view)", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-inquiries/pandits", "host": ["{{base_url}}"], "path": ["crm-inquiries", "pandits"] } } },
-        { "name": "Pandit availability", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-inquiries/pandits/availability?date=2026-11-20", "host": ["{{base_url}}"], "path": ["crm-inquiries", "pandits", "availability"], "query": [{ "key": "date", "value": "2026-11-20" }] } } },
-        { "name": "Stats / dashboard", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-inquiries/stats", "host": ["{{base_url}}"], "path": ["crm-inquiries", "stats"] } } },
-        { "name": "Pull missed website-booking syncs (admin only)", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-inquiries/sync/website-bookings", "host": ["{{base_url}}"], "path": ["crm-inquiries", "sync", "website-bookings"] } } },
-        { "name": "Bulk sync", "request": { "method": "POST", "url": { "raw": "{{base_url}}/crm-inquiries/sync", "host": ["{{base_url}}"], "path": ["crm-inquiries", "sync"] } } }
+        {
+          "name": "List pandits (CRM view)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/pandits",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "pandits"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pandit availability",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/pandits/availability?date=2026-11-20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "pandits",
+                "availability"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-11-20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Stats / dashboard",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pull missed website-booking syncs (admin only)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/sync/website-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "sync",
+                "website-bookings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bulk sync",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/sync",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "sync"
+              ]
+            }
+          }
+        }
       ]
     },
     {
       "name": "CRM Activity Log",
-      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{crm_token}}" }] },
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{crm_token}}"
+          }
+        ]
+      },
       "item": [
-        { "name": "List activity logs", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-activity-logs?inquiryId={{inquiry_id}}", "host": ["{{base_url}}"], "path": ["crm-activity-logs"], "query": [{ "key": "inquiryId", "value": "{{inquiry_id}}" }] } } },
+        {
+          "name": "List activity logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-activity-logs?inquiryId={{inquiry_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-activity-logs"
+              ],
+              "query": [
+                {
+                  "key": "inquiryId",
+                  "value": "{{inquiry_id}}"
+                }
+              ]
+            }
+          }
+        },
         {
           "name": "Create activity log entry",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"inquiryId\": \"{{inquiry_id}}\",\n  \"type\": \"note\",\n  \"message\": \"Called customer, will confirm tomorrow\"\n}" },
-            "url": { "raw": "{{base_url}}/crm-activity-logs", "host": ["{{base_url}}"], "path": ["crm-activity-logs"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inquiryId\": \"{{inquiry_id}}\",\n  \"type\": \"note\",\n  \"message\": \"Called customer, will confirm tomorrow\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-activity-logs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-activity-logs"
+              ]
+            }
           }
         },
         {
           "name": "Bulk fetch activity logs",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"inquiryIds\": [\"{{inquiry_id}}\"]\n}" },
-            "url": { "raw": "{{base_url}}/crm-activity-logs/bulk", "host": ["{{base_url}}"], "path": ["crm-activity-logs", "bulk"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inquiryIds\": [\"{{inquiry_id}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-activity-logs/bulk",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-activity-logs",
+                "bulk"
+              ]
+            }
           }
         }
       ]
@@ -141,11 +531,116 @@
     {
       "name": "CRM Webhooks (public, no auth)",
       "item": [
-        { "name": "Meta webhook verify (GET)", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-webhooks/meta?hub.mode=subscribe&hub.verify_token=<token>&hub.challenge=123", "host": ["{{base_url}}"], "path": ["crm-webhooks", "meta"] } } },
-        { "name": "Meta webhook event (POST)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}/crm-webhooks/meta", "host": ["{{base_url}}"], "path": ["crm-webhooks", "meta"] } } },
-        { "name": "WhatsApp webhook verify (GET)", "request": { "method": "GET", "url": { "raw": "{{base_url}}/crm-webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=<token>&hub.challenge=123", "host": ["{{base_url}}"], "path": ["crm-webhooks", "whatsapp"] } } },
-        { "name": "WhatsApp webhook event (POST)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": { "raw": "{{base_url}}/crm-webhooks/whatsapp", "host": ["{{base_url}}"], "path": ["crm-webhooks", "whatsapp"] } } },
-        { "name": "Website booking confirmed (POST)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"bookingId\": \"<website_booking_id>\"\n}" }, "url": { "raw": "{{base_url}}/crm-webhooks/website-booking", "host": ["{{base_url}}"], "path": ["crm-webhooks", "website-booking"] } } }
+        {
+          "name": "Meta webhook verify (GET)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-webhooks/meta?hub.mode=subscribe&hub.verify_token=<token>&hub.challenge=123",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-webhooks",
+                "meta"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Meta webhook event (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-webhooks/meta",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-webhooks",
+                "meta"
+              ]
+            }
+          }
+        },
+        {
+          "name": "WhatsApp webhook verify (GET)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=<token>&hub.challenge=123",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-webhooks",
+                "whatsapp"
+              ]
+            }
+          }
+        },
+        {
+          "name": "WhatsApp webhook event (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-webhooks/whatsapp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-webhooks",
+                "whatsapp"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Website booking confirmed (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"<website_booking_id>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/crm-webhooks/website-booking",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-webhooks",
+                "website-booking"
+              ]
+            }
+          }
+        }
       ]
     },
     {
@@ -155,79 +650,790 @@
           "name": "Login",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"mobile_number\": \"9999999999\",\n  \"password\": \"<password>\"\n}" },
-            "url": { "raw": "{{base_url}}/pandit-auth/login", "host": ["{{base_url}}"], "path": ["pandit-auth", "login"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9999999999\",\n  \"password\": \"<password>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit-auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit-auth",
+                "login"
+              ]
+            }
           },
-          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json();", "if (d && d.data && d.data.token) { pm.collectionVariables.set('pandit_token', d.data.token); }"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (d && d.data && d.data.token) { pm.collectionVariables.set('pandit_token', d.data.token); }"
+                ]
+              }
+            }
+          ]
         },
-        { "name": "Forgot password (send OTP)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"mobile_number\": \"9999999999\"\n}" }, "url": { "raw": "{{base_url}}/pandit-auth/forgot-password", "host": ["{{base_url}}"], "path": ["pandit-auth", "forgot-password"] } } },
-        { "name": "Reset password (with OTP)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"mobile_number\": \"9999999999\",\n  \"otp\": \"123456\",\n  \"new_password\": \"newpass123\"\n}" }, "url": { "raw": "{{base_url}}/pandit-auth/reset-password", "host": ["{{base_url}}"], "path": ["pandit-auth", "reset-password"] } } },
+        {
+          "name": "Forgot password (send OTP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9999999999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit-auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit-auth",
+                "forgot-password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset password (with OTP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile_number\": \"9999999999\",\n  \"otp\": \"123456\",\n  \"new_password\": \"newpass123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit-auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit-auth",
+                "reset-password"
+              ]
+            }
+          }
+        },
         {
           "name": "Change password",
           "request": {
             "method": "POST",
-            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{pandit_token}}" }] },
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"current_password\": \"<old>\",\n  \"new_password\": \"<new>\"\n}" },
-            "url": { "raw": "{{base_url}}/pandit-auth/change-password", "host": ["{{base_url}}"], "path": ["pandit-auth", "change-password"] }
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{pandit_token}}"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"<old>\",\n  \"new_password\": \"<new>\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit-auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit-auth",
+                "change-password"
+              ]
+            }
           }
         },
-        { "name": "Logout", "request": { "method": "POST", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{pandit_token}}" }] }, "url": { "raw": "{{base_url}}/pandit-auth/logout", "host": ["{{base_url}}"], "path": ["pandit-auth", "logout"] } } }
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{pandit_token}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit-auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit-auth",
+                "logout"
+              ]
+            }
+          }
+        }
       ]
     },
     {
       "name": "Pandit App",
-      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{pandit_token}}" }] },
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{pandit_token}}"
+          }
+        ]
+      },
       "item": [
-        { "name": "Get profile", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/profile", "host": ["{{base_url}}"], "path": ["pandit", "profile"] } } },
-        { "name": "Toggle availability", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"isAvailable\": true\n}" }, "url": { "raw": "{{base_url}}/pandit/availability", "host": ["{{base_url}}"], "path": ["pandit", "availability"] } } },
-        { "name": "Home (banners + today's bookings)", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/home", "host": ["{{base_url}}"], "path": ["pandit", "home"] } } },
-        { "name": "List bookings", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/bookings", "host": ["{{base_url}}"], "path": ["pandit", "bookings"] } } },
-        { "name": "Booking detail", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/bookings/{{booking_id}}", "host": ["{{base_url}}"], "path": ["pandit", "bookings", "{{booking_id}}"] } } },
-        { "name": "Send reached-OTP to customer", "request": { "method": "POST", "url": { "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/reached/otp", "host": ["{{base_url}}"], "path": ["pandit", "bookings", "{{booking_id}}", "reached", "otp"] } } },
-        { "name": "Confirm reached (with OTP + GPS)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"otp\": \"123456\",\n  \"latitude\": 28.4595,\n  \"longitude\": 77.0266\n}" }, "url": { "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/reached", "host": ["{{base_url}}"], "path": ["pandit", "bookings", "{{booking_id}}", "reached"] } } },
-        { "name": "Start puja", "request": { "method": "POST", "url": { "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/start", "host": ["{{base_url}}"], "path": ["pandit", "bookings", "{{booking_id}}", "start"] } } },
+        {
+          "name": "Get profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle availability",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit/availability",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "availability"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Home (banners + today's bookings)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/home",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "home"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List bookings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Booking detail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings/{{booking_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings",
+                "{{booking_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send reached-OTP to customer",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/reached/otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings",
+                "{{booking_id}}",
+                "reached",
+                "otp"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Confirm reached (with OTP + GPS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otp\": \"123456\",\n  \"latitude\": 28.4595,\n  \"longitude\": 77.0266\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/reached",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings",
+                "{{booking_id}}",
+                "reached"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Start puja",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/start",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings",
+                "{{booking_id}}",
+                "start"
+              ]
+            }
+          }
+        },
         {
           "name": "Upload completion images",
           "request": {
             "method": "POST",
-            "body": { "mode": "formdata", "formdata": [{ "key": "images", "type": "file", "src": [] }] },
-            "url": { "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/images", "host": ["{{base_url}}"], "path": ["pandit", "bookings", "{{booking_id}}", "images"] }
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/images",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings",
+                "{{booking_id}}",
+                "images"
+              ]
+            }
           }
         },
-        { "name": "Submit extra amount", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"amount\": 500,\n  \"reason\": \"Extra samagri purchased on-site\"\n}" }, "url": { "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/extra-amount", "host": ["{{base_url}}"], "path": ["pandit", "bookings", "{{booking_id}}", "extra-amount"] } } },
-        { "name": "Submit extra assets", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"items\": [\"Extra Kalash\"]\n}" }, "url": { "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/extra-assets", "host": ["{{base_url}}"], "path": ["pandit", "bookings", "{{booking_id}}", "extra-assets"] } } },
-        { "name": "Record payment collected", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"amount\": 2000,\n  \"method\": \"cash\"\n}" }, "url": { "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/payment", "host": ["{{base_url}}"], "path": ["pandit", "bookings", "{{booking_id}}", "payment"] } } },
-        { "name": "Complete booking", "request": { "method": "POST", "url": { "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/complete", "host": ["{{base_url}}"], "path": ["pandit", "bookings", "{{booking_id}}", "complete"] } } },
-        { "name": "Dashboard", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/dashboard", "host": ["{{base_url}}"], "path": ["pandit", "dashboard"] } } },
-        { "name": "Earnings", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/earnings", "host": ["{{base_url}}"], "path": ["pandit", "earnings"] } } },
-        { "name": "Dues owed to company", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/dues", "host": ["{{base_url}}"], "path": ["pandit", "dues"] } } },
-        { "name": "Pay dues (deposit)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"amount\": 2000\n}" }, "url": { "raw": "{{base_url}}/pandit/dues/pay", "host": ["{{base_url}}"], "path": ["pandit", "dues", "pay"] } } },
-        { "name": "Deposit history", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/deposits", "host": ["{{base_url}}"], "path": ["pandit", "deposits"] } } },
-        { "name": "Notifications", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/notifications", "host": ["{{base_url}}"], "path": ["pandit", "notifications"] } } },
-        { "name": "Ratings", "request": { "method": "GET", "url": { "raw": "{{base_url}}/pandit/ratings", "host": ["{{base_url}}"], "path": ["pandit", "ratings"] } } }
+        {
+          "name": "Submit extra amount",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500,\n  \"reason\": \"Extra samagri purchased on-site\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/extra-amount",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings",
+                "{{booking_id}}",
+                "extra-amount"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit extra assets",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\"Extra Kalash\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/extra-assets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings",
+                "{{booking_id}}",
+                "extra-assets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record payment collected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 2000,\n  \"method\": \"cash\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/payment",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings",
+                "{{booking_id}}",
+                "payment"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Complete booking",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/pandit/bookings/{{booking_id}}/complete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "bookings",
+                "{{booking_id}}",
+                "complete"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "dashboard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Earnings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/earnings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "earnings"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dues owed to company",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/dues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "dues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pay dues (deposit)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 2000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pandit/dues/pay",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "dues",
+                "pay"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Deposit history",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/deposits",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "deposits"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "notifications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ratings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pandit/ratings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pandit",
+                "ratings"
+              ]
+            }
+          }
+        }
       ]
     },
     {
       "name": "Customer Auth (pujariuser_app)",
       "item": [
-        { "name": "Send OTP", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"9999999999\"\n}" }, "url": { "raw": "{{base_url}}/customer-auth/send-otp", "host": ["{{base_url}}"], "path": ["customer-auth", "send-otp"] } } },
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"9999999999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customer-auth/send-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer-auth",
+                "send-otp"
+              ]
+            }
+          }
+        },
         {
           "name": "Verify OTP",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"9999999999\",\n  \"otp\": \"123456\"\n}" },
-            "url": { "raw": "{{base_url}}/customer-auth/verify-otp", "host": ["{{base_url}}"], "path": ["customer-auth", "verify-otp"] }
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"9999999999\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customer-auth/verify-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer-auth",
+                "verify-otp"
+              ]
+            }
           },
-          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json();", "if (d && d.data) { if (d.data.accessToken) pm.collectionVariables.set('customer_token', d.data.accessToken); if (d.data.refreshToken) pm.collectionVariables.set('customer_refresh_token', d.data.refreshToken); }"] } }]
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (d && d.data) { if (d.data.accessToken) pm.collectionVariables.set('customer_token', d.data.accessToken); if (d.data.refreshToken) pm.collectionVariables.set('customer_refresh_token', d.data.refreshToken); }"
+                ]
+              }
+            }
+          ]
         },
-        { "name": "Refresh token", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{customer_refresh_token}}\"\n}" }, "url": { "raw": "{{base_url}}/customer-auth/refresh", "host": ["{{base_url}}"], "path": ["customer-auth", "refresh"] } } },
-        { "name": "Logout", "request": { "method": "POST", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{customer_token}}" }] }, "url": { "raw": "{{base_url}}/customer-auth/logout", "host": ["{{base_url}}"], "path": ["customer-auth", "logout"] } } },
-        { "name": "Get my profile", "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{customer_token}}" }] }, "url": { "raw": "{{base_url}}/customer-auth/me", "host": ["{{base_url}}"], "path": ["customer-auth", "me"] } } },
-        { "name": "Change mobile — send OTP", "request": { "method": "POST", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{customer_token}}" }] }, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"9888888888\"\n}" }, "url": { "raw": "{{base_url}}/customer-auth/change-mobile/send-otp", "host": ["{{base_url}}"], "path": ["customer-auth", "change-mobile", "send-otp"] } } },
-        { "name": "Change mobile — verify", "request": { "method": "POST", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{customer_token}}" }] }, "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"9888888888\",\n  \"otp\": \"123456\"\n}" }, "url": { "raw": "{{base_url}}/customer-auth/change-mobile/verify", "host": ["{{base_url}}"], "path": ["customer-auth", "change-mobile", "verify"] } } }
+        {
+          "name": "Refresh token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{customer_refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customer-auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer-auth",
+                "refresh"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/customer-auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer-auth",
+                "logout"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get my profile",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/customer-auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer-auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change mobile — send OTP",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"9888888888\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customer-auth/change-mobile/send-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer-auth",
+                "change-mobile",
+                "send-otp"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change mobile — verify",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"9888888888\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customer-auth/change-mobile/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customer-auth",
+                "change-mobile",
+                "verify"
+              ]
+            }
+          }
+        }
       ]
     }
   ]
