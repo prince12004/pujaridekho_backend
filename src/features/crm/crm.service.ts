@@ -90,11 +90,7 @@ export async function reservePanditSlot(input: ReserveSlotInput) {
     date: input.date,
     slot: input.slot,
   });
-  if (existingForRef) {
-    if (existingForRef.bookingRef === input.ref) {
-      // Idempotent retry of the same assignment — not an error.
-      return existingForRef;
-    }
+  if (existingForRef && existingForRef.bookingRef !== input.ref) {
     throw ApiError.conflict("This pandit is already booked for this date and slot");
   }
 
@@ -112,6 +108,14 @@ export async function reservePanditSlot(input: ReserveSlotInput) {
       changedAt: new Date(),
     });
     await linkedBooking.save();
+  }
+
+  if (existingForRef) {
+    if (linkedBooking && !existingForRef.booking) {
+      existingForRef.booking = linkedBooking._id;
+      await existingForRef.save();
+    }
+    return existingForRef;
   }
 
   try {
