@@ -4,6 +4,7 @@ import { BOOKING_STATUS_LABELS } from "../../lib/booking-status-labels.js";
 import { BookingModel } from "../../models/booking.model.js";
 import { PoojaModel } from "../../models/pooja.model.js";
 import { FestivalModel } from "../../models/festival.model.js";
+import { PanditSlotReservationModel } from "../../models/pandit-slot-reservation.model.js";
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
 import { ADVANCE_AMOUNT } from "../payments/payments.service.js";
 
@@ -25,6 +26,17 @@ function computeFinalAmount(pricing: {
 function customerIdOf(booking: { customer: unknown }): string {
   const value = booking.customer as { _id?: { toString(): string } } | { toString(): string };
   if (value && typeof value === "object" && "_id" in value && value._id) return value._id.toString();
+  return String(value);
+}
+
+// Same extraction as customerIdOf, generalized for any possibly-populated ref
+// field (used below for the booking's `pandit`, which getBookingById
+// populates). Returns null for an empty ref instead of stringifying it.
+function refIdOf(value: unknown): string | null {
+  if (!value) return null;
+  if (typeof value === "object" && "_id" in (value as Record<string, unknown>)) {
+    return String((value as { _id: unknown })._id);
+  }
   return String(value);
 }
 
@@ -285,15 +297,27 @@ export async function updateBookingDetails(id: string, input: UpdateBookingDetai
 
 export async function assignPanditToBooking(id: string, panditId: string, adminId: string) {
   const booking = await getBookingById(id);
+  const previousPanditId = refIdOf(booking.pandit);
+  const isReassignment = Boolean(previousPanditId) && previousPanditId !== panditId;
+
   booking.pandit = panditId as never;
   booking.status = "pandit_assigned";
   booking.timeline.push({
     status: "pandit_assigned",
-    note: "Pandit assigned by admin",
+    note: isReassignment ? "Pandit reassigned by admin" : "Pandit assigned by admin",
     changedBy: adminId as never,
     changedAt: new Date(),
   });
   await booking.save();
+
+  if (isReassignment) {
+    // Admin assignment has no date/slot of its own to re-reserve, but the
+    // previous pandit may still hold a CRM slot reservation tied to this
+    // booking (e.g. originally assigned via the CRM) — drop it so the CRM
+    // availability calendar doesn't keep showing them as booked for a slot
+    // they're no longer on.
+    await PanditSlotReservationModel.deleteMany({ booking: booking._id, pandit: previousPanditId });
+  }
 
   await notifyCustomer({
     customer: customerIdOf(booking),
