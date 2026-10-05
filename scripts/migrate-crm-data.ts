@@ -53,7 +53,7 @@ const isDryRun = process.argv.includes("--dry-run");
 // process-wide `.env` convention, since both exist in this repo with the
 // same variable name.
 function readEnvFile(envPath: string): Record<string, string> {
-  const result = config({ path: envPath, processEnv: {} as NodeJS.ProcessEnv });
+  const result = config({ path: envPath, processEnv: {} });
   return (result.parsed ?? {}) as Record<string, string>;
 }
 
