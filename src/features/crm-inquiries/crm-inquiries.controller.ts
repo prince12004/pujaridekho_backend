@@ -11,6 +11,7 @@ import {
   deleteInquiry,
   getInquiry,
   getStats,
+  InquiryConflictError,
   listInquiries,
   syncWebsiteBookings,
   updateInquiry,
@@ -34,8 +35,19 @@ export const postInquiry = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const putInquiry = asyncHandler(async (req: Request, res: Response) => {
-  const result = await updateInquiry(req, req.params.id, req.body as Record<string, unknown>);
-  sendSuccess(res, result);
+  try {
+    const result = await updateInquiry(req, req.params.id, req.body as Record<string, unknown>);
+    sendSuccess(res, result);
+  } catch (err) {
+    if (err instanceof InquiryConflictError) {
+      // Flat `current` field (not nested under `data`) to match the
+      // original CRM API's 409 body, which the Flutter app's
+      // ConflictException expects as-is.
+      res.status(409).json({ success: false, message: err.message, current: err.current });
+      return;
+    }
+    throw err;
+  }
 });
 
 export const deleteInquiryById = asyncHandler(async (req: Request, res: Response) => {

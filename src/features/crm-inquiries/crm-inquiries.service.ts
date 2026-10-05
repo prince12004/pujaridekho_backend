@@ -201,10 +201,22 @@ export async function updateInquiry(req: Request, id: string, body: Record<strin
   if (clientVersion !== undefined && clientVersion !== null) {
     const current = await CrmInquiryModel.findOne({ id, ...crmOwnFilter(req) });
     if (current) {
-      throw ApiError.conflict("This inquiry has been updated by another user.");
+      // Carries the server's current copy of the record, same as the
+      // original server.js's 409 response — the Flutter app's
+      // ConflictException parses this `current` field to seed its "Refresh"
+      // action. Plain ApiError.conflict() can't carry this (its `errors`
+      // field is typed as Record<string, string[]>), so this throws a
+      // dedicated subclass the controller unwraps specially.
+      throw new InquiryConflictError(toJson(current as InquiryDoc));
     }
   }
   throw ApiError.notFound("Not found");
+}
+
+export class InquiryConflictError extends ApiError {
+  constructor(public readonly current: ReturnType<typeof toJson>) {
+    super(409, "This inquiry has been updated by another user.");
+  }
 }
 
 // Lazily imported to avoid a require cycle at module-load time between
