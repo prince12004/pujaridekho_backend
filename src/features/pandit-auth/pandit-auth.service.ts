@@ -31,9 +31,11 @@ export async function loginPandit(mobile: string, password: string) {
     throw ApiError.unauthorized("Incorrect mobile number or password.");
   }
 
-  const tokens = issuePanditTokenPair(pandit._id.toString());
+  const { token, refreshToken } = issuePanditTokenPair(pandit._id.toString());
   const profile = await presentPandit(pandit._id.toString());
-  return { ...tokens, pandit: profile };
+  // snake_case to match the Flutter app's AuthRepository, which reads
+  // data['token'] / data['refresh_token'] / data['pandit'] directly.
+  return { token, refresh_token: refreshToken, pandit: profile };
 }
 
 export async function requestPanditPasswordReset(mobile: string) {
