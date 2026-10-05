@@ -18,6 +18,8 @@ const addressSchema = z.object({
   isDefault: z.boolean().optional(),
 });
 
+
+
 export const getMyAddresses = asyncHandler(async (req: Request, res: Response) => {
   sendSuccess(res, await listMyAddresses(req.customer!.id));
 });
