@@ -4,6 +4,7 @@ import type { HydratedDocument } from "mongoose";
 import { ApiError } from "../../lib/api-error.js";
 import { CrmInquiryModel, type CrmInquiryDocument } from "../../models/crm-inquiry.model.js";
 import { BookingModel } from "../../models/booking.model.js";
+import { PanditSlotReservationModel } from "../../models/pandit-slot-reservation.model.js";
 import { crmHasFullAccess, crmOwnFilter, isCrmAdmin } from "../../middlewares/crm-auth.js";
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
 import { generateBookingId } from "../admin-bookings/admin-bookings.service.js";
@@ -145,9 +146,6 @@ export async function createInquiry(req: Request, body: Record<string, unknown>)
   if (!payload.websiteBookingId) delete payload.websiteBookingId;
   const doc = await CrmInquiryModel.create(payload);
 
-  // The CRM app lets a salesperson pick "Confirmed" while creating a brand
-  // new record (not just via a later edit/PATCH) — give it a real Booking
-  // right away too, same as the updateInquiry path below.
   if (!doc.websiteBookingId && doc.status === "confirmed") {
     void transferConfirmedInquiryToBooking(doc as InquiryDoc).catch((err) =>
       console.error(`CRM->Booking transfer failed for inquiry ${doc.id}:`, (err as Error).message),
@@ -194,20 +192,12 @@ export async function updateInquiry(req: Request, id: string, body: Record<strin
 
   if (doc) {
     if (doc.websiteBookingId) {
-      // Best-effort — the CRM write above already committed; a sync
-      // failure here shouldn't fail this request. In-process now, so the
-      // only realistic failure mode is a data error (e.g. no matching
-      // Booking/Pooja), not a network outage — still non-fatal to this
-      // request, just logged.
+
       void importAndSyncBooking(doc.websiteBookingId, pickWebsiteSyncableFields(doc)).catch((err) =>
         console.error(`Website sync failed for ${doc.websiteBookingId}:`, (err as Error).message),
       );
     } else if (doc.status === "confirmed") {
-      // A CRM-native inquiry (no linked website Booking) just got confirmed
-      // — give it a real Booking so it shows up in Admin Bookings and so a
-      // later pandit assignment can sync through to the pandit app, same as
-      // a website-originated booking. Best-effort for the same reason as
-      // the sync above.
+
       void transferConfirmedInquiryToBooking(doc).catch((err) =>
         console.error(`CRM->Booking transfer failed for inquiry ${doc.id}:`, (err as Error).message),
       );
@@ -218,12 +208,6 @@ export async function updateInquiry(req: Request, id: string, body: Record<strin
   if (clientVersion !== undefined && clientVersion !== null) {
     const current = await CrmInquiryModel.findOne({ id, ...crmOwnFilter(req) });
     if (current) {
-      // Carries the server's current copy of the record, same as the
-      // original server.js's 409 response — the Flutter app's
-      // ConflictException parses this `current` field to seed its "Refresh"
-      // action. Plain ApiError.conflict() can't carry this (its `errors`
-      // field is typed as Record<string, string[]>), so this throws a
-      // dedicated subclass the controller unwraps specially.
       throw new InquiryConflictError(toJson(current as InquiryDoc));
     }
   }
@@ -278,10 +262,6 @@ async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
   await CrmInquiryModel.updateOne({ id: doc.id }, { $set: { websiteBookingId: bookingId } });
 }
 
-// Lazily imported to avoid a require cycle at module-load time between
-// crm-inquiries.service and crm.service (neither currently imports the
-// other eagerly in this direction, but kept defensive since this is the one
-// call site pushing CRM -> website-booking state).
 async function importAndSyncBooking(websiteBookingId: string, fields: Record<string, unknown>) {
   const { updateBookingFromCrm } = await import("../crm/crm.service.js");
   return updateBookingFromCrm(websiteBookingId, fields as never);
@@ -347,10 +327,6 @@ export async function assignPanditToEvent(
   event.panditName = input.panditName;
   event.assignedSlot = input.slot;
 
-  // A CrmInquiry can have several pujaEvents, but the single linked website
-  // Booking (if any) only has one `pandit` field — mirror whichever event is
-  // earliest, same as `doc.panditId` below, rather than letting every event
-  // assignment stomp on it.
   const earliest = [...doc.pujaEvents].sort((a, b) => a.date.localeCompare(b.date))[0];
   await reservePanditSlot({
     panditId: input.panditId,
@@ -372,8 +348,17 @@ export async function assignPanditToEvent(
 }
 
 export async function deleteInquiry(id: string) {
-  const result = await CrmInquiryModel.deleteOne({ id });
-  if (result.deletedCount === 0) throw ApiError.notFound("Not found");
+  const doc = await CrmInquiryModel.findOne({ id });
+  if (!doc) throw ApiError.notFound("Not found");
+
+  const refs = [doc.id, ...(doc.pujaEvents ?? []).map((event) => `${doc.id}:${event.id}`)];
+  await PanditSlotReservationModel.deleteMany({ bookingRef: { $in: refs } });
+
+  if (doc.websiteBookingId) {
+    await BookingModel.deleteOne({ bookingId: doc.websiteBookingId });
+  }
+
+  await CrmInquiryModel.deleteOne({ id });
 }
 
 export async function getStats(req: Request) {

@@ -74,11 +74,6 @@ export interface ReserveSlotInput {
   date: string;
   slot: CrmSlot;
   ref: string;
-  // The real website Booking.bookingId this CRM assignment should sync to,
-  // when it differs from `ref` (e.g. a CrmInquiry's own `id`, or a
-  // `${inquiryId}:${eventId}` composite for a multi-date inquiry — neither
-  // of which is ever a real Booking.bookingId). Falls back to `ref` so
-  // direct callers that already pass a real bookingId as `ref` keep working.
   websiteBookingId?: string;
 }
 
@@ -202,9 +197,6 @@ export async function updateBookingFromCrm(websiteBookingId: string, input: CrmB
   if ("pujaTime" in input) booking.poojaTime = input.pujaTime;
 
   if ("pujaName" in input && input.pujaName) {
-    // Best-effort — the booking stays linked to its original Pooja/Festival
-    // if nothing matches, rather than risk repointing it at the wrong
-    // service (which would silently change its pricing/samagri too).
     const match =
       booking.serviceType === "festival"
         ? await FestivalModel.findOne({ name: new RegExp(`^${input.pujaName}$`, "i") })
@@ -222,10 +214,7 @@ export async function updateBookingFromCrm(websiteBookingId: string, input: CrmB
   if ("transactionId" in input) booking.pricing!.transactionId = input.transactionId;
 
   if ("samagriIncluded" in input) {
-    // Only ever turns this ON with certainty — a customer's own itemized
-    // samagri selection (booking.selectedSamagri) is real, paid-for data, so
-    // a CRM edit here can't silently make it read as "not included" (see
-    // toCrmBookingPayload — the two sources are OR'd together on read).
+
     booking.package = booking.package ?? ({} as never);
     booking.package!.samagriIncluded = input.samagriIncluded;
   }
