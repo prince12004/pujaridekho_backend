@@ -175,6 +175,8 @@ export interface CrmBookingUpdateInput {
   pujaName?: string;
   pujaDate?: string;
   pujaTime?: string;
+  packagePrice?: number;
+  samagriPrice?: number;
   totalAmount?: number;
   tokenAmount?: number;
   tokenStatus?: "pending" | "received";
@@ -207,16 +209,42 @@ export async function updateBookingFromCrm(websiteBookingId: string, input: CrmB
     }
   }
 
-  if ("totalAmount" in input) booking.pricing!.finalAmount = input.totalAmount!;
+  // packagePrice/samagriPrice: same derivation rule as the CRM inquiry side
+  // (deriveTotalAmount in crm-inquiries.service.ts) — once packagePrice is
+  // known (from this input or already stored on the booking), finalAmount is
+  // always recomputed from it rather than trusted as a flat totalAmount.
+  // Falls back to the old flat-overwrite behavior for callers that only ever
+  // send totalAmount (no package/samagri split).
+  const touchesPricingSplit = "packagePrice" in input || "samagriPrice" in input || "samagriIncluded" in input;
+  if ("packagePrice" in input) booking.pricing!.packagePrice = input.packagePrice!;
+  if ("samagriPrice" in input) booking.pricing!.samagriCharges = input.samagriPrice!;
+  if ("samagriIncluded" in input) {
+    booking.package = booking.package ?? ({} as never);
+    booking.package!.samagriIncluded = input.samagriIncluded;
+  }
+
+  const resolvedPackagePrice = "packagePrice" in input ? input.packagePrice : booking.pricing!.packagePrice;
+  if (touchesPricingSplit && typeof resolvedPackagePrice === "number") {
+    const samagriIncluded = Boolean(booking.package?.samagriIncluded);
+    const samagriCharges = booking.pricing!.samagriCharges ?? 0;
+    booking.pricing!.finalAmount = resolvedPackagePrice + (samagriIncluded ? samagriCharges : 0);
+  } else if ("totalAmount" in input) {
+    booking.pricing!.finalAmount = input.totalAmount!;
+  }
+
   if ("tokenAmount" in input) booking.pricing!.advanceAmount = input.tokenAmount!;
   if ("tokenStatus" in input) booking.pricing!.tokenStatus = input.tokenStatus!;
   if ("totalAmountStatus" in input) booking.pricing!.totalAmountStatus = input.totalAmountStatus!;
   if ("transactionId" in input) booking.pricing!.transactionId = input.transactionId;
 
-  if ("samagriIncluded" in input) {
-
-    booking.package = booking.package ?? ({} as never);
-    booking.package!.samagriIncluded = input.samagriIncluded;
+  // Riding along with this change: remainingAmount was never recomputed here
+  // at all before, so it went stale on every CRM edit independent of this
+  // feature — recompute it whenever anything affecting it changed.
+  if (touchesPricingSplit || "totalAmount" in input || "tokenAmount" in input) {
+    booking.pricing!.remainingAmount = Math.max(
+      (booking.pricing!.finalAmount ?? 0) - (booking.pricing!.advanceAmount ?? 0),
+      0,
+    );
   }
 
   if ("notes" in input && input.notes) {

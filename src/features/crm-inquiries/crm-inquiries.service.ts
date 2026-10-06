@@ -31,6 +31,8 @@ export function toJson(doc: InquiryDoc) {
     pujaEndDate: doc.pujaEndDate,
     pujaEvents: doc.pujaEvents ?? [],
     status: doc.status,
+    packagePrice: doc.packagePrice ?? null,
+    samagriPrice: doc.samagriPrice ?? null,
     totalAmount: doc.totalAmount,
     tokenAmount: doc.tokenAmount,
     tokenStatus: doc.tokenStatus,
@@ -52,6 +54,29 @@ export function toJson(doc: InquiryDoc) {
     version: doc.version,
     updatedAt: doc.updatedAt,
   };
+}
+
+// Single source of truth for CRM pricing: whenever a write includes
+// packagePrice, totalAmount is overwritten with packagePrice + (samagriPrice
+// if samagriIncluded) — never trusts a client-computed totalAmount once
+// packagePrice is in play. Missing pieces (samagriIncluded/samagriPrice) not
+// present in this particular patch fall back to the existing doc's stored
+// values, so a partial edit (e.g. patching only samagriPrice) still
+// recomputes correctly. If packagePrice is absent from both the patch and
+// the existing doc, totalAmount is left untouched entirely — old/legacy
+// writers that only ever send a flat totalAmount keep working unchanged.
+// Used by createInquiry, updateInquiry, and bulkSync — deliberately NOT a
+// Mongoose middleware hook, since bulkSync writes via bulkWrite(), which
+// bypasses document/query middleware entirely.
+function deriveTotalAmount(
+  existing: { packagePrice?: number | null; samagriPrice?: number | null; samagriIncluded?: boolean } | null,
+  patch: Record<string, unknown>,
+): void {
+  const packagePrice = "packagePrice" in patch ? (patch.packagePrice as number) : existing?.packagePrice;
+  if (typeof packagePrice !== "number") return;
+  const samagriIncluded = "samagriIncluded" in patch ? Boolean(patch.samagriIncluded) : Boolean(existing?.samagriIncluded);
+  const samagriPrice = "samagriPrice" in patch ? (patch.samagriPrice as number | null) : existing?.samagriPrice;
+  patch.totalAmount = packagePrice + (samagriIncluded ? (samagriPrice ?? 0) : 0);
 }
 
 function escapeRegex(s: string) {
@@ -145,6 +170,7 @@ export async function createInquiry(req: Request, body: Record<string, unknown>)
   payload.version = 0;
   payload.updatedAt = payload.createdAt || new Date().toISOString();
   if (!payload.websiteBookingId) delete payload.websiteBookingId;
+  deriveTotalAmount(null, payload);
   const doc = await CrmInquiryModel.create(payload);
 
   if (!doc.websiteBookingId && doc.status === "confirmed") {
@@ -160,6 +186,7 @@ export async function createInquiry(req: Request, body: Record<string, unknown>)
 // updateBookingFromCrm's CrmBookingUpdateInput in crm.service.ts.
 const WEBSITE_SYNCABLE_FIELDS = [
   "clientName", "phone", "pujaName", "pujaDate", "pujaTime",
+  "packagePrice", "samagriPrice",
   "totalAmount", "tokenAmount", "tokenStatus", "totalAmountStatus",
   "transactionId", "address", "notes", "status", "samagriIncluded",
 ] as const;
@@ -183,6 +210,14 @@ export async function updateInquiry(req: Request, id: string, body: Record<strin
   const filter: Record<string, unknown> = { id, ...crmOwnFilter(req) };
   if (clientVersion !== undefined && clientVersion !== null) {
     filter.version = clientVersion;
+  }
+
+  if ("packagePrice" in payload || "samagriPrice" in payload || "samagriIncluded" in payload) {
+    const existing = await CrmInquiryModel.findOne(
+      { id, ...crmOwnFilter(req) },
+      "packagePrice samagriPrice samagriIncluded",
+    );
+    deriveTotalAmount(existing, payload);
   }
 
   const doc = (await CrmInquiryModel.findOneAndUpdate(
@@ -249,6 +284,8 @@ async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
     poojaTime: doc.pujaTime ?? undefined,
     status: "booking_confirmed",
     pricing: {
+      packagePrice: doc.packagePrice ?? undefined,
+      samagriCharges: doc.samagriIncluded ? (doc.samagriPrice ?? 0) : 0,
       finalAmount,
       advanceAmount,
       remainingAmount: Math.max(finalAmount - advanceAmount, 0),
@@ -390,7 +427,7 @@ export async function getStats(req: Request) {
       ]),
       CrmInquiryModel.find(
         { ...scope, status: "confirmed" },
-        "totalAmount tokenAmount tokenStatus totalAmountStatus",
+        "totalAmount tokenAmount tokenStatus totalAmountStatus packagePrice samagriPrice samagriIncluded",
       ),
     ]);
 
@@ -401,8 +438,21 @@ export async function getStats(req: Request) {
     const paid = d.tokenStatus === "received" ? d.tokenAmount : 0;
     return sum + (d.totalAmount - paid);
   }, 0);
+  const packageRevenue = confirmedDocs.reduce((sum, d) => sum + (d.packagePrice ?? 0), 0);
+  const samagriRevenue = confirmedDocs.reduce((sum, d) => sum + (d.samagriIncluded ? (d.samagriPrice ?? 0) : 0), 0);
 
-  return { totalRecords, confirmed, inquiryCount, todayPujas, todayFollowUps, tokenTotal, totalCollected, pendingBalance };
+  return {
+    totalRecords,
+    confirmed,
+    inquiryCount,
+    todayPujas,
+    todayFollowUps,
+    tokenTotal,
+    totalCollected,
+    pendingBalance,
+    packageRevenue,
+    samagriRevenue,
+  };
 }
 
 export async function bulkSync(req: Request, inquiries: Array<Record<string, unknown>>) {
@@ -421,10 +471,25 @@ export async function bulkSync(req: Request, inquiries: Array<Record<string, unk
       );
   }
 
+  const pricingTouchedIds = items
+    .filter((item) => "packagePrice" in item || "samagriPrice" in item || "samagriIncluded" in item)
+    .map((item) => item.id as string);
+  const existingPricingById = new Map(
+    pricingTouchedIds.length > 0
+      ? (
+          await CrmInquiryModel.find(
+            { id: { $in: pricingTouchedIds } },
+            "id packagePrice samagriPrice samagriIncluded",
+          )
+        ).map((d) => [d.id, d])
+      : [],
+  );
+
   const ops = items.map((item) => {
     const body = { ...item };
     delete body.version;
     delete body.updatedAt;
+    deriveTotalAmount(existingPricingById.get(item.id as string) ?? null, body);
     return {
       updateOne: {
         filter: { id: item.id },

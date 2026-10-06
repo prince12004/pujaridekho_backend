@@ -38,6 +38,13 @@ const crmInquirySchema = new Schema(
       default: [],
     },
     status: { type: String, default: "inquiry", enum: ["inquiry", "confirmed", "notConverted"] },
+    // totalAmount stays the single authoritative total every existing screen
+    // reads. packagePrice/samagriPrice are optional — when packagePrice is
+    // present on a write, the service layer derives totalAmount from them
+    // (packagePrice + samagriPrice if samagriIncluded); left null on older
+    // records until someone edits them.
+    packagePrice: { type: Number, default: null },
+    samagriPrice: { type: Number, default: null },
     totalAmount: { type: Number, default: 0 },
     tokenAmount: { type: Number, default: 0 },
     tokenStatus: { type: String, default: "pending", enum: ["pending", "received"] },
