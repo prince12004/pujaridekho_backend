@@ -4,6 +4,7 @@ import type { HydratedDocument } from "mongoose";
 import { ApiError } from "../../lib/api-error.js";
 import { CrmInquiryModel, type CrmInquiryDocument } from "../../models/crm-inquiry.model.js";
 import { BookingModel } from "../../models/booking.model.js";
+import { PoojaModel } from "../../models/pooja.model.js";
 import { PanditSlotReservationModel } from "../../models/pandit-slot-reservation.model.js";
 import { crmHasFullAccess, crmOwnFilter, isCrmAdmin } from "../../middlewares/crm-auth.js";
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
@@ -233,14 +234,15 @@ async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
   const reachedOtp = await generateReachedOtp();
   const finalAmount = doc.totalAmount ?? 0;
   const advanceAmount = doc.tokenAmount ?? 0;
-  const paymentStatus =
-    doc.totalAmountStatus === "received" ? "paid" : doc.tokenStatus === "received" ? "partially_paid" : "unpaid";
+
+  const matchedPooja = doc.pujaName ? await PoojaModel.findOne({ name: new RegExp(`^${doc.pujaName}$`, "i") }) : null;
 
   await BookingModel.create({
     bookingId,
     customer: customer._id,
     customerSnapshot: { name: customer.name, mobile: customer.mobile, email: customer.email },
     serviceType: "pooja",
+    pooja: matchedPooja?._id,
     package: { name: doc.pujaName },
     address: doc.address ?? undefined,
     poojaDate,
@@ -251,8 +253,9 @@ async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
       advanceAmount,
       remainingAmount: Math.max(finalAmount - advanceAmount, 0),
       transactionId: doc.transactionId ?? undefined,
+      tokenStatus: doc.tokenStatus,
+      totalAmountStatus: doc.totalAmountStatus,
     },
-    paymentStatus,
     bookingChannel: "offline",
     bookingSource: "admin",
     timeline: [{ status: "booking_confirmed", note: `Transferred from CRM inquiry ${doc.id}` }],
