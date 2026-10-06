@@ -37,6 +37,7 @@ export async function listMyBookings(customerId: string, tab: string | undefined
 
 export async function getMyBookingById(customerId: string, bookingId: string) {
   const booking = await BookingModel.findById(bookingId)
+    .select("+panditExecution.reachedOtpPlain")
     .populate({
       path: "pooja",
       select: "name slug featuredImage packages samagriTemplate",

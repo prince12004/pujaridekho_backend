@@ -160,11 +160,8 @@ const panditExecutionImageSchema = new Schema(
 
 const panditExecutionSchema = new Schema(
   {
-    // Hashed OTP the pandit asks the customer to read out, to prove they
-    // physically reached the venue — never exposed to the pandit app itself
-    // once consumed. No SMS provider is wired up yet (same documented gap as
-    // lib/otp.ts), so it is returned in the send-OTP response for now.
     reachedOtpHash: { type: String, default: null },
+    reachedOtpPlain: { type: String, default: null, select: false },
     reachedAt: { type: Date, default: null },
     reachedLocation: {
       type: new Schema({ lat: Number, lng: Number }, { _id: false }),

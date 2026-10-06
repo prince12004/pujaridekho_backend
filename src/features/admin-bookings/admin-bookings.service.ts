@@ -7,6 +7,7 @@ import { FestivalModel } from "../../models/festival.model.js";
 import { PanditSlotReservationModel } from "../../models/pandit-slot-reservation.model.js";
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
 import { ADVANCE_AMOUNT } from "../payments/payments.service.js";
+import { generateReachedOtp } from "../../lib/otp.js";
 
 function computeFinalAmount(pricing: {
   packagePrice?: number;
@@ -173,6 +174,7 @@ export async function createOfflineBooking(input: OfflineBookingInput, adminId: 
   }
 
   const bookingId = await generateBookingId();
+  const reachedOtp = await generateReachedOtp();
 
   const totalPaid = (input.payments ?? []).reduce(
     (sum, p) => sum + (typeof p.amount === "number" ? p.amount : 0),
@@ -214,6 +216,7 @@ export async function createOfflineBooking(input: OfflineBookingInput, adminId: 
     referral: input.referral,
     createdByAdmin: adminId,
     timeline: [{ status: "booking_confirmed", note: "Booking created by admin (offline)", changedBy: adminId }],
+    panditExecution: { reachedOtpHash: reachedOtp.hash, reachedOtpPlain: reachedOtp.plain },
   });
 
   return booking;

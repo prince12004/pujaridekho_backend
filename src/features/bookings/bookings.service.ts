@@ -8,6 +8,7 @@ import { MuhuratModel } from "../../models/muhurat.model.js";
 import type { SamagriTemplateDocument } from "../../models/samagri-template.model.js";
 import { ADVANCE_AMOUNT } from "../payments/payments.service.js";
 import { resolvePackagePrice } from "../../lib/pooja-pricing.js";
+import { generateReachedOtp } from "../../lib/otp.js";
 
 async function generateBookingId() {
   const year = new Date().getFullYear();
@@ -108,6 +109,7 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
   }
 
   const bookingId = await generateBookingId();
+  const reachedOtp = await generateReachedOtp();
 
   const booking = await BookingModel.create({
     bookingId,
@@ -143,6 +145,7 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
     bookingChannel: "online",
     bookingSource: "website",
     timeline: [{ status: "pending_payment", note: "Booking created by customer on website" }],
+    panditExecution: { reachedOtpHash: reachedOtp.hash, reachedOtpPlain: reachedOtp.plain },
   });
 
   await createNotification({

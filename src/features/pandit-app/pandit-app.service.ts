@@ -156,6 +156,10 @@ export async function sendReachedOtp(panditId: string, bookingId: string) {
 
   const otp = String(1000 + Math.floor(Math.random() * 9000));
   booking.panditExecution!.reachedOtpHash = await bcrypt.hash(otp, 10);
+  // Keep the customer dashboard's displayed code in sync — it's shown the
+  // code generated at booking time, so regenerating it here must overwrite
+  // that one too or the two would mismatch.
+  booking.panditExecution!.reachedOtpPlain = otp;
   await booking.save();
 
   // No SMS provider wired up yet (same documented gap as lib/otp.ts) — the
@@ -176,6 +180,7 @@ export async function markReached(panditId: string, bookingId: string, otp: stri
   if (!isValid) throw new ApiError(422, "Incorrect OTP. Please check with the customer.");
 
   booking.panditExecution!.reachedOtpHash = null;
+  booking.panditExecution!.reachedOtpPlain = null;
   booking.panditExecution!.reachedAt = new Date();
   booking.panditExecution!.reachedLocation = lat != null && lng != null ? { lat, lng } : null;
   booking.panditExecution!.reachedOtpVerified = true;

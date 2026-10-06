@@ -46,6 +46,12 @@ export async function requestOtp(mobile: string, purpose: OtpPurpose) {
   return { expiresAt, devOtp: code };
 }
 
+export async function generateReachedOtp(): Promise<{ plain: string; hash: string }> {
+  const plain = String(1000 + Math.floor(Math.random() * 9000));
+  const hash = await bcrypt.hash(plain, 10);
+  return { plain, hash };
+}
+
 export async function consumeOtp(mobile: string, purpose: OtpPurpose, code: string) {
   const record = await OtpModel.findOne({ mobile, purpose, consumed: false }).sort({ createdAt: -1 });
   if (!record) throw ApiError.badRequest("No active OTP request found — please request a new OTP");

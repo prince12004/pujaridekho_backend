@@ -7,6 +7,7 @@ import { BookingModel } from "../../models/booking.model.js";
 import { crmHasFullAccess, crmOwnFilter, isCrmAdmin } from "../../middlewares/crm-auth.js";
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
 import { generateBookingId } from "../admin-bookings/admin-bookings.service.js";
+import { generateReachedOtp } from "../../lib/otp.js";
 import {
   getCrmAvailability,
   listCrmPandits,
@@ -245,6 +246,7 @@ async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
 
   const customer = await findOrCreateCustomerByMobile({ name: doc.clientName, mobile: doc.phone });
   const bookingId = await generateBookingId();
+  const reachedOtp = await generateReachedOtp();
   const finalAmount = doc.totalAmount ?? 0;
   const advanceAmount = doc.tokenAmount ?? 0;
   const paymentStatus =
@@ -270,6 +272,7 @@ async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
     bookingChannel: "offline",
     bookingSource: "admin",
     timeline: [{ status: "booking_confirmed", note: `Transferred from CRM inquiry ${doc.id}` }],
+    panditExecution: { reachedOtpHash: reachedOtp.hash, reachedOtpPlain: reachedOtp.plain },
   });
 
   await CrmInquiryModel.updateOne({ id: doc.id }, { $set: { websiteBookingId: bookingId } });
