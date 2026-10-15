@@ -130,6 +130,33 @@ export async function reservePanditSlot(input: ReserveSlotInput) {
   }
 }
 
+// Pandit-assignment sync used by the slot-free CRM assign-pandit flow
+// (crm-inquiries.service.ts) — just the Booking-sync half of
+// reservePanditSlot above, with no PanditSlotReservationModel/clash-checking
+// involved. reservePanditSlot itself stays for the still-live
+// /pandits/availability endpoint and the legacy website-facing
+// /pandits/:id/bookings routes.
+export async function syncPanditAssignmentToBooking(
+  websiteBookingId: string,
+  input: { panditId: string; date: string; time?: string | null; ref: string },
+) {
+  const booking = await BookingModel.findOne({ bookingId: websiteBookingId });
+  if (!booking) return;
+
+  booking.pandit = input.panditId as never;
+  booking.poojaDate = new Date(input.date);
+  if (input.time) booking.poojaTime = input.time;
+  if (booking.status === "booking_confirmed" || booking.status === "pandit_assignment_pending") {
+    booking.status = "pandit_assigned";
+  }
+  booking.timeline.push({
+    status: booking.status,
+    note: `Pandit assigned via CRM (ref ${input.ref})`,
+    changedAt: new Date(),
+  });
+  await booking.save();
+}
+
 export async function releasePanditSlot(panditId: string, bookingRef: string) {
   await getPanditById(panditId);
 

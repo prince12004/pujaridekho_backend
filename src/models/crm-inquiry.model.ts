@@ -1,12 +1,4 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-
-// Ported 1:1 from pujaridekhocrm/backend/server.js's inquirySchema (the CRM's
-// "Inquiry"/lead model) so migrated documents (see
-// scripts/migrate-crm-data.ts) map cleanly onto this collection without any
-// field renaming/reshaping. Deliberately NOT merged with HomeLeadModel —
-// that model is an unrelated, much simpler "website contact form" lead,
-// while this is the CRM's full sales-pipeline record (assignment, pandit
-// scheduling, payment tracking, optimistic locking, website-booking sync).
 const crmInquirySchema = new Schema(
   {
     id: { type: String, required: true, unique: true },

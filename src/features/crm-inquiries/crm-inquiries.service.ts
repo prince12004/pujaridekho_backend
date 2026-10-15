@@ -5,16 +5,17 @@ import { ApiError } from "../../lib/api-error.js";
 import { CrmInquiryModel, type CrmInquiryDocument } from "../../models/crm-inquiry.model.js";
 import { BookingModel } from "../../models/booking.model.js";
 import { PoojaModel } from "../../models/pooja.model.js";
+import { PanditModel } from "../../models/pandit.model.js";
 import { PanditSlotReservationModel } from "../../models/pandit-slot-reservation.model.js";
 import { crmHasFullAccess, crmOwnFilter, isCrmAdmin } from "../../middlewares/crm-auth.js";
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
 import { generateBookingId } from "../admin-bookings/admin-bookings.service.js";
+import { getPanditById } from "../admin-pandits/admin-pandits.service.js";
 import { generateReachedOtp } from "../../lib/otp.js";
 import {
   getCrmAvailability,
   listCrmPandits,
-  releasePanditSlot,
-  reservePanditSlot,
+  syncPanditAssignmentToBooking,
 } from "../crm/crm.service.js";
 
 
@@ -307,10 +308,13 @@ async function importAndSyncBooking(websiteBookingId: string, fields: Record<str
   return updateBookingFromCrm(websiteBookingId, fields as never);
 }
 
+// Slot-free: the admin decides who does what, the server never blocks an
+// assignment because of time. `input.slot` (if an old app build still sends
+// one) is accepted but ignored — no reservation, no clash-check, no 409.
 export async function assignPandit(
   req: Request,
   id: string,
-  input: { panditId: string; panditName: string; slot: string },
+  input: { panditId: string; panditName: string; slot?: string },
 ) {
   const doc = (await CrmInquiryModel.findOne({ id, ...crmOwnFilter(req) })) as InquiryDoc | null;
   if (!doc) throw ApiError.notFound("Not found");
@@ -321,24 +325,23 @@ export async function assignPandit(
     throw ApiError.badRequest("Puja date is required before assigning a pandit");
   }
 
-  if (doc.panditId && doc.assignedSlot) {
-    await releasePanditSlot(doc.panditId, doc.id).catch(() => undefined);
-  }
-
-  await reservePanditSlot({
-    panditId: input.panditId,
-    date: String(doc.pujaDate).slice(0, 10),
-    slot: input.slot as never,
-    ref: doc.id,
-    websiteBookingId: doc.websiteBookingId ?? undefined,
-  });
+  await getPanditById(input.panditId); // throws 404 if the pandit doesn't exist
 
   doc.panditId = input.panditId;
   doc.panditName = input.panditName;
-  doc.assignedSlot = input.slot;
+  doc.assignedSlot = null;
   doc.updatedAt = new Date().toISOString();
   doc.version += 1;
   await doc.save();
+
+  if (doc.websiteBookingId) {
+    await syncPanditAssignmentToBooking(doc.websiteBookingId, {
+      panditId: input.panditId,
+      date: String(doc.pujaDate).slice(0, 10),
+      time: doc.pujaTime,
+      ref: doc.id,
+    });
+  }
 
   return toJson(doc);
 }
@@ -347,7 +350,7 @@ export async function assignPanditToEvent(
   req: Request,
   id: string,
   eventId: string,
-  input: { panditId: string; panditName: string; slot: string },
+  input: { panditId: string; panditName: string; slot?: string },
 ) {
   const doc = (await CrmInquiryModel.findOne({ id, ...crmOwnFilter(req) })) as InquiryDoc | null;
   if (!doc) throw ApiError.notFound("Not found");
@@ -357,24 +360,16 @@ export async function assignPanditToEvent(
   const event = doc.pujaEvents.find((e) => e.id === eventId);
   if (!event) throw ApiError.notFound("Puja date not found on this booking");
 
-  const ref = `${doc.id}:${event.id}`;
-
-  if (event.panditId && event.assignedSlot) {
-    await releasePanditSlot(event.panditId, ref).catch(() => undefined);
-  }
+  await getPanditById(input.panditId); // throws 404 if the pandit doesn't exist
 
   event.panditId = input.panditId;
   event.panditName = input.panditName;
-  event.assignedSlot = input.slot;
+  event.assignedSlot = null;
 
+  // A CrmInquiry can have several pujaEvents, but the single linked website
+  // Booking (if any) only has one `pandit` field — mirror whichever event is
+  // earliest, same as the top-level doc.panditId below.
   const earliest = [...doc.pujaEvents].sort((a, b) => a.date.localeCompare(b.date))[0];
-  await reservePanditSlot({
-    panditId: input.panditId,
-    date: String(event.date).slice(0, 10),
-    slot: input.slot as never,
-    ref,
-    websiteBookingId: event.id === earliest.id ? (doc.websiteBookingId ?? undefined) : undefined,
-  });
 
   doc.panditId = earliest.panditId ?? null;
   doc.panditName = earliest.panditName ?? null;
@@ -383,6 +378,15 @@ export async function assignPanditToEvent(
   doc.updatedAt = new Date().toISOString();
   doc.version += 1;
   await doc.save();
+
+  if (event.id === earliest.id && doc.websiteBookingId) {
+    await syncPanditAssignmentToBooking(doc.websiteBookingId, {
+      panditId: input.panditId,
+      date: String(event.date).slice(0, 10),
+      time: event.time,
+      ref: `${doc.id}:${event.id}`,
+    });
+  }
 
   return toJson(doc);
 }
@@ -453,6 +457,98 @@ export async function getStats(req: Request) {
     packageRevenue,
     samagriRevenue,
   };
+}
+
+const SCHEDULE_EXCLUDED_BOOKING_STATUSES = ["pending_payment", "cancelled", "refund_requested", "refunded"];
+
+interface PanditScheduleCrmPuja {
+  inquiryId: string;
+  eventId: string;
+  time: string | null;
+  pujaName: string;
+  label?: string;
+  source: "crm";
+}
+interface PanditScheduleWebsitePuja {
+  bookingRef: string;
+  time: string | null;
+  pujaName: string;
+  source: "website";
+}
+type PanditSchedulePuja = PanditScheduleCrmPuja | PanditScheduleWebsitePuja;
+
+// Replaces the fixed 8-11/12-3/4-8 slot-availability check: instead of the
+// server blocking a clash, the admin sees everything a pandit is already
+// down for that day (from both CRM inquiries and real website Bookings) and
+// decides for themselves.
+export async function getPanditSchedule(date: string) {
+  const pandits = await PanditModel.find({ accountStatus: "active" }).select("fullName mobile");
+
+  const crmDocs = await CrmInquiryModel.find({
+    status: "confirmed",
+    $or: [
+      { pujaEvents: { $elemMatch: { date: { $regex: `^${date}` }, panditId: { $ne: null } } } },
+      { pujaEvents: { $size: 0 }, pujaDate: { $regex: `^${date}` }, panditId: { $ne: null } },
+    ],
+  });
+
+  const bookings = await BookingModel.find({
+    pandit: { $ne: null },
+    poojaDate: { $gte: new Date(`${date}T00:00:00`), $lte: new Date(`${date}T23:59:59.999`) },
+    status: { $nin: SCHEDULE_EXCLUDED_BOOKING_STATUSES },
+  })
+    .select("bookingId pandit poojaTime package serviceType pooja festival")
+    .populate("pooja", "name")
+    .populate("festival", "name");
+
+  const byPandit = new Map<string, PanditSchedulePuja[]>();
+  const pushPuja = (panditId: string, puja: PanditSchedulePuja) => {
+    const list = byPandit.get(panditId) ?? [];
+    list.push(puja);
+    byPandit.set(panditId, list);
+  };
+
+  for (const doc of crmDocs) {
+    if (doc.pujaEvents.length > 0) {
+      for (const event of doc.pujaEvents) {
+        if (!event.panditId || String(event.date).slice(0, 10) !== date) continue;
+        pushPuja(event.panditId, {
+          inquiryId: doc.id,
+          eventId: event.id,
+          time: event.time ?? null,
+          pujaName: doc.pujaName,
+          label: event.label,
+          source: "crm",
+        });
+      }
+    } else if (doc.panditId) {
+      pushPuja(doc.panditId, {
+        inquiryId: doc.id,
+        eventId: `legacy-${doc.id}`,
+        time: doc.pujaTime ?? null,
+        pujaName: doc.pujaName,
+        source: "crm",
+      });
+    }
+  }
+
+  for (const booking of bookings) {
+    const pooja = booking.pooja as unknown as { name?: string } | null;
+    const festival = booking.festival as unknown as { name?: string } | null;
+    const pujaName = booking.package?.name ?? pooja?.name ?? festival?.name ?? booking.serviceType;
+    pushPuja(String(booking.pandit), {
+      bookingRef: booking.bookingId,
+      time: booking.poojaTime ?? null,
+      pujaName,
+      source: "website",
+    });
+  }
+
+  return pandits.map((pandit) => {
+    const panditId = pandit._id.toString();
+    const pujas = (byPandit.get(panditId) ?? []).sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
+    return { panditId, name: pandit.fullName, phone: pandit.mobile, pujas };
+  });
 }
 
 export async function bulkSync(req: Request, inquiries: Array<Record<string, unknown>>) {

@@ -10,6 +10,7 @@ import {
   createInquiry,
   deleteInquiry,
   getInquiry,
+  getPanditSchedule,
   getStats,
   InquiryConflictError,
   listInquiries,
@@ -58,33 +59,21 @@ export const deleteInquiryById = asyncHandler(async (req: Request, res: Response
 const assignPanditSchema = z.object({
   panditId: z.string().min(1, "panditId is required"),
   panditName: z.string().min(1, "panditName is required"),
-  slot: z.string().min(1, "slot is required"),
+  // Accepted but ignored — old app builds still send it, the slot system
+  // itself is gone (no reservation, no clash-check).
+  slot: z.string().optional(),
 });
 
 export const postAssignPandit = asyncHandler(async (req: Request, res: Response) => {
   const input = assignPanditSchema.parse(req.body);
-  try {
-    const result = await assignPandit(req, req.params.id, input);
-    sendSuccess(res, result);
-  } catch (err) {
-    if ((err as { code?: string }).code === "SLOT_TAKEN" || (err instanceof ApiError && err.statusCode === 409)) {
-      throw ApiError.conflict("That slot was just booked — pick another");
-    }
-    throw err;
-  }
+  const result = await assignPandit(req, req.params.id, input);
+  sendSuccess(res, result);
 });
 
 export const postAssignPanditToEvent = asyncHandler(async (req: Request, res: Response) => {
   const input = assignPanditSchema.parse(req.body);
-  try {
-    const result = await assignPanditToEvent(req, req.params.id, req.params.eventId, input);
-    sendSuccess(res, result);
-  } catch (err) {
-    if ((err as { code?: string }).code === "SLOT_TAKEN" || (err instanceof ApiError && err.statusCode === 409)) {
-      throw ApiError.conflict("That slot was just booked — pick another");
-    }
-    throw err;
-  }
+  const result = await assignPanditToEvent(req, req.params.id, req.params.eventId, input);
+  sendSuccess(res, result);
 });
 
 export const getStatsHandler = asyncHandler(async (req: Request, res: Response) => {
@@ -114,4 +103,9 @@ const dateQuerySchema = z.object({
 export const getInquiryPanditAvailability = asyncHandler(async (req: Request, res: Response) => {
   const { date } = dateQuerySchema.parse(req.query);
   sendSuccess(res, await getCrmAvailability(date));
+});
+
+export const getInquiryPanditSchedule = asyncHandler(async (req: Request, res: Response) => {
+  const { date } = dateQuerySchema.parse(req.query);
+  sendSuccess(res, await getPanditSchedule(date));
 });

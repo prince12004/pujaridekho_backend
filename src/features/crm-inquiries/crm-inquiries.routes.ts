@@ -6,6 +6,7 @@ import {
   getInquiryById,
   getInquiryPandits,
   getInquiryPanditAvailability,
+  getInquiryPanditSchedule,
   getStatsHandler,
   getWebsiteBookingsSync,
   postAssignPandit,
@@ -25,6 +26,7 @@ crmInquiriesRouter.use(requireCrmAuth, blockSuperadminMutations);
 
 crmInquiriesRouter.get("/pandits", getInquiryPandits);
 crmInquiriesRouter.get("/pandits/availability", getInquiryPanditAvailability);
+crmInquiriesRouter.get("/pandits/schedule", getInquiryPanditSchedule);
 
 crmInquiriesRouter.get("/stats", getStatsHandler);
 crmInquiriesRouter.get("/sync/website-bookings", requireCrmAdmin, getWebsiteBookingsSync);
