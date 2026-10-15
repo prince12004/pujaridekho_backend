@@ -278,7 +278,7 @@ async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
     customerSnapshot: { name: customer.name, mobile: customer.mobile, email: customer.email },
     serviceType: "pooja",
     pooja: matchedPooja?._id,
-    package: { name: doc.pujaName },
+    package: { name: doc.pujaName, samagriIncluded: doc.samagriIncluded },
     address: doc.address ?? undefined,
     poojaDate,
     poojaTime: doc.pujaTime ?? undefined,
