@@ -425,18 +425,22 @@ export async function getStats(req: Request, range?: { from?: string; to?: strin
   const scope = crmOwnFilter(req);
   const today = new Date().toISOString().slice(0, 10);
 
-  const confirmedFilter: Record<string, unknown> = { ...scope, status: "confirmed" };
+  // from/to filters totalRecords/confirmed/inquiryCount and the money
+  // aggregation by pujaDate — todayPujas/todayFollowUps are a different
+  // concept ("today" specifically) and stay unaffected by the range.
+  const rangeScope: Record<string, unknown> = { ...scope };
   if (range?.from || range?.to) {
     const pujaDate: Record<string, string> = {};
     if (range.from) pujaDate.$gte = range.from;
     if (range.to) pujaDate.$lte = range.to;
-    confirmedFilter.pujaDate = pujaDate;
+    rangeScope.pujaDate = pujaDate;
   }
+  const confirmedFilter: Record<string, unknown> = { ...rangeScope, status: "confirmed" };
 
   const [totalRecords, confirmed, inquiryCount, todayPujas, todayFollowUps, confirmedDocs] = await Promise.all([
-    CrmInquiryModel.countDocuments(scope),
-    CrmInquiryModel.countDocuments({ ...scope, status: "confirmed" }),
-    CrmInquiryModel.countDocuments({ ...scope, status: "inquiry" }),
+    CrmInquiryModel.countDocuments(rangeScope),
+    CrmInquiryModel.countDocuments(confirmedFilter),
+    CrmInquiryModel.countDocuments({ ...rangeScope, status: "inquiry" }),
     CrmInquiryModel.countDocuments({
       ...scope,
       $or: [
@@ -542,13 +546,15 @@ export async function getPanditSchedule(date: string) {
     byPandit.set(panditId, list);
   };
 
+  // Once an inquiry is linked to a real website Booking, the CRM side is
+  // still what the app needs to show/act on (it carries inquiryId/eventId —
+  // the app needs these to know which puja an assignment is for; a
+  // bookingRef alone isn't enough). Track which Bookings are already
+  // represented via a CrmInquiry so the website-side loop below can skip
+  // them — otherwise the same puja would be listed twice.
+  const crmLinkedBookingIds = new Set(crmDocs.map((d) => d.websiteBookingId).filter((id): id is string => Boolean(id)));
+
   for (const doc of crmDocs) {
-    // Once an inquiry is linked to a real website Booking, that Booking is
-    // the authoritative record of the assignment (pandit/time get synced
-    // onto it via syncPanditAssignmentToBooking) — it's already picked up
-    // by the `bookings` query below with source: "website". Counting the
-    // CRM side too would list the same puja twice.
-    if (doc.websiteBookingId) continue;
     if (doc.pujaEvents.length > 0) {
       for (const event of doc.pujaEvents) {
         if (!event.panditId || String(event.date).slice(0, 10) !== date) continue;
@@ -573,6 +579,7 @@ export async function getPanditSchedule(date: string) {
   }
 
   for (const booking of bookings) {
+    if (crmLinkedBookingIds.has(booking.bookingId)) continue;
     const pooja = booking.pooja as unknown as { name?: string } | null;
     const festival = booking.festival as unknown as { name?: string } | null;
     const pujaName = booking.package?.name ?? pooja?.name ?? festival?.name ?? booking.serviceType;
@@ -586,7 +593,12 @@ export async function getPanditSchedule(date: string) {
 
   return pandits.map((pandit) => {
     const panditId = pandit._id.toString();
-    const pujas = (byPandit.get(panditId) ?? []).sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
+    const pujas = (byPandit.get(panditId) ?? []).sort((a, b) => {
+      if (a.time == null && b.time == null) return 0;
+      if (a.time == null) return 1; // no-time pujas sort after timed ones
+      if (b.time == null) return -1;
+      return a.time.localeCompare(b.time);
+    });
     return { panditId, name: pandit.fullName, phone: pandit.mobile, pujas };
   });
 }
