@@ -509,6 +509,12 @@ export async function getPanditSchedule(date: string) {
   };
 
   for (const doc of crmDocs) {
+    // Once an inquiry is linked to a real website Booking, that Booking is
+    // the authoritative record of the assignment (pandit/time get synced
+    // onto it via syncPanditAssignmentToBooking) — it's already picked up
+    // by the `bookings` query below with source: "website". Counting the
+    // CRM side too would list the same puja twice.
+    if (doc.websiteBookingId) continue;
     if (doc.pujaEvents.length > 0) {
       for (const event of doc.pujaEvents) {
         if (!event.panditId || String(event.date).slice(0, 10) !== date) continue;
