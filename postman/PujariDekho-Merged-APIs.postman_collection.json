@@ -392,17 +392,52 @@
           }
         },
         {
+          "name": "Pandit schedule (day view, no slots)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/crm-inquiries/pandits/schedule?date=2026-11-20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "crm-inquiries",
+                "pandits",
+                "schedule"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-11-20"
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "Stats / dashboard",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/crm-inquiries/stats",
+              "raw": "{{base_url}}/crm-inquiries/stats?from=2026-11-01&to=2026-11-30",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "crm-inquiries",
                 "stats"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-11-01",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-11-30",
+                  "disabled": true
+                }
               ]
             }
           }
