@@ -76,8 +76,14 @@ export const postAssignPanditToEvent = asyncHandler(async (req: Request, res: Re
   sendSuccess(res, result);
 });
 
+const statsQuerySchema = z.object({
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "from must be YYYY-MM-DD").optional(),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "to must be YYYY-MM-DD").optional(),
+});
+
 export const getStatsHandler = asyncHandler(async (req: Request, res: Response) => {
-  const result = await getStats(req);
+  const range = statsQuerySchema.parse(req.query);
+  const result = await getStats(req, range);
   sendSuccess(res, result);
 });
 

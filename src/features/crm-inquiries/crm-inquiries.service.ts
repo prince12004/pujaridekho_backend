@@ -87,6 +87,7 @@ function escapeRegex(s: string) {
 export function buildInquiryFilter(req: Request): Record<string, unknown> {
   const filter: Record<string, unknown> = { ...crmOwnFilter(req) };
   if (req.query.status) filter.status = req.query.status;
+  if (req.query.panditId) filter.panditId = req.query.panditId;
   if (crmHasFullAccess(req) && req.query.assignedTo) {
     filter.assignedTo = req.query.assignedTo === "unassigned" ? null : req.query.assignedTo;
   }
@@ -405,45 +406,73 @@ export async function deleteInquiry(id: string) {
   await CrmInquiryModel.deleteOne({ id });
 }
 
-export async function getStats(req: Request) {
+// Token is additive, never subtracted from puja+samagri — a customer paying
+// puja 2000 + samagri 1000 + token 100 owes 3100 total; token "received"
+// only accounts for that 100, independent of whether the puja+samagri
+// portion has been paid. Old records with no packagePrice fall back to
+// totalAmount minus samagri (same fallback already used elsewhere for
+// packageRevenue), so historical data keeps working under the new formula.
+function crmMoney(doc: { totalAmount: number; tokenAmount: number; packagePrice?: number | null; samagriPrice?: number | null; samagriIncluded: boolean; tokenStatus: string; totalAmountStatus: string }) {
+  const samagriPrice = doc.samagriIncluded ? (doc.samagriPrice ?? 0) : 0;
+  const packagePrice = doc.packagePrice ?? Math.max(doc.totalAmount - samagriPrice, 0);
+  const grandTotal = packagePrice + samagriPrice + doc.tokenAmount;
+  const tokenReceived = doc.tokenStatus === "received" ? doc.tokenAmount : 0;
+  const pujaAmountReceived = doc.totalAmountStatus === "received" ? packagePrice + samagriPrice : 0;
+  return { packagePrice, samagriPrice, grandTotal, tokenReceived, pujaAmountReceived };
+}
+
+export async function getStats(req: Request, range?: { from?: string; to?: string }) {
   const scope = crmOwnFilter(req);
   const today = new Date().toISOString().slice(0, 10);
-  const [totalRecords, confirmed, inquiryCount, todayPujas, todayFollowUps, tokenData, totalCollectedData, confirmedDocs] =
-    await Promise.all([
-      CrmInquiryModel.countDocuments(scope),
-      CrmInquiryModel.countDocuments({ ...scope, status: "confirmed" }),
-      CrmInquiryModel.countDocuments({ ...scope, status: "inquiry" }),
-      CrmInquiryModel.countDocuments({
-        ...scope,
-        $or: [
-          { pujaEvents: { $elemMatch: { date: { $regex: `^${today}` } } } },
-          { pujaEvents: { $size: 0 }, pujaDate: { $regex: `^${today}` } },
-        ],
-      }),
-      CrmInquiryModel.countDocuments({ ...scope, nextCallDate: { $regex: `^${today}` } }),
-      CrmInquiryModel.aggregate([
-        { $match: { ...scope, tokenStatus: "received" } },
-        { $group: { _id: null, total: { $sum: "$tokenAmount" } } },
-      ]),
-      CrmInquiryModel.aggregate([
-        { $match: { ...scope, totalAmountStatus: "received" } },
-        { $group: { _id: null, total: { $sum: "$totalAmount" } } },
-      ]),
-      CrmInquiryModel.find(
-        { ...scope, status: "confirmed" },
-        "totalAmount tokenAmount tokenStatus totalAmountStatus packagePrice samagriPrice samagriIncluded",
-      ),
-    ]);
 
-  const tokenTotal = tokenData[0]?.total ?? 0;
-  const totalCollected = totalCollectedData[0]?.total ?? 0;
-  const pendingBalance = confirmedDocs.reduce((sum, d) => {
-    if (d.totalAmountStatus === "received") return sum;
-    const paid = d.tokenStatus === "received" ? d.tokenAmount : 0;
-    return sum + (d.totalAmount - paid);
-  }, 0);
-  const packageRevenue = confirmedDocs.reduce((sum, d) => sum + (d.packagePrice ?? 0), 0);
-  const samagriRevenue = confirmedDocs.reduce((sum, d) => sum + (d.samagriIncluded ? (d.samagriPrice ?? 0) : 0), 0);
+  const confirmedFilter: Record<string, unknown> = { ...scope, status: "confirmed" };
+  if (range?.from || range?.to) {
+    const pujaDate: Record<string, string> = {};
+    if (range.from) pujaDate.$gte = range.from;
+    if (range.to) pujaDate.$lte = range.to;
+    confirmedFilter.pujaDate = pujaDate;
+  }
+
+  const [totalRecords, confirmed, inquiryCount, todayPujas, todayFollowUps, confirmedDocs] = await Promise.all([
+    CrmInquiryModel.countDocuments(scope),
+    CrmInquiryModel.countDocuments({ ...scope, status: "confirmed" }),
+    CrmInquiryModel.countDocuments({ ...scope, status: "inquiry" }),
+    CrmInquiryModel.countDocuments({
+      ...scope,
+      $or: [
+        { pujaEvents: { $elemMatch: { date: { $regex: `^${today}` } } } },
+        { pujaEvents: { $size: 0 }, pujaDate: { $regex: `^${today}` } },
+      ],
+    }),
+    CrmInquiryModel.countDocuments({ ...scope, nextCallDate: { $regex: `^${today}` } }),
+    CrmInquiryModel.find(
+      confirmedFilter,
+      "totalAmount tokenAmount tokenStatus totalAmountStatus packagePrice samagriPrice samagriIncluded",
+    ),
+  ]);
+
+  let pujaAmount = 0;
+  let samagriAmount = 0;
+  let tokenAmount = 0;
+  let tokenReceived = 0;
+  let pujaAmountReceived = 0;
+  let pujasWithToken = 0;
+  let pujasWithoutToken = 0;
+
+  for (const doc of confirmedDocs) {
+    const money = crmMoney(doc);
+    pujaAmount += money.packagePrice;
+    samagriAmount += money.samagriPrice;
+    tokenAmount += doc.tokenAmount;
+    tokenReceived += money.tokenReceived;
+    pujaAmountReceived += money.pujaAmountReceived;
+    if (doc.tokenAmount > 0) pujasWithToken += 1;
+    else pujasWithoutToken += 1;
+  }
+
+  const totalRevenue = pujaAmount + samagriAmount + tokenAmount;
+  const totalCollected = tokenReceived + pujaAmountReceived;
+  const totalDue = totalRevenue - totalCollected;
 
   return {
     totalRecords,
@@ -451,11 +480,16 @@ export async function getStats(req: Request) {
     inquiryCount,
     todayPujas,
     todayFollowUps,
-    tokenTotal,
+    pujaAmount,
+    samagriAmount,
+    tokenAmount,
+    totalRevenue,
+    tokenReceived,
+    pujaAmountReceived,
     totalCollected,
-    pendingBalance,
-    packageRevenue,
-    samagriRevenue,
+    totalDue,
+    pujasWithToken,
+    pujasWithoutToken,
   };
 }
 
