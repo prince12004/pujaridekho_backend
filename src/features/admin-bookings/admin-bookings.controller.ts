@@ -120,12 +120,16 @@ const offlineBookingSchema = z.object({
 export const postOfflineBooking = asyncHandler(async (req: Request, res: Response) => {
   const input = offlineBookingSchema.parse(req.body);
   const booking = await createOfflineBooking(input, req.admin!.id);
+  // Plain snapshot without panditExecution — that carries the pandit's
+  // reached-OTP, which must not end up readable in the audit log.
+  const auditSnapshot: Record<string, unknown> = booking.toObject();
+  delete auditSnapshot.panditExecution;
   await recordAuditLog(req, req.admin!, {
     action: "create",
     entityType: "Booking",
     entityId: booking._id.toString(),
     description: `Created offline booking ${booking.bookingId}`,
-    after: booking,
+    after: auditSnapshot,
   });
   sendSuccess(res, booking, "Offline booking created", 201);
 });

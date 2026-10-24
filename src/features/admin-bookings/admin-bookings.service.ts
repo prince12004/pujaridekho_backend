@@ -53,10 +53,21 @@ export interface ListBookingsQuery {
 export async function generateBookingId() {
   const year = new Date().getFullYear();
   const prefix = `PD-${year}-`;
-  // Not perfectly race-proof under heavy concurrent writes, but collisions are
-  // vanishingly unlikely for admin-created bookings; retried on unique violation.
-  const count = await BookingModel.countDocuments({ bookingId: { $regex: `^${prefix}` } });
-  return `${prefix}${String(count + 1).padStart(6, "0")}`;
+  // Derived from the highest existing sequence, not countDocuments() — once
+  // any booking is deleted (e.g. via CRM inquiry deletion) count+1 points at
+  // an ID that's still taken, and every create after that hits E11000.
+  // Zero-padded suffixes sort correctly as strings.
+  const latest = await BookingModel.findOne({ bookingId: { $regex: `^${prefix}\\d+$` } })
+    .sort({ bookingId: -1 })
+    .select("bookingId")
+    .lean();
+  const lastSeq = latest ? parseInt(latest.bookingId.slice(prefix.length), 10) || 0 : 0;
+  return `${prefix}${String(lastSeq + 1).padStart(6, "0")}`;
+}
+
+function isDuplicateBookingIdError(err: unknown) {
+  const e = err as { code?: number; keyPattern?: Record<string, unknown> };
+  return e?.code === 11000 && Boolean(e.keyPattern?.bookingId);
 }
 
 export async function listBookings(query: ListBookingsQuery) {
@@ -173,7 +184,6 @@ export async function createOfflineBooking(input: OfflineBookingInput, adminId: 
     if (!festivalExists) throw ApiError.badRequest("Selected festival does not exist");
   }
 
-  const bookingId = await generateBookingId();
   const reachedOtp = await generateReachedOtp();
 
   const totalPaid = (input.payments ?? []).reduce(
@@ -189,8 +199,7 @@ export async function createOfflineBooking(input: OfflineBookingInput, adminId: 
   };
   const paymentStatus = totalPaid <= 0 ? "unpaid" : totalPaid >= finalAmount && finalAmount > 0 ? "paid" : "partially_paid";
 
-  const booking = await BookingModel.create({
-    bookingId,
+  const doc = {
     customer: customer._id,
     customerSnapshot: { name: customer.name, mobile: customer.mobile, email: customer.email },
     serviceType: input.serviceType,
@@ -217,9 +226,17 @@ export async function createOfflineBooking(input: OfflineBookingInput, adminId: 
     createdByAdmin: adminId,
     timeline: [{ status: "booking_confirmed", note: "Booking created by admin (offline)", changedBy: adminId }],
     panditExecution: { reachedOtpHash: reachedOtp.hash, reachedOtpPlain: reachedOtp.plain },
-  });
+  };
 
-  return booking;
+  // Two admins creating at the same moment can still compute the same next
+  // ID — retry a few times on a bookingId unique violation.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await BookingModel.create({ ...doc, bookingId: await generateBookingId() });
+    } catch (err) {
+      if (!isDuplicateBookingIdError(err) || attempt >= 2) throw err;
+    }
+  }
 }
 
 export async function updateBookingStatus(id: string, status: string, note: string | undefined, adminId: string) {

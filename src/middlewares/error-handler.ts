@@ -27,6 +27,12 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     return sendError(res, 400, `Invalid value for field "${err.path}"`);
   }
 
+  if ((err as { code?: number })?.code === 11000) {
+    const field = Object.keys((err as { keyPattern?: Record<string, unknown> }).keyPattern ?? {})[0];
+    logger.error("Duplicate key error", err);
+    return sendError(res, 409, field ? `A record with this ${field} already exists` : "Duplicate record");
+  }
+
   logger.error("Unhandled error", err);
   return sendError(
     res,
