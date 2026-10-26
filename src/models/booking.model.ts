@@ -1,8 +1,5 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
-// Unified status lifecycle for BOTH online (website) and offline (admin-created)
-// bookings — a single Booking model/service backs both flows, per explicit
-// requirement: "Do NOT build two independent booking systems."
 export const BOOKING_STATUSES = [
   "pending_payment",
   "payment_received",

@@ -13,11 +13,6 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(16, "JWT_ACCESS_SECRET must be at least 16 characters"),
   JWT_REFRESH_SECRET: z.string().min(16, "JWT_REFRESH_SECRET must be at least 16 characters"),
   ADMIN_JWT_SECRET: z.string().min(16, "ADMIN_JWT_SECRET must be at least 16 characters"),
-  // Pandit mobile app (pujaripandit_app) auth — its own secret, separate from
-  // ADMIN_JWT_SECRET/JWT_ACCESS_SECRET so a pandit token can never be replayed
-  // against admin or customer routes and vice versa. Defaulted (like
-  // CRM_JWT_SECRET) so existing local/.env setups don't break; override in
-  // production.
   PANDIT_JWT_SECRET: z
     .string()
     .min(16, "PANDIT_JWT_SECRET must be at least 16 characters")
@@ -32,13 +27,6 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   WEBSITE_API_KEY: z.string().min(16, "WEBSITE_API_KEY must be at least 16 characters"),
-  // CRM backoffice (salespeople + admin/superadmin) JWT auth — ported from
-  // pujaridekhocrm/backend/server.js. Deliberately its own secret/env-var
-  // login, separate from ADMIN_JWT_SECRET (main admin panel) and
-  // WEBSITE_API_KEY (CRM app -> this API's pandit/booking proxy): the CRM's
-  // "admin"/"superadmin" roles are env-var logins, not AdminUserModel
-  // accounts, and mixing the two JWTs would let a CRM token's role claims
-  // be replayed against admin-only routes and vice versa.
   CRM_JWT_SECRET: z.string().min(16, "CRM_JWT_SECRET must be at least 16 characters").default("pujari-dekho-jwt-secret-2024"),
   CRM_ADMIN_USERNAME: z.string().default("admin"),
   CRM_ADMIN_PASSWORD: z.string().default("admin@123"),
