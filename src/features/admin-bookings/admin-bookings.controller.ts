@@ -30,6 +30,7 @@ const listQuerySchema = z.object({
   bookingChannel: z.string().optional(),
   serviceType: z.string().optional(),
   city: z.string().optional(),
+  pooja: z.string().optional(),
 });
 
 export const getBookings = asyncHandler(async (req: Request, res: Response) => {

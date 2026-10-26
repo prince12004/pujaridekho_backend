@@ -1,3 +1,4 @@
+import { isValidObjectId } from "mongoose";
 import { ApiError } from "../../lib/api-error.js";
 import { notifyCustomer } from "../../lib/notify-customer.js";
 import { BOOKING_STATUS_LABELS } from "../../lib/booking-status-labels.js";
@@ -49,6 +50,7 @@ export interface ListBookingsQuery {
   bookingChannel?: string;
   serviceType?: string;
   city?: string;
+  pooja?: string;
 }
 
 function escapeRegex(value: string) {
@@ -103,6 +105,7 @@ export async function listBookings(query: ListBookingsQuery) {
   if (query.status) filter.status = query.status;
   if (query.bookingChannel) filter.bookingChannel = query.bookingChannel;
   if (query.serviceType) filter.serviceType = query.serviceType;
+  if (query.pooja && isValidObjectId(query.pooja)) filter.pooja = query.pooja;
   if (query.city?.trim()) filter.city = { $regex: `^\\s*${escapeRegex(query.city.trim())}\\s*$`, $options: "i" };
   const search = query.search?.trim();
   if (search) {
