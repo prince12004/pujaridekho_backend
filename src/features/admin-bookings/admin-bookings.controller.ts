@@ -19,6 +19,7 @@ import {
   listConfirmedBookings,
   updateBookingDetails,
   updateBookingStatus,
+  listBookingCities,
 } from "./admin-bookings.service.js";
 
 const listQuerySchema = z.object({
@@ -28,12 +29,17 @@ const listQuerySchema = z.object({
   status: z.string().optional(),
   bookingChannel: z.string().optional(),
   serviceType: z.string().optional(),
+  city: z.string().optional(),
 });
 
 export const getBookings = asyncHandler(async (req: Request, res: Response) => {
   const query = listQuerySchema.parse(req.query);
   const result = await listBookings(query);
   sendSuccess(res, result);
+});
+
+export const getBookingCities = asyncHandler(async (_req: Request, res: Response) => {
+  sendSuccess(res, await listBookingCities());
 });
 
 export const getBooking = asyncHandler(async (req: Request, res: Response) => {

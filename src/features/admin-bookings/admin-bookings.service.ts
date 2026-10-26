@@ -48,6 +48,31 @@ export interface ListBookingsQuery {
   status?: string;
   bookingChannel?: string;
   serviceType?: string;
+  city?: string;
+}
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Mobiles are stored as typed ("+91 98765 43210", "9876543210"), so a
+// digits-only search matches with any non-digit characters in between.
+function mobileSearchRegex(search: string) {
+  const digits = search.replace(/\D/g, "");
+  if (digits.length < 3 || /[a-z]/i.test(search)) return null;
+  return digits.split("").join("\\D*");
+}
+
+// Distinct cities across bookings for the admin list filter. City is free
+// text, so variants differing only in case/whitespace are merged.
+export async function listBookingCities() {
+  const cities = (await BookingModel.distinct("city")) as (string | null)[];
+  const byKey = new Map<string, string>();
+  for (const city of cities) {
+    const name = city?.trim();
+    if (name && !byKey.has(name.toLowerCase())) byKey.set(name.toLowerCase(), name);
+  }
+  return [...byKey.values()].sort((a, b) => a.localeCompare(b));
 }
 
 export async function generateBookingId() {
@@ -78,11 +103,14 @@ export async function listBookings(query: ListBookingsQuery) {
   if (query.status) filter.status = query.status;
   if (query.bookingChannel) filter.bookingChannel = query.bookingChannel;
   if (query.serviceType) filter.serviceType = query.serviceType;
-  if (query.search) {
+  if (query.city?.trim()) filter.city = { $regex: `^\\s*${escapeRegex(query.city.trim())}\\s*$`, $options: "i" };
+  const search = query.search?.trim();
+  if (search) {
+    const text = escapeRegex(search);
     filter.$or = [
-      { bookingId: { $regex: query.search, $options: "i" } },
-      { "customerSnapshot.name": { $regex: query.search, $options: "i" } },
-      { "customerSnapshot.mobile": { $regex: query.search, $options: "i" } },
+      { bookingId: { $regex: text, $options: "i" } },
+      { "customerSnapshot.name": { $regex: text, $options: "i" } },
+      { "customerSnapshot.mobile": { $regex: mobileSearchRegex(search) ?? text, $options: "i" } },
     ];
   }
 
