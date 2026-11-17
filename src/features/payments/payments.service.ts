@@ -55,6 +55,19 @@ export async function initiatePayUPayment(input: InitiatePaymentInput) {
         ? "PujariDekho Consultation"
         : "PujariDekho Order";
 
+  if (input.entityType === "booking") {
+    // Record the hand-off before sending the customer to PayU, so a customer
+    // who closes the gateway page shows up as "Pending" rather than looking
+    // like they never tried to pay.
+    await BookingModel.updateOne(
+      { _id: input.entityId },
+      {
+        $push: { paymentAttempts: { txnid, gateway: "payu", amount: input.amount, status: "initiated", initiatedAt: new Date() } },
+        $set: { lastPaymentAttemptStatus: "initiated" },
+      },
+    );
+  }
+
   const hash = generatePayURequestHash({
     txnid,
     amount,
@@ -107,6 +120,12 @@ export async function handlePayUCallback(body: PayUCallbackBody) {
 
   if (entityType === "booking" && entityId) {
     const booking = await BookingModel.findById(entityId);
+    const alreadyProcessed = booking?.paymentAttempts.some((a) => a.txnid === body.txnid && a.status !== "initiated");
+    if (booking && alreadyProcessed) {
+      // PayU can deliver the same callback more than once — don't record the
+      // money twice.
+      return { succeeded, entityType, entityId };
+    }
     if (booking) {
       booking.payments.push({
         amount: Number(body.amount),
@@ -115,6 +134,29 @@ export async function handlePayUCallback(body: PayUCallbackBody) {
         transactionRef: body.mihpayid ?? body.txnid,
         notes: "PayU gateway payment",
         recordedAt: new Date(),
+      });
+      const attemptStatus = succeeded ? "success" : "failed";
+      const attempt = booking.paymentAttempts.find((a) => a.txnid === body.txnid);
+      if (attempt) {
+        attempt.status = attemptStatus;
+        attempt.gatewayRef = body.mihpayid;
+        attempt.completedAt = new Date();
+      } else {
+        booking.paymentAttempts.push({
+          txnid: body.txnid,
+          gateway: "payu",
+          amount: Number(body.amount),
+          status: attemptStatus,
+          gatewayRef: body.mihpayid,
+          initiatedAt: new Date(),
+          completedAt: new Date(),
+        });
+      }
+      booking.lastPaymentAttemptStatus = attemptStatus;
+      booking.timeline.push({
+        status: booking.status,
+        note: `PayU payment of ₹${Number(body.amount).toLocaleString("en-IN")} ${succeeded ? "succeeded" : "failed"}`,
+        changedAt: new Date(),
       });
       if (succeeded) {
         const totalPaid = booking.payments.filter((p) => p.status !== "failed").reduce((sum, p) => sum + p.amount, 0);

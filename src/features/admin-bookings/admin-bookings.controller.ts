@@ -31,6 +31,7 @@ const listQuerySchema = z.object({
   serviceType: z.string().optional(),
   city: z.string().optional(),
   pooja: z.string().optional(),
+  paymentState: z.string().optional(),
 });
 
 export const getBookings = asyncHandler(async (req: Request, res: Response) => {

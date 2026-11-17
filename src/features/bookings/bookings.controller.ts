@@ -20,6 +20,7 @@ const bookingSchema = z.object({
   muhuratSlotId: z.string().optional(),
   selectedSamagri: z.array(z.object({ name: z.string() })).optional(),
   packageName: z.string().optional(),
+  checkoutLeadId: z.string().optional(),
 });
 
 export const postBooking = asyncHandler(async (req: Request, res: Response) => {

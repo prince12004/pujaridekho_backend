@@ -9,7 +9,7 @@ import { PanditModel } from "../../models/pandit.model.js";
 import { PanditSlotReservationModel } from "../../models/pandit-slot-reservation.model.js";
 import { crmHasFullAccess, crmOwnFilter, isCrmAdmin } from "../../middlewares/crm-auth.js";
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
-import { generateBookingId } from "../admin-bookings/admin-bookings.service.js";
+import { createBookingWithUniqueId } from "../../lib/booking-id.js";
 import { getPanditById } from "../admin-pandits/admin-pandits.service.js";
 import { generateReachedOtp } from "../../lib/otp.js";
 import {
@@ -267,15 +267,13 @@ async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
   if (!stillUnlinked) return;
 
   const customer = await findOrCreateCustomerByMobile({ name: doc.clientName, mobile: doc.phone });
-  const bookingId = await generateBookingId();
   const reachedOtp = await generateReachedOtp();
   const finalAmount = doc.totalAmount ?? 0;
   const advanceAmount = doc.tokenAmount ?? 0;
 
   const matchedPooja = doc.pujaName ? await PoojaModel.findOne({ name: new RegExp(`^${doc.pujaName}$`, "i") }) : null;
 
-  await BookingModel.create({
-    bookingId,
+  const created = await createBookingWithUniqueId({
     customer: customer._id,
     customerSnapshot: { name: customer.name, mobile: customer.mobile, email: customer.email },
     serviceType: "pooja",
@@ -301,7 +299,7 @@ async function transferConfirmedInquiryToBooking(doc: InquiryDoc) {
     panditExecution: { reachedOtpHash: reachedOtp.hash, reachedOtpPlain: reachedOtp.plain },
   });
 
-  await CrmInquiryModel.updateOne({ id: doc.id }, { $set: { websiteBookingId: bookingId } });
+  await CrmInquiryModel.updateOne({ id: doc.id }, { $set: { websiteBookingId: created.bookingId } });
 }
 
 async function importAndSyncBooking(websiteBookingId: string, fields: Record<string, unknown>) {

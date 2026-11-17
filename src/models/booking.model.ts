@@ -97,6 +97,25 @@ const paymentRecordSchema = new Schema(
   { _id: false },
 );
 
+// Every hand-off to the payment gateway, kept apart from `payments[]` (which
+// only holds money actually received/recorded and drives paymentStatus).
+// "initiated" = customer was sent to PayU and no callback has come back yet,
+// which is what the admin panel shows as "Pending".
+export const PAYMENT_ATTEMPT_STATUSES = ["initiated", "success", "failed"] as const;
+
+const paymentAttemptSchema = new Schema(
+  {
+    txnid: { type: String, required: true },
+    gateway: { type: String, default: "payu" },
+    amount: { type: Number, required: true, min: 0 },
+    status: { type: String, enum: PAYMENT_ATTEMPT_STATUSES, default: "initiated" },
+    gatewayRef: { type: String },
+    initiatedAt: { type: Date, default: Date.now },
+    completedAt: { type: Date },
+  },
+  { _id: false },
+);
+
 const referralSchema = new Schema(
   {
     referredBy: { type: String },
@@ -258,6 +277,12 @@ const bookingSchema = new Schema(
     pricing: { type: pricingSchema, default: {} },
     payments: { type: [paymentRecordSchema], default: [] },
     paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: "unpaid" },
+    paymentAttempts: { type: [paymentAttemptSchema], default: [] },
+    // Status of the most recent gateway attempt (null = customer never
+    // reached the payment page). Denormalised for list filtering.
+    lastPaymentAttemptStatus: { type: String, enum: [...PAYMENT_ATTEMPT_STATUSES, null], default: null },
+    // The checkout capture (HomeLead, source "checkout") this booking came from.
+    checkoutLead: { type: Schema.Types.ObjectId, ref: "HomeLead", default: null },
 
     // Distinguishes a customer-initiated website booking from an
     // admin-entered offline booking, while both flow through this same model.
@@ -278,7 +303,9 @@ const bookingSchema = new Schema(
 );
 
 bookingSchema.index({ status: 1, createdAt: -1 });
+bookingSchema.index({ createdAt: -1 });
 bookingSchema.index({ customer: 1 });
+bookingSchema.index({ "paymentAttempts.txnid": 1 });
 bookingSchema.index({ pandit: 1 });
 bookingSchema.index({ bookingChannel: 1, bookingSource: 1 });
 

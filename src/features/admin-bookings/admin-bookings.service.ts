@@ -9,6 +9,9 @@ import { PanditSlotReservationModel } from "../../models/pandit-slot-reservation
 import { findOrCreateCustomerByMobile } from "../admin-customers/admin-customers.service.js";
 import { ADVANCE_AMOUNT } from "../payments/payments.service.js";
 import { generateReachedOtp } from "../../lib/otp.js";
+import { createBookingWithUniqueId } from "../../lib/booking-id.js";
+
+export { generateBookingId } from "../../lib/booking-id.js";
 
 function computeFinalAmount(pricing: {
   packagePrice?: number;
@@ -51,6 +54,9 @@ export interface ListBookingsQuery {
   serviceType?: string;
   city?: string;
   pooja?: string;
+  // Admin-facing payment state: paid | partially_paid | pending | unpaid | refunded.
+  // "pending" = unpaid, customer was sent to the gateway, no result yet.
+  paymentState?: string;
 }
 
 function escapeRegex(value: string) {
@@ -77,26 +83,6 @@ export async function listBookingCities() {
   return [...byKey.values()].sort((a, b) => a.localeCompare(b));
 }
 
-export async function generateBookingId() {
-  const year = new Date().getFullYear();
-  const prefix = `PD-${year}-`;
-  // Derived from the highest existing sequence, not countDocuments() — once
-  // any booking is deleted (e.g. via CRM inquiry deletion) count+1 points at
-  // an ID that's still taken, and every create after that hits E11000.
-  // Zero-padded suffixes sort correctly as strings.
-  const latest = await BookingModel.findOne({ bookingId: { $regex: `^${prefix}\\d+$` } })
-    .sort({ bookingId: -1 })
-    .select("bookingId")
-    .lean();
-  const lastSeq = latest ? parseInt(latest.bookingId.slice(prefix.length), 10) || 0 : 0;
-  return `${prefix}${String(lastSeq + 1).padStart(6, "0")}`;
-}
-
-function isDuplicateBookingIdError(err: unknown) {
-  const e = err as { code?: number; keyPattern?: Record<string, unknown> };
-  return e?.code === 11000 && Boolean(e.keyPattern?.bookingId);
-}
-
 export async function listBookings(query: ListBookingsQuery) {
   const page = query.page && query.page > 0 ? query.page : 1;
   const limit = query.limit && query.limit > 0 ? query.limit : 20;
@@ -106,6 +92,21 @@ export async function listBookings(query: ListBookingsQuery) {
   if (query.bookingChannel) filter.bookingChannel = query.bookingChannel;
   if (query.serviceType) filter.serviceType = query.serviceType;
   if (query.pooja && isValidObjectId(query.pooja)) filter.pooja = query.pooja;
+  switch (query.paymentState) {
+    case "paid":
+    case "partially_paid":
+    case "refunded":
+      filter.paymentStatus = query.paymentState;
+      break;
+    case "pending":
+      filter.paymentStatus = "unpaid";
+      filter.lastPaymentAttemptStatus = "initiated";
+      break;
+    case "unpaid":
+      filter.paymentStatus = "unpaid";
+      filter.lastPaymentAttemptStatus = { $ne: "initiated" };
+      break;
+  }
   if (query.city?.trim()) filter.city = { $regex: `^\\s*${escapeRegex(query.city.trim())}\\s*$`, $options: "i" };
   const search = query.search?.trim();
   if (search) {
@@ -122,7 +123,7 @@ export async function listBookings(query: ListBookingsQuery) {
       .populate("pooja", "name slug")
       .populate("festival", "name slug")
       .populate("pandit", "fullName mobile")
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1, _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit),
     BookingModel.countDocuments(filter),
@@ -259,15 +260,7 @@ export async function createOfflineBooking(input: OfflineBookingInput, adminId: 
     panditExecution: { reachedOtpHash: reachedOtp.hash, reachedOtpPlain: reachedOtp.plain },
   };
 
-  // Two admins creating at the same moment can still compute the same next
-  // ID — retry a few times on a bookingId unique violation.
-  for (let attempt = 0; ; attempt++) {
-    try {
-      return await BookingModel.create({ ...doc, bookingId: await generateBookingId() });
-    } catch (err) {
-      if (!isDuplicateBookingIdError(err) || attempt >= 2) throw err;
-    }
-  }
+  return createBookingWithUniqueId(doc);
 }
 
 export async function updateBookingStatus(id: string, status: string, note: string | undefined, adminId: string) {

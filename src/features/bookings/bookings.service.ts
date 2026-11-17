@@ -1,7 +1,7 @@
+import { isValidObjectId } from "mongoose";
 import { ApiError } from "../../lib/api-error.js";
 import { createNotification } from "../../lib/notify.js";
 import { notifyCustomer } from "../../lib/notify-customer.js";
-import { BookingModel } from "../../models/booking.model.js";
 import { PoojaModel } from "../../models/pooja.model.js";
 import { FestivalModel } from "../../models/festival.model.js";
 import { MuhuratModel } from "../../models/muhurat.model.js";
@@ -9,13 +9,9 @@ import type { SamagriTemplateDocument } from "../../models/samagri-template.mode
 import { ADVANCE_AMOUNT } from "../payments/payments.service.js";
 import { resolvePackagePrice } from "../../lib/pooja-pricing.js";
 import { generateReachedOtp } from "../../lib/otp.js";
-
-async function generateBookingId() {
-  const year = new Date().getFullYear();
-  const prefix = `PD-${year}-`;
-  const count = await BookingModel.countDocuments({ bookingId: { $regex: `^${prefix}` } });
-  return `${prefix}${String(count + 1).padStart(6, "0")}`;
-}
+import { createBookingWithUniqueId } from "../../lib/booking-id.js";
+import { logger } from "../../config/logger.js";
+import { markCheckoutLeadConverted } from "../leads/leads.service.js";
 
 export interface CreatePublicBookingInput {
   customer: { name: string; mobile: string; email?: string };
@@ -33,6 +29,10 @@ export interface CreatePublicBookingInput {
   // whatever price the client last saw, since that's the only way the
   // charge can't be tampered with in the browser.
   packageName?: string;
+  // HomeLead id returned by POST /leads/checkout — captured when the
+  // customer pressed "Book Now", before login. Linked here so the capture is
+  // marked converted and no longer listed as an incomplete checkout.
+  checkoutLeadId?: string;
 }
 
 function formatSlotTimeRange(startTime: string, endTime: string): string {
@@ -108,45 +108,64 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
     muhuratSlot = { muhurat: reserved.muhuratId, slotId: reserved.slotId };
   }
 
-  const bookingId = await generateBookingId();
   const reachedOtp = await generateReachedOtp();
 
-  const booking = await BookingModel.create({
-    bookingId,
-    customer: customerId,
-    customerSnapshot: { name: input.customer.name, mobile: input.customer.mobile, email: input.customer.email },
-    serviceType,
-    pooja: serviceType === "pooja" ? service._id : undefined,
-    festival: serviceType === "festival" ? service._id : undefined,
-    package: selectedPackage
-      ? {
-          name: selectedPackage.name,
-          price: packagePrice,
-          salePrice: selectedPackage.salePrice,
-          samagriIncluded: selectedPackage.samagriIncluded,
-          dakshinaIncluded: selectedPackage.dakshinaIncluded,
-        }
-      : undefined,
-    city: input.city,
-    address: input.address,
-    poojaDate: input.poojaDate,
-    poojaTime,
-    muhuratSlot,
-    status: "pending_payment",
-    selectedSamagri,
-    pricing: {
-      packagePrice,
-      marketPrice: service.marketPrice,
-      samagriCharges,
-      additionalCharges: platformFee,
-      finalAmount,
-    },
-    paymentStatus: "unpaid",
-    bookingChannel: "online",
-    bookingSource: "website",
-    timeline: [{ status: "pending_payment", note: "Booking created by customer on website" }],
-    panditExecution: { reachedOtpHash: reachedOtp.hash, reachedOtpPlain: reachedOtp.plain },
-  });
+  let booking;
+  try {
+    booking = await createBookingWithUniqueId({
+      customer: customerId,
+      customerSnapshot: { name: input.customer.name, mobile: input.customer.mobile, email: input.customer.email },
+      serviceType,
+      pooja: serviceType === "pooja" ? service._id : undefined,
+      festival: serviceType === "festival" ? service._id : undefined,
+      package: selectedPackage
+        ? {
+            name: selectedPackage.name,
+            price: packagePrice,
+            salePrice: selectedPackage.salePrice,
+            samagriIncluded: selectedPackage.samagriIncluded,
+            dakshinaIncluded: selectedPackage.dakshinaIncluded,
+          }
+        : undefined,
+      city: input.city,
+      address: input.address,
+      poojaDate: input.poojaDate,
+      poojaTime,
+      muhuratSlot,
+      status: "pending_payment",
+      selectedSamagri,
+      pricing: {
+        packagePrice,
+        marketPrice: service.marketPrice,
+        samagriCharges,
+        additionalCharges: platformFee,
+        finalAmount,
+      },
+      paymentStatus: "unpaid",
+      bookingChannel: "online",
+      bookingSource: "website",
+      checkoutLead: input.checkoutLeadId && isValidObjectId(input.checkoutLeadId) ? input.checkoutLeadId : null,
+      timeline: [{ status: "pending_payment", note: "Booking created by customer on website" }],
+      panditExecution: { reachedOtpHash: reachedOtp.hash, reachedOtpPlain: reachedOtp.plain },
+    });
+  } catch (err) {
+    // The Muhurat seat was taken above — give it back if the booking itself
+    // couldn't be saved, or the slot leaks capacity.
+    if (muhuratSlot) {
+      await MuhuratModel.updateOne(
+        { _id: muhuratSlot.muhurat },
+        { $inc: { "slots.$[slot].bookedCount": -1 } },
+        { arrayFilters: [{ "slot._id": muhuratSlot.slotId }] },
+      ).catch(() => undefined);
+    }
+    throw err;
+  }
+
+  if (input.checkoutLeadId) {
+    await markCheckoutLeadConverted(input.checkoutLeadId, booking).catch((err) => {
+      logger.error("Failed to link checkout lead to booking", { message: err instanceof Error ? err.message : err });
+    });
+  }
 
   await createNotification({
     type: "booking",
