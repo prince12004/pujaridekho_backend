@@ -61,3 +61,27 @@ export async function deleteFile(filename: string): Promise<void> {
   }
   await fsPromises.unlink(path.join(LOCAL_UPLOAD_DIR, filename)).catch(() => undefined);
 }
+
+export interface SavedAudio extends SavedFile {
+  durationSec: number | null;
+}
+
+/** Audio clips (MP3 / M4A). Cloudinary stores audio under resource_type
+ * "video" and reports its duration; the local-disk fallback can't, so the
+ * admin can type the duration in. */
+export async function saveAudio(buffer: Buffer, originalName: string, mimeType: string): Promise<SavedAudio> {
+  const filename = generateFilename(originalName);
+  if (cloudinaryConfigured) {
+    const result = await cloudinary.uploader.upload(`data:${mimeType};base64,${buffer.toString("base64")}`, {
+      public_id: `${CLOUDINARY_FOLDER}/audio/${path.parse(filename).name}`,
+      resource_type: "video",
+    });
+    return {
+      filename: result.public_id,
+      url: result.secure_url,
+      durationSec: typeof result.duration === "number" ? Math.round(result.duration) : null,
+    };
+  }
+  await fsPromises.writeFile(path.join(LOCAL_UPLOAD_DIR, filename), buffer);
+  return { filename, url: `${env.API_PUBLIC_URL}/uploads/${filename}`, durationSec: null };
+}

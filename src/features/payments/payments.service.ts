@@ -1,4 +1,5 @@
 import { ApiError } from "../../lib/api-error.js";
+import { notifyBookingEvent, notifyOrderEvent } from "../../lib/booking-events.js";
 import { generatePayURequestHash, generateTxnId, PAYU_BASE_URL, verifyPayUResponseHash } from "../../lib/payu.js";
 import { notifyCustomer } from "../../lib/notify-customer.js";
 import { env } from "../../config/env.js";
@@ -171,15 +172,7 @@ export async function handlePayUCallback(body: PayUCallbackBody) {
       }
       await booking.save();
 
-      if (succeeded && booking.customer) {
-        await notifyCustomer({
-          customer: booking.customer.toString(),
-          type: "payment",
-          title: "Payment successful",
-          message: `₹${Number(body.amount).toLocaleString("en-IN")} received for booking ${booking.bookingId}.`,
-          link: `/account/bookings/${booking._id}`,
-        });
-      }
+      await notifyBookingEvent(booking, succeeded ? "payment_received" : "payment_failed", { amount: Number(body.amount) });
     }
   } else if (entityType === "order" && entityId) {
     const order = await OrderModel.findById(entityId);
@@ -193,15 +186,7 @@ export async function handlePayUCallback(body: PayUCallbackBody) {
       order.timeline.push({ status: order.status, note: `PayU payment ${succeeded ? "succeeded" : "failed"}`, changedAt: new Date() });
       await order.save();
 
-      if (succeeded && order.customer) {
-        await notifyCustomer({
-          customer: order.customer.toString(),
-          type: "payment",
-          title: "Payment successful",
-          message: `₹${Number(body.amount).toLocaleString("en-IN")} received for order ${order.orderId}.`,
-          link: `/account/orders/${order._id}`,
-        });
-      }
+      if (succeeded) await notifyOrderEvent(order, "confirmed");
     }
   } else if (entityType === "consultation" && entityId) {
     const consultation = await ConsultationModel.findById(entityId);

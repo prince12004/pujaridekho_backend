@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { notifyBookingEvent } from "../../lib/booking-events.js";
 import { ApiError } from "../../lib/api-error.js";
 import { saveFile } from "../../lib/cloud-storage.js";
 import { PanditModel } from "../../models/pandit.model.js";
@@ -194,11 +195,13 @@ export async function startPuja(panditId: string, bookingId: string) {
   await ensureNoOverdue(panditId);
 
   booking.panditExecution!.startedAt = new Date();
-  if (booking.status !== "pooja_started") {
+  const wasStarted = booking.status === "pooja_started";
+  if (!wasStarted) {
     booking.status = "pooja_started";
     booking.timeline.push({ status: "pooja_started", note: "Pandit started the puja (app)", changedAt: new Date() });
   }
   await booking.save();
+  if (!wasStarted) await notifyBookingEvent(booking, "pooja_started");
   return toBookingJson(booking);
 }
 
@@ -278,6 +281,7 @@ export async function completeBooking(panditId: string, bookingId: string) {
   booking.status = "pooja_completed";
   booking.timeline.push({ status: "pooja_completed", note: "Pandit completed the puja (app)", changedAt: new Date() });
   await booking.save();
+  await notifyBookingEvent(booking, "pooja_completed");
 
   await PanditNotificationModel.create({
     pandit: panditId,

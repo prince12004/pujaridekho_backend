@@ -10,6 +10,27 @@ const socialLinksSchema = new Schema(
   { _id: false },
 );
 
+// Mobile app version gate, read by the Flutter app on launch:
+//   installed < minVersion    → blocking "Update required"
+//   installed < latestVersion → dismissible "Update available"
+const appPlatformSchema = new Schema(
+  {
+    minVersion: { type: String, default: "1.0.0" },
+    latestVersion: { type: String, default: "1.0.0" },
+    storeUrl: { type: String, default: "" },
+  },
+  { _id: false },
+);
+
+const appSettingsSchema = new Schema(
+  {
+    android: { type: appPlatformSchema, default: () => ({}) },
+    ios: { type: appPlatformSchema, default: () => ({}) },
+    updateMessage: { type: String, default: "A new version of Pujari Dekho is available." },
+  },
+  { _id: false },
+);
+
 const settingsSchema = new Schema(
   {
     siteName: { type: String, default: "PujariDekho" },
@@ -22,6 +43,9 @@ const settingsSchema = new Schema(
     socialLinks: { type: socialLinksSchema, default: () => ({}) },
     maintenanceMode: { type: Boolean, default: false },
     maintenanceMessage: { type: String, default: "" },
+    // Defaults apply even to the existing settings document, so GET /settings
+    // never returns a null "app" object.
+    app: { type: appSettingsSchema, default: () => ({}) },
   },
   { timestamps: true },
 );

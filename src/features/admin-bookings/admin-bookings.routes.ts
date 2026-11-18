@@ -12,6 +12,8 @@ import {
   patchAssignPandit,
   postBookingPayment,
   postBookingNote,
+  patchCancelRequest,
+  patchRescheduleRequest,
 } from "./admin-bookings.controller.js";
 
 export const adminBookingsRouter = Router();
@@ -28,3 +30,5 @@ adminBookingsRouter.patch("/:id/details", requirePermission(PERMISSIONS.BOOKINGS
 adminBookingsRouter.patch("/:id/assign-pandit", requirePermission(PERMISSIONS.BOOKINGS_ASSIGN_PANDIT), patchAssignPandit);
 adminBookingsRouter.post("/:id/payments", requirePermission(PERMISSIONS.BOOKINGS_EDIT), postBookingPayment);
 adminBookingsRouter.post("/:id/notes", requirePermission(PERMISSIONS.BOOKINGS_EDIT), postBookingNote);
+adminBookingsRouter.patch("/:id/cancel-request", requirePermission(PERMISSIONS.BOOKINGS_EDIT), patchCancelRequest);
+adminBookingsRouter.patch("/:id/reschedule-request", requirePermission(PERMISSIONS.BOOKINGS_EDIT), patchRescheduleRequest);

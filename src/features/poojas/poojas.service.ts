@@ -1,3 +1,4 @@
+import { publicAudios } from "../../models/audio-clip.schema.js";
 import { ApiError } from "../../lib/api-error.js";
 import { PoojaModel } from "../../models/pooja.model.js";
 
@@ -39,5 +40,6 @@ export async function getPublicPoojaBySlug(slug: string) {
         .populate("category", "name slug")
         .populate("samagriTemplate");
     if (!pooja) throw ApiError.notFound("Pooja not found");
-    return pooja;
+    // Only active audio clips, in display order (inactive ones stay admin-only).
+    return { ...pooja.toObject(), audios: publicAudios(pooja.audios) };
 }

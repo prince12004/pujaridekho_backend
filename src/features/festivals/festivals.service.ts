@@ -1,3 +1,4 @@
+import { publicAudios } from "../../models/audio-clip.schema.js";
 import { ApiError } from "../../lib/api-error.js";
 import { FestivalModel } from "../../models/festival.model.js";
 
@@ -30,5 +31,5 @@ export async function listPublicFestivals(query: PublicListFestivalsQuery) {
 export async function getPublicFestivalBySlug(slug: string) {
   const festival = await FestivalModel.findOne({ slug, status: "published" });
   if (!festival) throw ApiError.notFound("Festival not found");
-  return festival;
+  return { ...festival.toObject(), audios: publicAudios(festival.audios) };
 }

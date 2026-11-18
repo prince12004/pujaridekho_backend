@@ -1,5 +1,15 @@
 import type { Request, Response } from "express";
 import { z } from "zod";
+
+const audioClipInput = z.object({
+  _id: z.string().optional(),
+  title: z.string().trim().min(1, "Audio title is required").max(150),
+  language: z.string().trim().max(20).default("hi"),
+  url: z.string().trim().url("Upload the audio file first"),
+  durationSec: z.number().min(0).nullable().optional(),
+  sortOrder: z.number().optional(),
+  isActive: z.boolean().optional(),
+});
 import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
 import { recordAuditLog } from "../../lib/audit.js";
@@ -46,6 +56,7 @@ const festivalSchema = z.object({
   samagri: z.array(samagriItemSchema).optional(),
   packages: z.array(packageSchema).optional(),
   faq: z.array(faqSchema).optional(),
+  audios: z.array(audioClipInput).max(20).optional(),
   citiesAvailable: z.array(z.string()).optional(),
   featured: z.boolean().optional(),
   status: z.enum(["draft", "published", "archived"]).optional(),

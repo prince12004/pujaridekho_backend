@@ -1,3 +1,4 @@
+import { audioClipSchema } from "./audio-clip.schema.js";
 import { Schema, model, type InferSchemaType } from "mongoose";
 
 const samagriItemSchema = new Schema(
@@ -43,6 +44,7 @@ const festivalSchema = new Schema(
     samagri: { type: [samagriItemSchema], default: [] },
     packages: { type: [packageSchema], default: [] },
     faq: { type: [faqSchema], default: [] },
+    audios: { type: [audioClipSchema], default: [] },
     citiesAvailable: { type: [String], default: [] },
     featured: { type: Boolean, default: false },
     status: { type: String, enum: ["draft", "published", "archived"], default: "draft" },

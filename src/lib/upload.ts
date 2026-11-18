@@ -16,3 +16,19 @@ export const upload = multer({
     cb(null, true);
   },
 });
+
+// Pooja / festival audio clips: MP3 or M4A, max 10 MB (2–5 minute clips recommended).
+const AUDIO_MIME_TYPES = new Set(["audio/mpeg", "audio/mp3", "audio/mp4", "audio/x-m4a", "audio/m4a", "audio/aac", "audio/x-aac"]);
+const AUDIO_EXTENSIONS = /\.(mp3|m4a)$/i;
+
+export const audioUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!AUDIO_MIME_TYPES.has(file.mimetype) && !AUDIO_EXTENSIONS.test(file.originalname)) {
+      cb(new Error("Only MP3 or M4A audio files are allowed"));
+      return;
+    }
+    cb(null, true);
+  },
+});

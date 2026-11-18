@@ -38,3 +38,7 @@ Thumbs.db
 
 # misc
 *.pem
+# Firebase / other credentials — never commit
+secrets/
+*service-account*.json
+firebase-adminsdk*.json

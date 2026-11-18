@@ -27,6 +27,7 @@ export const PERMISSIONS = {
   AUDIT_VIEW: "audit:view",
   CRM_VIEW: "crm:view",
   CRM_MANAGE: "crm:manage",
+  NOTIFICATIONS_SEND: "notifications:send",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

@@ -43,6 +43,13 @@ const envSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
   LEAD_NOTIFICATION_EMAIL: z.string().email().default("pujaridekho@gmail.com"),
+  // Firebase Cloud Messaging service account — the JSON itself or a path to the
+  // .json file. Never commit it. When unset, push is skipped (in-app
+  // notifications are still saved).
+  FIREBASE_SERVICE_ACCOUNT: z.string().optional(),
+  // Booking reminder job (every 15 min). Set to "false" on extra API
+  // instances so reminders run on one server only.
+  REMINDERS_ENABLED: z.enum(["true", "false"]).default("true"),
 });
 
 const parsed = envSchema.safeParse(process.env);

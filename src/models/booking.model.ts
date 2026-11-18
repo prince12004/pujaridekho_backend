@@ -298,6 +298,20 @@ const bookingSchema = new Schema(
     cancelRequest: { type: cancelRequestSchema, default: null },
 
     panditExecution: { type: panditExecutionSchema, default: () => ({}) },
+
+    // Sent-flags for the reminder job, so each reminder goes out once. Cleared
+    // when the puja date/time changes so reminders follow the new schedule.
+    reminders: {
+      type: new Schema(
+        {
+          dayBeforeSentAt: { type: Date, default: null },
+          twoHourSentAt: { type: Date, default: null },
+          paymentSentAt: { type: Date, default: null },
+        },
+        { _id: false },
+      ),
+      default: () => ({}),
+    },
   },
   { timestamps: true },
 );
@@ -307,6 +321,7 @@ bookingSchema.index({ createdAt: -1 });
 bookingSchema.index({ customer: 1 });
 bookingSchema.index({ "paymentAttempts.txnid": 1 });
 bookingSchema.index({ pandit: 1 });
+bookingSchema.index({ status: 1, poojaDate: 1 });
 bookingSchema.index({ bookingChannel: 1, bookingSource: 1 });
 
 export type BookingDocument = InferSchemaType<typeof bookingSchema>;

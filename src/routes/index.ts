@@ -60,6 +60,9 @@ import { adminSearchRouter } from "../features/admin-search/admin-search.routes.
 import { newsletterRouter } from "../features/newsletter/newsletter.routes.js";
 import { leadsRouter } from "../features/leads/leads.routes.js";
 import { adminSeoManagementRouter, seoPagesRouter } from "../features/seo-management/seo-management.routes.js";
+import { adminUploadsRouter } from "../features/admin-uploads/admin-uploads.routes.js";
+import { adminPushRouter } from "../features/admin-push/admin-push.routes.js";
+import { accountDevicesRouter } from "../features/account-devices/account-devices.routes.js";
 import { adminNewsletterRouter } from "../features/admin-newsletter/admin-newsletter.routes.js";
 import { adminLeadsRouter } from "../features/admin-leads/admin-leads.routes.js";
 import { customerAuthRouter } from "../features/customer-auth/customer-auth.routes.js";
@@ -118,6 +121,8 @@ apiRouter.use("/admin/search", adminSearchRouter);
 apiRouter.use("/admin/newsletter-subscribers", adminNewsletterRouter);
 apiRouter.use("/admin/leads", adminLeadsRouter);
 apiRouter.use("/admin/seo-management", adminSeoManagementRouter);
+apiRouter.use("/admin/uploads", adminUploadsRouter);
+apiRouter.use("/admin/push", adminPushRouter);
 
 // External CRM app integration — website API key auth, not admin JWT.
 apiRouter.use("/crm", crmRouter);
@@ -180,3 +185,4 @@ apiRouter.use("/account/invoices", accountInvoicesRouter);
 apiRouter.use("/account/notifications", accountNotificationsRouter);
 apiRouter.use("/account/support", accountSupportRouter);
 apiRouter.use("/account/profile", accountProfileRouter);
+apiRouter.use("/account/devices", accountDevicesRouter);

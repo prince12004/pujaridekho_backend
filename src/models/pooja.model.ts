@@ -1,3 +1,4 @@
+import { audioClipSchema } from "./audio-clip.schema.js";
 import { Schema, model, type InferSchemaType } from "mongoose";
 
 const cityPriceSchema = new Schema(
@@ -53,6 +54,7 @@ const poojaSchema = new Schema(
     samagriTemplate: { type: Schema.Types.ObjectId, ref: "SamagriTemplate" },
     packages: { type: [packageSchema], default: [] },
     faq: { type: [faqSchema], default: [] },
+    audios: { type: [audioClipSchema], default: [] },
     relatedPoojas: { type: [Schema.Types.ObjectId], ref: "Pooja", default: [] },
     relatedBlogSlugs: { type: [String], default: [] },
     relatedProductSlugs: { type: [String], default: [] },

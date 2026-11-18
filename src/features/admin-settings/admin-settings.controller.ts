@@ -12,6 +12,34 @@ const socialLinksSchema = z.object({
   twitter: z.string().optional(),
 });
 
+const SEMVER = /^\d+\.\d+\.\d+$/;
+
+export function compareVersions(a: string, b: string) {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pa[i] ?? 0) - (pb[i] ?? 0);
+  }
+  return 0;
+}
+
+const appPlatformSchema = z
+  .object({
+    minVersion: z.string().trim().regex(SEMVER, "Version must look like 1.2.3"),
+    latestVersion: z.string().trim().regex(SEMVER, "Version must look like 1.2.3"),
+    storeUrl: z.union([z.literal(""), z.string().trim().url("Enter a valid store link")]),
+  })
+  .refine((v) => compareVersions(v.latestVersion, v.minVersion) >= 0, {
+    message: "Latest version must be the same as or higher than the minimum version",
+    path: ["latestVersion"],
+  });
+
+const appSettingsSchema = z.object({
+  android: appPlatformSchema,
+  ios: appPlatformSchema,
+  updateMessage: z.string().trim().max(300).optional().default(""),
+});
+
 const settingsSchema = z.object({
   siteName: z.string().optional(),
   tagline: z.string().optional(),
@@ -23,6 +51,7 @@ const settingsSchema = z.object({
   socialLinks: socialLinksSchema.optional(),
   maintenanceMode: z.boolean().optional(),
   maintenanceMessage: z.string().optional(),
+  app: appSettingsSchema.optional(),
 });
 
 export const getAdminSettings = asyncHandler(async (_req: Request, res: Response) => {

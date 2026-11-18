@@ -1,7 +1,7 @@
 import { isValidObjectId } from "mongoose";
 import { ApiError } from "../../lib/api-error.js";
 import { createNotification } from "../../lib/notify.js";
-import { notifyCustomer } from "../../lib/notify-customer.js";
+import { notifyBookingEvent } from "../../lib/booking-events.js";
 import { PoojaModel } from "../../models/pooja.model.js";
 import { FestivalModel } from "../../models/festival.model.js";
 import { MuhuratModel } from "../../models/muhurat.model.js";
@@ -174,13 +174,7 @@ export async function createPublicBooking(input: CreatePublicBookingInput, custo
     link: `/admin/bookings/${booking._id}`,
   });
 
-  await notifyCustomer({
-    customer: customerId,
-    type: "booking",
-    title: "Booking created",
-    message: `Your booking for "${service.name}" (${booking.bookingId}) has been created. Complete payment to confirm.`,
-    link: `/account/bookings/${booking._id}`,
-  });
+  await notifyBookingEvent(booking, "created");
 
   return booking;
 }

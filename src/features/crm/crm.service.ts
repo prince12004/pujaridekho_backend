@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { notifyBookingEvent, onBookingStatusChange } from "../../lib/booking-events.js";
 import { ApiError } from "../../lib/api-error.js";
 import { toCrmBookingPayload, type CrmBookingPayload } from "../../lib/crm-booking-payload.js";
 import { PanditModel } from "../../models/pandit.model.js";
@@ -143,6 +144,7 @@ export async function syncPanditAssignmentToBooking(
   const booking = await BookingModel.findOne({ bookingId: websiteBookingId });
   if (!booking) return;
 
+  const previousPandit = booking.pandit ? String(booking.pandit) : null;
   booking.pandit = input.panditId as never;
   booking.poojaDate = new Date(input.date);
   if (input.time) booking.poojaTime = input.time;
@@ -155,6 +157,7 @@ export async function syncPanditAssignmentToBooking(
     changedAt: new Date(),
   });
   await booking.save();
+  if (previousPandit !== String(input.panditId)) await notifyBookingEvent(booking, "pandit_assigned");
 }
 
 export async function releasePanditSlot(panditId: string, bookingRef: string) {
@@ -216,6 +219,7 @@ export interface CrmBookingUpdateInput {
 }
 
 export async function updateBookingFromCrm(websiteBookingId: string, input: CrmBookingUpdateInput) {
+  let crmStatusChange: { from: string; to: string } | null = null;
   const booking = await BookingModel.findOne({ bookingId: websiteBookingId });
   if (!booking) throw ApiError.notFound(`No booking found with id "${websiteBookingId}"`);
 
@@ -281,6 +285,7 @@ export async function updateBookingFromCrm(websiteBookingId: string, input: CrmB
   if ("status" in input) {
     const nextStatus = input.status === "notConverted" ? "cancelled" : "booking_confirmed";
     if (booking.status !== nextStatus) {
+      crmStatusChange = { from: booking.status, to: nextStatus };
       booking.status = nextStatus;
       booking.timeline.push({
         status: nextStatus,
@@ -291,5 +296,6 @@ export async function updateBookingFromCrm(websiteBookingId: string, input: CrmB
   }
 
   await booking.save();
+  if (crmStatusChange) await onBookingStatusChange(booking, crmStatusChange.from, crmStatusChange.to);
   return booking;
 }

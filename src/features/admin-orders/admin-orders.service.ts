@@ -1,4 +1,5 @@
 import { ApiError } from "../../lib/api-error.js";
+import { onOrderStatusChange } from "../../lib/booking-events.js";
 import { OrderModel } from "../../models/order.model.js";
 
 export interface ListOrdersQuery {
@@ -41,10 +42,12 @@ export async function getOrderById(id: string) {
 
 export async function updateOrderStatus(id: string, status: string, note?: string) {
   const order = await getOrderById(id);
+  const previousStatus = order.status;
   order.status = status as (typeof order)["status"];
   order.timeline.push({ status, note, changedAt: new Date() });
   if (status === "delivered") order.paymentStatus = order.paymentStatus === "unpaid" ? "paid" : order.paymentStatus;
   await order.save();
+  await onOrderStatusChange(order, previousStatus, status);
   return order;
 }
 

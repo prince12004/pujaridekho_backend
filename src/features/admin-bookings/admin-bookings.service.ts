@@ -1,4 +1,5 @@
 import { isValidObjectId } from "mongoose";
+import { hasStatusNotification, notifyBookingEvent, onBookingStatusChange } from "../../lib/booking-events.js";
 import { ApiError } from "../../lib/api-error.js";
 import { notifyCustomer } from "../../lib/notify-customer.js";
 import { BOOKING_STATUS_LABELS } from "../../lib/booking-status-labels.js";
@@ -265,17 +266,22 @@ export async function createOfflineBooking(input: OfflineBookingInput, adminId: 
 
 export async function updateBookingStatus(id: string, status: string, note: string | undefined, adminId: string) {
   const booking = await getBookingById(id);
+  const previousStatus = booking.status;
   booking.status = status as (typeof booking)["status"];
   booking.timeline.push({ status, note, changedBy: adminId as never, changedAt: new Date() });
   await booking.save();
 
-  await notifyCustomer({
-    customer: customerIdOf(booking),
-    type: "booking",
-    title: "Booking status updated",
-    message: `Booking ${booking.bookingId} is now "${BOOKING_STATUS_LABELS[status] ?? status}".`,
-    link: `/account/bookings/${booking._id}`,
-  });
+  if (hasStatusNotification(status)) {
+    await onBookingStatusChange(booking, previousStatus, status);
+  } else if (previousStatus !== status) {
+    await notifyCustomer({
+      customer: customerIdOf(booking),
+      type: "booking",
+      title: "Booking status updated",
+      message: `Booking ${booking.bookingId} is now "${BOOKING_STATUS_LABELS[status] ?? status}".`,
+      link: `/account/bookings/${booking._id}`,
+    });
+  }
 
   return booking;
 }
@@ -307,7 +313,13 @@ export async function updateBookingDetails(id: string, input: UpdateBookingDetai
   const booking = await getBookingById(id);
 
   const { pricing, selectedSamagri, ...rest } = input;
+  const scheduleChanged =
+    (rest.poojaDate && new Date(rest.poojaDate).getTime() !== new Date(booking.poojaDate).getTime()) ||
+    (rest.poojaTime !== undefined && rest.poojaTime !== booking.poojaTime);
   Object.assign(booking, rest);
+  if (scheduleChanged) {
+    booking.reminders = { dayBeforeSentAt: null, twoHourSentAt: null, paymentSentAt: booking.reminders?.paymentSentAt ?? null } as never;
+  }
 
   if (selectedSamagri) {
     booking.selectedSamagri = selectedSamagri as never;
@@ -363,13 +375,7 @@ export async function assignPanditToBooking(id: string, panditId: string, adminI
     await PanditSlotReservationModel.deleteMany({ booking: booking._id, pandit: previousPanditId });
   }
 
-  await notifyCustomer({
-    customer: customerIdOf(booking),
-    type: "pandit_assignment",
-    title: "Pandit assigned to your booking",
-    message: `A verified pandit has been assigned to booking ${booking.bookingId}.`,
-    link: `/account/bookings/${booking._id}`,
-  });
+  await notifyBookingEvent(booking, "pandit_assigned");
 
   return booking;
 }
@@ -405,5 +411,56 @@ export async function addBookingNote(id: string, note: string, adminId: string) 
   const booking = await getBookingById(id);
   booking.internalNotes.push({ note, addedBy: adminId as never, addedAt: new Date() });
   await booking.save();
+  return booking;
+}
+
+// ---------------------------------------------------------------- Customer requests
+
+/** Approve or reject a customer's cancellation request. */
+export async function resolveCancelRequest(id: string, decision: "approve" | "reject", note: string | undefined, adminId: string) {
+  const booking = await getBookingById(id);
+  if (!booking.cancelRequest || booking.cancelRequest.status !== "requested") {
+    throw ApiError.badRequest("This booking has no pending cancellation request");
+  }
+  booking.cancelRequest.status = decision === "approve" ? "approved" : "rejected";
+  booking.cancelRequest.resolvedAt = new Date();
+  booking.cancelRequest.resolutionNote = note;
+  if (decision === "approve") {
+    booking.status = "cancelled";
+    booking.timeline.push({ status: "cancelled", note: note || "Cancellation request approved", changedBy: adminId as never, changedAt: new Date() });
+  } else {
+    booking.timeline.push({ status: booking.status, note: note || "Cancellation request rejected", changedBy: adminId as never, changedAt: new Date() });
+  }
+  await booking.save();
+  await notifyBookingEvent(booking, decision === "approve" ? "cancel_approved" : "cancel_rejected");
+  return booking;
+}
+
+/** Approve (moves the puja to the requested date/time) or reject a reschedule request. */
+export async function resolveRescheduleRequest(id: string, decision: "approve" | "reject", note: string | undefined, adminId: string) {
+  const booking = await getBookingById(id);
+  const request = booking.rescheduleRequest;
+  if (!request || request.status !== "requested") {
+    throw ApiError.badRequest("This booking has no pending reschedule request");
+  }
+  request.status = decision === "approve" ? "approved" : "rejected";
+  request.resolvedAt = new Date();
+  request.resolutionNote = note;
+  if (decision === "approve") {
+    booking.poojaDate = request.requestedDate;
+    if (request.requestedTime) booking.poojaTime = request.requestedTime;
+    // New schedule → the day-before / 2-hour reminders should fire again.
+    booking.reminders = { dayBeforeSentAt: null, twoHourSentAt: null, paymentSentAt: booking.reminders?.paymentSentAt ?? null } as never;
+    booking.timeline.push({
+      status: booking.status,
+      note: note || `Rescheduled to ${request.requestedDate.toISOString().slice(0, 10)}${request.requestedTime ? ` ${request.requestedTime}` : ""}`,
+      changedBy: adminId as never,
+      changedAt: new Date(),
+    });
+  } else {
+    booking.timeline.push({ status: booking.status, note: note || "Reschedule request rejected", changedBy: adminId as never, changedAt: new Date() });
+  }
+  await booking.save();
+  await notifyBookingEvent(booking, decision === "approve" ? "reschedule_approved" : "reschedule_rejected", { newDate: booking.poojaDate });
   return booking;
 }

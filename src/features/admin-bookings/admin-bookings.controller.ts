@@ -20,6 +20,8 @@ import {
   updateBookingDetails,
   updateBookingStatus,
   listBookingCities,
+  resolveCancelRequest,
+  resolveRescheduleRequest,
 } from "./admin-bookings.service.js";
 
 const listQuerySchema = z.object({
@@ -231,4 +233,33 @@ export const postBookingNote = asyncHandler(async (req: Request, res: Response) 
   const { note } = noteSchema.parse(req.body);
   const booking = await addBookingNote(req.params.id, note, req.admin!.id);
   sendSuccess(res, booking, "Note added", 201);
+});
+
+const requestDecisionSchema = z.object({
+  decision: z.enum(["approve", "reject"]),
+  note: z.string().trim().max(500).optional(),
+});
+
+export const patchCancelRequest = asyncHandler(async (req: Request, res: Response) => {
+  const { decision, note } = requestDecisionSchema.parse(req.body);
+  const booking = await resolveCancelRequest(req.params.id, decision, note, req.admin!.id);
+  await recordAuditLog(req, req.admin!, {
+    action: "update",
+    entityType: "Booking",
+    entityId: booking._id.toString(),
+    description: `Cancellation request for ${booking.bookingId} ${decision === "approve" ? "approved" : "rejected"}`,
+  });
+  sendSuccess(res, booking, decision === "approve" ? "Booking cancelled" : "Cancellation request rejected");
+});
+
+export const patchRescheduleRequest = asyncHandler(async (req: Request, res: Response) => {
+  const { decision, note } = requestDecisionSchema.parse(req.body);
+  const booking = await resolveRescheduleRequest(req.params.id, decision, note, req.admin!.id);
+  await recordAuditLog(req, req.admin!, {
+    action: "update",
+    entityType: "Booking",
+    entityId: booking._id.toString(),
+    description: `Reschedule request for ${booking.bookingId} ${decision === "approve" ? "approved" : "rejected"}`,
+  });
+  sendSuccess(res, booking, decision === "approve" ? "Booking rescheduled" : "Reschedule request rejected");
 });
