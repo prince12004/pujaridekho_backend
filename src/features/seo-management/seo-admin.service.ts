@@ -324,17 +324,27 @@ export async function listFooterGroups() {
   return SeoFooterGroupModel.find().sort({ sortOrder: 1 }).lean();
 }
 
-export async function saveFooterGroups(
-  groups: { key: string; title: string; isActive?: boolean; links: { label: string; url: string; isActive?: boolean }[] }[],
-) {
+export interface FooterGroupInput {
+  key: string;
+  title: string;
+  isActive?: boolean;
+  kind?: "links" | "poojas" | "blogs" | "text";
+  body?: string;
+  limit?: number;
+  links: { label: string; url: string; isActive?: boolean }[];
+}
+
+export async function saveFooterGroups(groups: FooterGroupInput[]) {
   const problems: string[] = [];
   for (const group of groups) {
+    if (group.kind === "text" && !group.body?.trim()) problems.push(`"${group.title}" needs some text`);
+    if (group.kind && group.kind !== "links") continue;
     for (const link of group.links) {
-      if (link.isActive !== false && !(await isLiveUrl(link.url))) problems.push(`"${link.label}" → ${link.url}`);
+      if (link.isActive !== false && !(await isLiveUrl(link.url))) problems.push(`"${link.label}" → ${link.url} is not a live page`);
     }
   }
   if (problems.length) {
-    throw ApiError.badRequest(`These links don't point to a live page (fix the URL or switch the link off): ${problems.join(", ")}`);
+    throw ApiError.badRequest(`Please fix: ${problems.join(", ")}`);
   }
   const keys = groups.map((g) => g.key);
   if (new Set(keys).size !== keys.length) throw ApiError.badRequest("Footer group keys must be unique");
@@ -343,7 +353,17 @@ export async function saveFooterGroups(
   for (const [index, group] of groups.entries()) {
     await SeoFooterGroupModel.updateOne(
       { key: group.key },
-      { $set: { title: group.title, isActive: group.isActive !== false, sortOrder: index, links: group.links } },
+      {
+        $set: {
+          title: group.title,
+          isActive: group.isActive !== false,
+          sortOrder: index,
+          kind: group.kind ?? "links",
+          body: group.body,
+          limit: group.limit ?? 12,
+          links: group.kind && group.kind !== "links" ? [] : group.links,
+        },
+      },
       { upsert: true },
     );
   }

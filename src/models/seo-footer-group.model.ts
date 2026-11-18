@@ -1,7 +1,11 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
-// Footer link columns (seo_footer_groups + seo_footer_links). Links are
-// embedded and ordered by array position.
+// Footer blocks (seo_footer_groups + seo_footer_links), ordered by sortOrder:
+//   links  — a hand-made list of links (ordered by array position)
+//   poojas — links generated from published poojas (featured/popular first)
+//   blogs  — links to the latest published blog posts
+//   text   — a heading + paragraph (e.g. "Verified Pandits"), shown above the link columns
+export const FOOTER_GROUP_KINDS = ["links", "poojas", "blogs", "text"] as const;
 const footerLinkSchema = new Schema(
   {
     label: { type: String, required: true, trim: true },
@@ -17,6 +21,10 @@ const seoFooterGroupSchema = new Schema(
     title: { type: String, required: true, trim: true },
     sortOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
+    kind: { type: String, enum: FOOTER_GROUP_KINDS, default: "links" },
+    body: { type: String, trim: true },
+    // Max links for the automatic kinds (poojas / blogs).
+    limit: { type: Number, default: 12, min: 1, max: 30 },
     links: { type: [footerLinkSchema], default: [] },
   },
   { timestamps: true },

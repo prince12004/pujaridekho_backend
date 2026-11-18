@@ -143,7 +143,8 @@ async function main() {
       content: sanitizeContent(seed.content),
       coverageNote: seed.coverageNote,
       faqs: seed.faqs,
-      services: await resolveServices(seed.services),
+      // Location pages list every published pooja automatically.
+      services: seed.pageType === "location" ? [] : await resolveServices(seed.services),
       indexable: true,
       showInDirectory: true,
       directorySection: seed.pageType === "office_location" ? "office" : "main",
@@ -174,29 +175,6 @@ async function main() {
   // ---- Footer columns
   const footerExists = await SeoFooterGroupModel.exists({});
   if (!footerExists || RESET_FOOTER) {
-    const popular: { label: string; pooja?: string; url?: string }[] = [
-      { label: "Griha Pravesh Puja", pooja: "griha pravesh" },
-      { label: "Satyanarayan Katha", pooja: "satyanarayan" },
-      { label: "Rudrabhishek Puja", pooja: "rudrabhishek" },
-      { label: "Vastu Shanti Puja", pooja: "vastu shanti" },
-      { label: "Ganesh Puja", pooja: "^ganesh" },
-      { label: "Havan", pooja: "havan" },
-      { label: "Birthday Puja", pooja: "birthday" },
-      { label: "Mundan Puja", pooja: "mundan" },
-      { label: "Namkaran Puja", pooja: "namkaran" },
-      { label: "Vahan Puja", pooja: "vehicle|vahan" },
-      { label: "Office Puja", url: "/office-puja" },
-      { label: "Shop Opening Puja", url: "/shop-opening-puja" },
-    ];
-    const popularLinks = [];
-    for (const item of popular) {
-      const pooja = item.pooja ? await findPooja(item.pooja) : null;
-      const url = pooja ? `/poojas/${pooja.slug}` : item.url;
-      // Unresolved pujas are stored switched off with a placeholder URL so an
-      // admin can point them at the right page later.
-      popularLinks.push(url ? { label: item.label, url, isActive: true } : { label: item.label, url: "/poojas", isActive: false });
-    }
-
     const company = [
       { label: "About Us", url: "/about" },
       { label: "Contact Us", url: "/contact" },
@@ -217,8 +195,38 @@ async function main() {
       companyLinks.push({ ...link, isActive: live });
     }
 
+    // Our own wording — only claims PujariDekho can stand behind (no
+    // invented pandit counts or "AI" features).
+    const textBlocks = [
+      {
+        key: "about-verified-pandits",
+        title: "Verified Pandits",
+        body:
+          "Every pandit ji on PujariDekho is verified before being assigned to a booking, and performs the puja according to traditional vidhi — whether it is a Griha Pravesh, Satyanarayan Katha, Rudrabhishek or a sanskar ceremony for your family.",
+      },
+      {
+        key: "about-online-booking",
+        title: "Online Puja Booking",
+        body:
+          "Choose your puja, enter your address and preferred date, and confirm online with a ₹99 booking amount or the full amount. The price is shown before you pay, and you can add the puja samagri so it arrives with the pandit ji.",
+      },
+      {
+        key: "about-pandit-near-me",
+        title: "Pandit Ji Near Me",
+        body:
+          "Looking for a pandit near you in Delhi NCR? PujariDekho serves homes, societies, offices and shops across Noida, Greater Noida, Greater Noida West, Ghaziabad, Delhi and Gurugram. See all locations on our SEO directory page.",
+      },
+      {
+        key: "about-muhurat",
+        title: "Muhurat & Guidance",
+        body:
+          "Not sure which puja suits the occasion or when to hold it? Message our team on WhatsApp for help choosing the right puja and a suitable muhurat for Griha Pravesh, Mundan, Namkaran, business openings and other ceremonies.",
+      },
+    ].map((b) => ({ ...b, kind: "text" as const, links: [] as { label: string; url: string; isActive: boolean }[] }));
+
     const groups = [
-      { key: "popular-pujas", title: "Popular Pujas", links: popularLinks },
+      ...textBlocks,
+      { key: "popular-pujas", title: "Popular Pujas", kind: "poojas" as const, limit: 12, links: [] },
       {
         key: "seo-pages",
         title: "Pandit Near You",
@@ -241,6 +249,7 @@ async function main() {
         ].map((l) => ({ ...l, isActive: true })),
       },
       { key: "company", title: "Company", links: companyLinks },
+      { key: "latest-blogs", title: "Latest Blogs", kind: "blogs" as const, limit: 5, links: [] },
     ];
 
     if (!DRY_RUN) {
@@ -249,7 +258,7 @@ async function main() {
         await SeoFooterGroupModel.updateOne({ key: group.key }, { $set: { ...group, sortOrder: i, isActive: true } }, { upsert: true });
       }
     }
-    console.log("Footer columns:", groups.map((g) => `${g.title} (${g.links.filter((l) => l.isActive).length} live)`).join(", "));
+    console.log("Footer blocks:", groups.map((g) => `${g.title}${"kind" in g && g.kind !== "links" ? ` [${g.kind}]` : ` (${g.links.filter((l) => l.isActive).length} links)`}`).join(", "));
     const off = groups.flatMap((g) => g.links.filter((l) => !l.isActive).map((l) => `${g.title} → ${l.label}`));
     if (off.length) console.log("Footer links switched off until their page exists:\n  " + off.join("\n  "));
   } else {

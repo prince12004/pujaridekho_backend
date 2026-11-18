@@ -29,12 +29,16 @@ export interface SeedPage {
   directoryOrder: number;
 }
 
+// Location pages are seeded with NO hand-picked services: they then show
+// every published pooja from the catalogue automatically (see
+// getPublicPageBySlug), so new poojas appear without editing each page.
+// This list is kept only as a reference for admins curating a page by hand.
 export const HOME_SERVICES: SeedService[] = [
   { label: "Griha Pravesh Puja", pooja: "griha pravesh" },
   { label: "Satyanarayan Katha", pooja: "satyanarayan" },
   { label: "Rudrabhishek Puja", pooja: "rudrabhishek" },
   { label: "Vastu Shanti Puja", pooja: "vastu shanti" },
-  { label: "Ganesh Puja", pooja: "^ganesh" },
+  { label: "Ganesh Puja", pooja: "ganesh" },
   { label: "Havan", pooja: "havan" },
   { label: "Birthday Puja", pooja: "birthday" },
   { label: "Marriage Puja", pooja: "marriage|vivah" },
@@ -48,12 +52,13 @@ export const HOME_SERVICES: SeedService[] = [
 ];
 
 export const BUSINESS_SERVICES: SeedService[] = [
-  { label: "Office / Shop Opening Puja", pooja: "office|shop" },
-  { label: "Ganesh Puja", pooja: "^ganesh" },
-  { label: "Lakshmi Puja", pooja: "lakshmi" },
+  { label: "Office / Shop Opening Puja", pooja: "office ?/ ?shop|shop.*opening|office.*opening" },
+  { label: "Office Diwali Puja", pooja: "diwali" },
+  { label: "Ganesh Puja", pooja: "ganesh" },
   { label: "Vastu Shanti Puja", pooja: "vastu shanti" },
   { label: "Satyanarayan Katha", pooja: "satyanarayan" },
-  { label: "Navgraha Shanti Puja", pooja: "navgraha" },
+  { label: "Navgrah Shanti Puja", pooja: "navgrah" },
+  { label: "Bhoomi Pujan", pooja: "bhoomi|bhumi" },
   { label: "Havan", pooja: "havan" },
 ];
 
@@ -637,9 +642,9 @@ export const SEED_PAGES: SeedPage[] = [
     ],
     services: [
       { label: "Vastu Shanti Puja", pooja: "vastu shanti" },
-      { label: "Office / Shop Opening Puja", pooja: "office|shop" },
-      { label: "Navgraha Shanti Puja", pooja: "navgraha" },
-      { label: "Ganesh Puja", pooja: "^ganesh" },
+      { label: "Office / Shop Opening Puja", pooja: "office ?/ ?shop|shop.*opening|office.*opening" },
+      { label: "Navgrah Shanti Puja", pooja: "navgrah" },
+      { label: "Ganesh Puja", pooja: "ganesh" },
     ],
     directoryOrder: 4,
   },
@@ -774,10 +779,10 @@ export const SEED_PAGES: SeedPage[] = [
     ],
     services: [
       { label: "Vastu Shanti Puja", pooja: "vastu shanti" },
-      { label: "Office / Shop Opening Puja", pooja: "office|shop" },
+      { label: "Office / Shop Opening Puja", pooja: "office ?/ ?shop|shop.*opening|office.*opening" },
       { label: "Satyanarayan Katha", pooja: "satyanarayan" },
       { label: "Bhoomi Puja", pooja: "bhoomi|bhumi" },
-      { label: "Ganesh Puja", pooja: "^ganesh" },
+      { label: "Ganesh Puja", pooja: "ganesh" },
     ],
     directoryOrder: 8,
   },
@@ -810,9 +815,9 @@ export const SEED_PAGES: SeedPage[] = [
       bookingFaqs.howToBook,
     ],
     services: [
-      { label: "Lakshmi Puja", pooja: "lakshmi" },
-      { label: "Ganesh Puja", pooja: "^ganesh" },
-      { label: "Office / Shop Opening Puja", pooja: "office|shop" },
+      { label: "Diwali Lakshmi Puja", pooja: "diwali|lakshmi" },
+      { label: "Ganesh Puja", pooja: "ganesh" },
+      { label: "Office / Shop Opening Puja", pooja: "office ?/ ?shop|shop.*opening|office.*opening" },
     ],
     directoryOrder: 9,
   },

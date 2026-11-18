@@ -109,8 +109,15 @@ export async function getPublicPageBySlug(slug: string) {
   }
   breadcrumbs.push({ name: page.name });
 
-  // ---- Services (resolved to live pooja pages / SEO pages; dead ones dropped)
-  const poojaIds = (page.services ?? []).map((s) => s.pooja).filter((id): id is Id => !!id);
+  // ---- Services (resolved to live pooja pages / SEO pages; dead ones dropped).
+  // A page with no hand-picked services shows every published pooja straight
+  // from the catalogue, so new poojas appear on all such pages automatically.
+  const pageServices: { label: string; pooja?: Id | null; url?: string; note?: string }[] = page.services?.length
+    ? page.services
+    : (
+        await PoojaModel.find({ status: "published" }).sort({ sortOrder: 1, createdAt: 1 }).select("_id name").lean()
+      ).map((p) => ({ label: p.name, pooja: p._id as Id }));
+  const poojaIds = pageServices.map((s) => s.pooja).filter((id): id is Id => !!id);
   const poojas = poojaIds.length
     ? await PoojaModel.find({ _id: { $in: poojaIds }, status: "published" })
         .select("name slug startingPrice marketPrice featuredImage heroBanner shortDescription")
@@ -119,7 +126,7 @@ export async function getPublicPageBySlug(slug: string) {
   const poojaById = new Map(poojas.map((p) => [String(p._id), p]));
   const services = [];
   const usedUrls = new Set<string>();
-  for (const service of page.services ?? []) {
+  for (const service of pageServices) {
     let pooja = service.pooja ? poojaById.get(String(service.pooja)) : undefined;
     let url = pooja ? `/poojas/${pooja.slug}` : service.url;
     // Two services pointing at the same pooja (e.g. one "Office / Shop
@@ -132,7 +139,8 @@ export async function getPublicPageBySlug(slug: string) {
     if (!url || !(await isLiveUrl(url))) continue;
     usedUrls.add(url);
     services.push({
-      label: service.label,
+      // Linked poojas always show their current catalogue name.
+      label: pooja?.name ?? service.label,
       note: service.note,
       url,
       pooja: pooja
@@ -346,18 +354,44 @@ export function invalidateFooterCache() {
   footerCache = null;
 }
 
-export async function getPublicFooter() {
-  if (footerCache && Date.now() - footerCache.at < FOOTER_TTL_MS) return footerCache.data;
+export interface PublicFooterGroup {
+  key: string;
+  kind: "links" | "poojas" | "blogs" | "text";
+  title: string;
+  body?: string;
+  links: { label: string; url: string }[];
+}
+
+export async function getPublicFooter(): Promise<PublicFooterGroup[]> {
+  if (footerCache && Date.now() - footerCache.at < FOOTER_TTL_MS) return footerCache.data as PublicFooterGroup[];
   const groups = await SeoFooterGroupModel.find({ isActive: true }).sort({ sortOrder: 1 }).lean();
-  const data = [];
+  const data: PublicFooterGroup[] = [];
   for (const group of groups) {
-    const links = [];
-    for (const l of group.links ?? []) {
-      if (l.isActive === false) continue;
-      // Only ever render links that resolve — no broken footer links.
-      if (await isLiveUrl(l.url)) links.push({ label: l.label, url: l.url });
+    const kind = (group.kind ?? "links") as PublicFooterGroup["kind"];
+    const limit = group.limit ?? 12;
+    if (kind === "text") {
+      if (group.body?.trim()) data.push({ key: group.key, kind, title: group.title, body: group.body.trim(), links: [] });
+      continue;
     }
-    if (links.length) data.push({ key: group.key, title: group.title, links });
+    let links: { label: string; url: string }[] = [];
+    if (kind === "poojas") {
+      const poojas = await PoojaModel.find({ status: "published" })
+        .sort({ featured: -1, popular: -1, sortOrder: 1, createdAt: 1 })
+        .limit(limit)
+        .select("name slug")
+        .lean();
+      links = poojas.map((p) => ({ label: p.name, url: `/poojas/${p.slug}` }));
+    } else if (kind === "blogs") {
+      const blogs = await BlogModel.find({ status: "published" }).sort({ publishedAt: -1, createdAt: -1 }).limit(limit).select("title slug").lean();
+      links = blogs.map((b) => ({ label: b.title, url: `/blog/${b.slug}` }));
+    } else {
+      for (const l of group.links ?? []) {
+        if (l.isActive === false) continue;
+        // Only ever render links that resolve — no broken footer links.
+        if (await isLiveUrl(l.url)) links.push({ label: l.label, url: l.url });
+      }
+    }
+    if (links.length) data.push({ key: group.key, kind, title: group.title, links });
   }
   footerCache = { at: Date.now(), data };
   return data;
