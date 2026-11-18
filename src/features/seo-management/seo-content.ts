@@ -5,6 +5,7 @@ import { PageModel } from "../../models/page.model.js";
 import { PoojaModel } from "../../models/pooja.model.js";
 import { ProductModel } from "../../models/product.model.js";
 import { SeoPageModel } from "../../models/seo-page.model.js";
+import { findServiceCityForPageSlug } from "./seo-cities.js";
 
 // Top-level website routes that exist as real Next.js pages. An SEO page slug
 // may never shadow one of them, and footer links pointing at them are always
@@ -142,7 +143,9 @@ export async function internalPathExists(rawPath: string): Promise<boolean> {
 
   const segments = path.split("/").filter(Boolean);
   if (segments.length === 1) {
-    return Boolean(await SeoPageModel.exists({ slug: segments[0], status: "published" }));
+    if (await SeoPageModel.exists({ slug: segments[0], status: "published" })) return true;
+    // Basic city pages (/pandit-in-<city>) exist for every served city.
+    return Boolean(await findServiceCityForPageSlug(segments[0]));
   }
   if (segments.length === 2) {
     const [section, slug] = segments;

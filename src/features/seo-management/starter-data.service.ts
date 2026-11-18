@@ -51,17 +51,8 @@ export async function buildDefaultFooterGroups() {
   return [
     { key: "popular-searches", title: "Popular Searches", kind: "tags" as const, isActive: true, links: searchLinks },
     ...STARTER_FOOTER_TEXT_BLOCKS.map((b) => ({ ...b, kind: "text" as const, isActive: true, links: [] })),
-    { key: "puja-categories", title: "Puja Categories", kind: "categories" as const, limit: 4, isActive: true, links: [] },
-    {
-      key: "seo-pages",
-      title: "Pandit Near You",
-      kind: "links" as const,
-      isActive: true,
-      links: [
-        ...SEED_CITIES.map((c) => ({ label: `Pandit in ${c.name}`, url: `/pandit-in-${c.slug}`, isActive: true })),
-        { label: "All Locations", url: "/seo-pages", isActive: true },
-      ],
-    },
+    { key: "popular-pujas", title: "Popular Pujas", kind: "poojas" as const, limit: 8, isActive: true, links: [] },
+    { key: "pandit-near-you", title: "Pandit Near You", kind: "cities" as const, body: "All SEO Pages", limit: 12, isActive: true, links: [] },
     { key: "office-business", title: "Office & Business Puja", kind: "links" as const, isActive: true, links: STARTER_OFFICE_LINKS.map((l) => ({ ...l, isActive: true })) },
     { key: "company", title: "Company", kind: "links" as const, isActive: true, links: companyLinks },
     { key: "latest-blogs", title: "Latest Blogs", kind: "blogs" as const, limit: 5, isActive: true, links: [] },

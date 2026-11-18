@@ -3,12 +3,14 @@ import { Schema, model, type InferSchemaType } from "mongoose";
 // Footer blocks (seo_footer_groups + seo_footer_links), ordered by sortOrder:
 //   links  — a hand-made list of links (ordered by array position)
 //   tags   — a hand-made list shown as pill links beside the logo (e.g. Popular Searches)
+//   cities — "Pandit in <city>" for every served city + an "All SEO Pages" link last
+//            (body = label of that last link)
 //   categories — one column per pooja category, built from published poojas
 //            (biggest categories first; `limit` = max columns, the rest go in "More Pujas")
 //   poojas — links generated from published poojas (featured/popular first)
 //   blogs  — links to the latest published blog posts
 //   text   — a heading + paragraph (e.g. "Verified Pandits"), shown above the link columns
-export const FOOTER_GROUP_KINDS = ["links", "tags", "categories", "poojas", "blogs", "text"] as const;
+export const FOOTER_GROUP_KINDS = ["links", "tags", "cities", "categories", "poojas", "blogs", "text"] as const;
 const footerLinkSchema = new Schema(
   {
     label: { type: String, required: true, trim: true },

@@ -37,6 +37,10 @@ const seoSettingsSchema = new Schema(
       finalCtaHeading: String,
       finalCtaHeadingNoPlace: String,
       finalCtaText: String,
+      cityFallbackHeading: String,
+      cityFallbackIntro: String,
+      cityFallbackMetaTitle: String,
+      cityFallbackMetaDescription: String,
     },
     directory: {
       title: String,

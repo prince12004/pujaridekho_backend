@@ -11,6 +11,8 @@ import { SeoLocationModel } from "../../models/seo-location.model.js";
 import { SeoPageModel } from "../../models/seo-page.model.js";
 import { SeoRedirectModel } from "../../models/seo-redirect.model.js";
 import { STATIC_PUBLIC_ROUTES, isLiveUrl } from "./seo-content.js";
+import { findServiceCityForPageSlug, getCityLinks } from "./seo-cities.js";
+import { getSeoSettings } from "./seo-settings.service.js";
 
 type Id = Types.ObjectId;
 
@@ -74,10 +76,37 @@ async function publishedLocationPages(locationIds: Id[], pageType: "location" | 
 }
 
 export async function getPublicPageBySlug(slug: string) {
-  const page = (await SeoPageModel.findOne({ slug: slug.toLowerCase(), status: "published" }).lean()) as unknown as
+  let page = (await SeoPageModel.findOne({ slug: slug.toLowerCase(), status: "published" }).lean()) as unknown as
     | LeanPage
     | null;
-  if (!page) return null;
+  // No written page yet for a served city: serve a basic, noindex city page
+  // (live poojas, booking steps, CTAs) so "Pandit in <city>" links always
+  // work. It is replaced by the real page as soon as one is published.
+  let isBasicCityPage = false;
+  if (!page) {
+    const city = await findServiceCityForPageSlug(slug.toLowerCase());
+    if (!city) return null;
+    const settings = await getSeoSettings();
+    const fill = (t: string) => t.replace(/\{place\}/g, city.name);
+    isBasicCityPage = true;
+    page = {
+      _id: (city.locationId ?? null) as unknown as Id,
+      pageType: "location",
+      slug: slug.toLowerCase(),
+      name: `Pandit in ${city.name}`,
+      location: city.locationId ?? null,
+      h1: fill(settings.landing.cityFallbackHeading),
+      metaTitle: fill(settings.landing.cityFallbackMetaTitle),
+      metaDescription: fill(settings.landing.cityFallbackMetaDescription),
+      intro: fill(settings.landing.cityFallbackIntro),
+      content: "",
+      services: [],
+      faqs: [],
+      internalLinks: [],
+      status: "published",
+      indexable: false,
+    };
+  }
 
   const location = page.location
     ? ((await SeoLocationModel.findById(page.location).lean()) as unknown as LeanLocation | null)
@@ -245,6 +274,10 @@ export async function getPublicPageBySlug(slug: string) {
         .lean()
     : [];
 
+  if (isBasicCityPage && nearby.length === 0) {
+    nearby = (await getCityLinks()).filter((l) => l.url !== `/${page.slug}`).map((l) => ({ name: l.label, path: l.url }));
+  }
+
   return {
     _id: page._id,
     pageType: page.pageType,
@@ -357,7 +390,7 @@ export function invalidateFooterCache() {
 
 export interface PublicFooterGroup {
   key: string;
-  kind: "links" | "tags" | "categories" | "poojas" | "blogs" | "text";
+  kind: "links" | "tags" | "cities" | "categories" | "poojas" | "blogs" | "text";
   title: string;
   body?: string;
   links: { label: string; url: string }[];
@@ -378,6 +411,13 @@ export async function getPublicFooter(): Promise<PublicFooterGroup[]> {
     const limit = group.limit ?? 12;
     if (kind === "text") {
       if (group.body?.trim()) data.push({ key: group.key, kind, title: group.title, body: group.body.trim(), links: [] });
+      continue;
+    }
+    if (kind === "cities") {
+      // "Pandit in <city>" for every served city, then the directory link last.
+      const cityLinks = (await getCityLinks()).slice(0, limit);
+      const cityColumn = [...cityLinks, { label: group.body?.trim() || "All SEO Pages", url: "/seo-pages" }];
+      if (cityLinks.length) data.push({ key: group.key, kind: "links", title: group.title, links: cityColumn });
       continue;
     }
     if (kind === "categories") {
