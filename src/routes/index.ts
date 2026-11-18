@@ -59,6 +59,7 @@ import { adminNotificationsRouter } from "../features/admin-notifications/admin-
 import { adminSearchRouter } from "../features/admin-search/admin-search.routes.js";
 import { newsletterRouter } from "../features/newsletter/newsletter.routes.js";
 import { leadsRouter } from "../features/leads/leads.routes.js";
+import { adminSeoManagementRouter, seoPagesRouter } from "../features/seo-management/seo-management.routes.js";
 import { adminNewsletterRouter } from "../features/admin-newsletter/admin-newsletter.routes.js";
 import { adminLeadsRouter } from "../features/admin-leads/admin-leads.routes.js";
 import { customerAuthRouter } from "../features/customer-auth/customer-auth.routes.js";
@@ -116,6 +117,7 @@ apiRouter.use("/admin/notifications", adminNotificationsRouter);
 apiRouter.use("/admin/search", adminSearchRouter);
 apiRouter.use("/admin/newsletter-subscribers", adminNewsletterRouter);
 apiRouter.use("/admin/leads", adminLeadsRouter);
+apiRouter.use("/admin/seo-management", adminSeoManagementRouter);
 
 // External CRM app integration — website API key auth, not admin JWT.
 apiRouter.use("/crm", crmRouter);
@@ -153,6 +155,7 @@ apiRouter.use("/pages", pagesRouter);
 apiRouter.use("/seo", seoRouter);
 apiRouter.use("/newsletter", newsletterRouter);
 apiRouter.use("/leads", leadsRouter);
+apiRouter.use("/seo-pages", seoPagesRouter);
 apiRouter.use("/customer-auth", customerAuthRouter);
 
 // Pandit mobile app (pujaripandit_app) — its own JWT (PANDIT_JWT_SECRET),
