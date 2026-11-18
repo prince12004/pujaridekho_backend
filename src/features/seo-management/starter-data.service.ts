@@ -14,6 +14,10 @@ export interface StarterImportOptions {
   pages?: boolean; // the 21 written pages
   footer?: boolean; // default footer blocks (only if none exist, unless resetFooter)
   resetFooter?: boolean;
+  /** Also publish every remaining draft location page — as NOINDEX, since it
+   * has no unique copy yet. It is live and linkable, but stays out of Google
+   * and the sitemap until an admin adds content and makes it indexable. */
+  publishDraftsNoindex?: boolean;
 }
 
 export interface StarterImportReport {
@@ -26,6 +30,7 @@ export interface StarterImportReport {
   footer: "created" | "kept-existing" | "skipped";
   footerLinksOff: string[];
   unmatchedPoojas: string[];
+  draftsPublishedNoindex: number;
 }
 
 /** Default footer blocks: shown live when no footer has been saved yet, and
@@ -82,6 +87,7 @@ export async function importStarterData(options: StarterImportOptions = {}): Pro
     footer: "skipped",
     footerLinksOff: [],
     unmatchedPoojas: [],
+    draftsPublishedNoindex: 0,
   };
   const poojaCache = new Map<string, { _id: unknown; slug: string } | null>();
 
@@ -229,6 +235,14 @@ export async function importStarterData(options: StarterImportOptions = {}): Pro
         invalidateFooterCache();
       }
       report.footer = "created";
+    }
+  }
+
+  if (options.publishDraftsNoindex) {
+    const filter = { pageType: "location", status: "draft", location: { $ne: null } };
+    report.draftsPublishedNoindex = await SeoPageModel.countDocuments(filter);
+    if (!dryRun) {
+      await SeoPageModel.updateMany(filter, { $set: { status: "published", indexable: false, publishedAt: new Date() } });
     }
   }
 

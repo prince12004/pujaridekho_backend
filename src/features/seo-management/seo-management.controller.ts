@@ -270,6 +270,7 @@ const importSchema = z.object({
   pages: z.boolean().optional(),
   footer: z.boolean().optional(),
   resetFooter: z.boolean().optional(),
+  publishDraftsNoindex: z.boolean().optional(),
 });
 
 export const postImportStarter = asyncHandler(async (req: Request, res: Response) => {

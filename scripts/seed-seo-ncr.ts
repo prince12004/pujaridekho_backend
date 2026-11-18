@@ -5,6 +5,7 @@
  *   npm run seed:seo                       # apply
  *   npm run seed:seo -- --dry-run          # report only
  *   npm run seed:seo -- --reset-footer     # rebuild the footer blocks
+ *   npm run seed:seo -- --publish-drafts-noindex  # also publish draft location pages as noindex
  */
 import mongoose from "mongoose";
 import { connectDatabase, disconnectDatabase } from "../src/config/db.js";
@@ -14,7 +15,11 @@ async function main() {
   await connectDatabase();
   const dryRun = process.argv.includes("--dry-run");
   console.log(`Connected to ${mongoose.connection.name}${dryRun ? " (dry run)" : ""}`);
-  const report = await importStarterData({ dryRun, resetFooter: process.argv.includes("--reset-footer") });
+  const report = await importStarterData({
+    dryRun,
+    resetFooter: process.argv.includes("--reset-footer"),
+    publishDraftsNoindex: process.argv.includes("--publish-drafts-noindex"),
+  });
   console.log(JSON.stringify(report, null, 2));
   await disconnectDatabase();
 }

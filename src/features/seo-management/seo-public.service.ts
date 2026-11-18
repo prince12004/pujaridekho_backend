@@ -286,7 +286,9 @@ export async function getPublicPageBySlug(slug: string) {
     h1: page.h1 || page.name,
     metaTitle: page.metaTitle || page.h1 || page.name,
     metaDescription: page.metaDescription || page.intro || "",
-    intro: page.intro,
+    intro:
+      page.intro ||
+      (await getSeoSettings()).landing.cityFallbackIntro.replace(/\{place\}/g, location?.name ?? city?.name ?? page.name),
     content: page.content,
     bannerImage: page.bannerImage,
     images: page.images ?? [],
@@ -330,9 +332,11 @@ function isEligible(page: LeanPage, siteUrl?: string) {
 }
 
 export async function getDirectory() {
-  const pages = ((await SeoPageModel.find({ status: "published", indexable: true, showInDirectory: true })
+  // Live pages are listed for visitors even while noindex (e.g. societies
+  // still waiting for unique content); the sitemap stays indexable-only.
+  const pages = ((await SeoPageModel.find({ status: "published", showInDirectory: true })
     .select("pageType slug name h1 location canonicalUrl indexable status directorySection directoryOrder")
-    .lean()) as unknown as LeanPage[]).filter((p) => isEligible(p));
+    .lean()) as unknown as LeanPage[]).filter((p) => isEligible({ ...p, indexable: true }));
 
   const locationIds = pages.map((p) => p.location).filter((id): id is Id => !!id);
   const locations = (await SeoLocationModel.find({ _id: { $in: locationIds } }).lean()) as unknown as LeanLocation[];
