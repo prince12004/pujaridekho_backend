@@ -55,6 +55,7 @@ export const DEFAULT_SEO_SETTINGS = {
       "Find and book experienced Pandit Ji for Hindu puja ceremonies across Noida, Greater Noida, Ghaziabad, Delhi and Gurugram. Explore our location-wise services covering residential sectors, popular societies and commercial areas.",
     officeGroupTitle: "Office Puja Locations",
     servicesGroupTitle: "Office & Business Puja Services",
+    poojasGroupTitle: "Puja Services",
     emptyText: "Location pages are being prepared. Please check back soon.",
   },
   footer: {

@@ -11,7 +11,7 @@ import { SeoLocationModel } from "../../models/seo-location.model.js";
 import { SeoPageModel } from "../../models/seo-page.model.js";
 import { SeoRedirectModel } from "../../models/seo-redirect.model.js";
 import { STATIC_PUBLIC_ROUTES, isLiveUrl } from "./seo-content.js";
-import { findServiceCityForPageSlug, getCityLinks } from "./seo-cities.js";
+import { findServiceCityForPageSlug, getCityLinks, getServiceCities } from "./seo-cities.js";
 import { getSeoSettings } from "./seo-settings.service.js";
 
 type Id = Types.ObjectId;
@@ -337,9 +337,9 @@ export async function getDirectory() {
   const locationIds = pages.map((p) => p.location).filter((id): id is Id => !!id);
   const locations = (await SeoLocationModel.find({ _id: { $in: locationIds } }).lean()) as unknown as LeanLocation[];
   const locationById = new Map(locations.map((l) => [String(l._id), l]));
-  const cities = (await SeoLocationModel.find({ type: "city", isActive: true })
-    .sort({ sortOrder: 1, name: 1 })
-    .lean()) as unknown as LeanLocation[];
+  // Every served city is listed (SEO cities, or else Cities & Service Areas),
+  // linking to its written page when published, otherwise its basic city page.
+  const cities = await getServiceCities();
 
   const sortPages = (a: LeanPage, b: LeanPage) =>
     (a.directoryOrder ?? 0) - (b.directoryOrder ?? 0) || a.name.localeCompare(b.name);
@@ -354,12 +354,15 @@ export async function getDirectory() {
 
   const cityGroups = cities
     .map((city) => {
-      const inCity = pages.filter((p) => {
-        if (p.pageType !== "location" || !p.location) return false;
-        const loc = locationById.get(String(p.location));
-        return !!loc && (String(loc._id) === String(city._id) || String(loc.city) === String(city._id));
-      });
-      const main = inCity.find((p) => String(p.location) === String(city._id));
+      const cityId = city.locationId ? String(city.locationId) : null;
+      const inCity = cityId
+        ? pages.filter((p) => {
+            if (p.pageType !== "location" || !p.location) return false;
+            const loc = locationById.get(String(p.location));
+            return !!loc && (String(loc._id) === cityId || String(loc.city) === cityId);
+          })
+        : [];
+      const main = inCity.find((p) => String(p.location) === cityId);
       const sections = ["sectors", "localities", "commercial", "societies"]
         .map((section) => ({
           key: section,
@@ -370,14 +373,22 @@ export async function getDirectory() {
             .map(link),
         }))
         .filter((s) => s.links.length > 0);
-      return { key: city.slug, title: city.name, main: main ? link(main) : null, sections };
-    })
-    .filter((g) => g.main || g.sections.length > 0);
+      return {
+        key: city.slug,
+        title: city.name,
+        main: main ? link(main) : { name: `Pandit in ${city.name}`, path: `/pandit-in-${city.slug}` },
+        sections,
+      };
+    });
 
   const office = pages.filter((p) => p.pageType === "office_location").sort(sortPages).map(link);
   const services = pages.filter((p) => p.pageType === "service").sort(sortPages).map(link);
 
-  return { cities: cityGroups, office, services };
+  const poojas = (
+    await PoojaModel.find({ status: "published" }).sort({ sortOrder: 1, createdAt: 1 }).select("name slug").lean()
+  ).map((p) => ({ name: p.name, path: `/poojas/${p.slug}` }));
+
+  return { cities: cityGroups, office, services, poojas };
 }
 
 // Footer is on every page — cache the validated result briefly.

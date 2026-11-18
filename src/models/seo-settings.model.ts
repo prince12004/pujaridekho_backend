@@ -47,6 +47,7 @@ const seoSettingsSchema = new Schema(
       description: String,
       officeGroupTitle: String,
       servicesGroupTitle: String,
+      poojasGroupTitle: String,
       emptyText: String,
     },
     footer: {
