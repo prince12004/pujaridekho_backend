@@ -9,6 +9,7 @@ seoPagesRouter.get("/directory", c.getPublicDirectory);
 seoPagesRouter.get("/footer", c.getFooter);
 seoPagesRouter.get("/sitemap", c.getSitemap);
 seoPagesRouter.get("/redirects", c.getRedirects);
+seoPagesRouter.get("/settings", c.getPublicSeoSettings);
 seoPagesRouter.get("/by-slug/:slug", c.getPublicSeoPage);
 
 export const adminSeoManagementRouter = Router();
@@ -37,3 +38,8 @@ adminSeoManagementRouter.patch("/redirects/:id", c.patchRedirect);
 adminSeoManagementRouter.delete("/redirects/:id", c.removeRedirect);
 
 adminSeoManagementRouter.get("/sitemap", c.getSitemapReport);
+
+adminSeoManagementRouter.get("/settings", c.getAdminSeoSettings);
+adminSeoManagementRouter.put("/settings", c.putSeoSettings);
+adminSeoManagementRouter.post("/settings/reset", c.postResetSeoSettings);
+adminSeoManagementRouter.post("/import-starter", c.postImportStarter);

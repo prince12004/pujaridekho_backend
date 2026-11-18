@@ -7,6 +7,8 @@ import { recordAuditLog } from "../../lib/audit.js";
 import { SEO_LOCATION_TYPES } from "../../models/seo-location.model.js";
 import { SEO_DIRECTORY_SECTIONS, SEO_PAGE_TYPES } from "../../models/seo-page.model.js";
 import * as admin from "./seo-admin.service.js";
+import { getSeoSettings, resetSeoSettings, saveSeoSettings } from "./seo-settings.service.js";
+import { importStarterData } from "./starter-data.service.js";
 import {
   getActiveRedirects,
   getDirectory,
@@ -215,4 +217,60 @@ export const removeRedirect = asyncHandler(async (req: Request, res: Response) =
 
 export const getSitemapReport = asyncHandler(async (_req: Request, res: Response) => {
   sendSuccess(res, await admin.getSitemapReport());
+});
+
+// ---------------------------------------------------------------- Page content settings
+
+export const getPublicSeoSettings = asyncHandler(async (_req: Request, res: Response) => {
+  sendSuccess(res, await getSeoSettings());
+});
+
+const titledText = z.object({ title: z.string().trim().max(120), text: z.string().trim().max(400) });
+const settingsSchema = z.object({
+  landing: z.record(z.string(), z.union([z.string().max(400), z.array(titledText).max(8)])).optional(),
+  directory: z.record(z.string(), z.string().max(600)).optional(),
+  footer: z
+    .object({
+      blurb: z.string().max(600).optional(),
+      newsletterTitle: z.string().max(120).optional(),
+      newsletterText: z.string().max(300).optional(),
+      trustBadges: z.array(z.string().trim().max(80)).max(6).optional(),
+      copyright: z.string().max(200).optional(),
+      showAllLocationsLink: z.boolean().optional(),
+    })
+    .optional(),
+});
+
+export const getAdminSeoSettings = asyncHandler(async (_req: Request, res: Response) => {
+  sendSuccess(res, await getSeoSettings());
+});
+
+export const putSeoSettings = asyncHandler(async (req: Request, res: Response) => {
+  const input = settingsSchema.parse(req.body);
+  const saved = await saveSeoSettings(input as never);
+  await audit(req, "update", "SeoSettings", "global", "Updated SEO page content settings");
+  sendSuccess(res, saved, "Settings saved");
+});
+
+export const postResetSeoSettings = asyncHandler(async (req: Request, res: Response) => {
+  const data = await resetSeoSettings();
+  await audit(req, "update", "SeoSettings", "global", "Reset SEO page content settings to defaults");
+  sendSuccess(res, data, "Settings reset");
+});
+
+const importSchema = z.object({
+  dryRun: z.boolean().optional(),
+  locations: z.boolean().optional(),
+  pages: z.boolean().optional(),
+  footer: z.boolean().optional(),
+  resetFooter: z.boolean().optional(),
+});
+
+export const postImportStarter = asyncHandler(async (req: Request, res: Response) => {
+  const options = importSchema.parse(req.body ?? {});
+  const report = await importStarterData(options);
+  if (!options.dryRun) {
+    await audit(req, "create", "SeoStarterData", "starter", `Imported SEO starter data (${report.locations} locations, ${report.published} pages)`);
+  }
+  sendSuccess(res, report, options.dryRun ? "Preview ready" : "Starter data imported");
 });

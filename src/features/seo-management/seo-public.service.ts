@@ -364,7 +364,13 @@ export interface PublicFooterGroup {
 
 export async function getPublicFooter(): Promise<PublicFooterGroup[]> {
   if (footerCache && Date.now() - footerCache.at < FOOTER_TTL_MS) return footerCache.data as PublicFooterGroup[];
-  const groups = await SeoFooterGroupModel.find({ isActive: true }).sort({ sortOrder: 1 }).lean();
+  let groups: { key: string; title: string; kind?: string | null; body?: string | null; limit?: number | null; links?: { label: string; url: string; isActive?: boolean | null }[] }[] =
+    await SeoFooterGroupModel.find({ isActive: true }).sort({ sortOrder: 1 }).lean();
+  // Nothing saved yet → show the default blocks, built live from the database.
+  if (groups.length === 0 && !(await SeoFooterGroupModel.exists({}))) {
+    const { buildDefaultFooterGroups } = await import("./starter-data.service.js");
+    groups = await buildDefaultFooterGroups();
+  }
   const data: PublicFooterGroup[] = [];
   for (const group of groups) {
     const kind = (group.kind ?? "links") as PublicFooterGroup["kind"];

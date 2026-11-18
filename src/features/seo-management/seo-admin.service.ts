@@ -321,7 +321,12 @@ export async function bulkUpdateDirectory(items: { id: string; showInDirectory?:
 // ---------------------------------------------------------------- Footer
 
 export async function listFooterGroups() {
-  return SeoFooterGroupModel.find().sort({ sortOrder: 1 }).lean();
+  const saved = await SeoFooterGroupModel.find().sort({ sortOrder: 1 }).lean();
+  if (saved.length) return saved;
+  // Nothing saved yet: open the editor with the default blocks the website is
+  // already showing. They are stored only when the admin presses Save.
+  const { buildDefaultFooterGroups } = await import("./starter-data.service.js");
+  return buildDefaultFooterGroups();
 }
 
 export interface FooterGroupInput {
