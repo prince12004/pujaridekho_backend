@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "PujariDekho — CRM + Pandit App + Customer Auth (merged backend)",
+    "name": "PujariDekho — CRM + Pandit App + Customer Auth + App support (merged backend)",
     "description": "Covers the endpoints added/merged into apps/api for: the CRM backoffice (salespeople + inquiries, migrated from the old standalone pujaridekhocrm/backend), the pujaripandit_app mobile backend, and customer auth used by pujariuser_app. All routes are mounted under {{base_url}} which should already include /api/v1, e.g. http://localhost:4000/api/v1 for local dev, or https://pujaridekho.com/api/v1 in production (served off the main domain at /api, reverse-proxied to apps/api — no separate subdomain).\n\nTokens: run the relevant *Login* request first — each has a test script that saves the returned token into the matching collection variable (crm_token / pandit_token / customer_token) which every other request in that folder uses automatically via Bearer auth.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -35,6 +35,10 @@
     },
     {
       "key": "salesperson_id",
+      "value": ""
+    },
+    {
+      "key": "admin_token",
       "value": ""
     }
   ],
@@ -1466,6 +1470,472 @@
                 "change-mobile",
                 "verify"
               ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "App support — settings, audio, devices & push (Nov 2026)",
+      "description": "Endpoints for the Pujari Dekho app update check, pooja audio and push notifications. All responses use the { success, data } envelope.",
+      "item": [
+        {
+          "name": "Admin login (sets admin_token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Admin JWT for the admin endpoints below.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@pujaridekho.com\",\n  \"password\": \"…\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (d && d.data && d.data.token) { pm.collectionVariables.set('admin_token', d.data.token); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get settings (public) — includes app version block",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings"
+              ]
+            },
+            "description": "Returns maintenanceMode, maintenanceMessage and app: { android: {minVersion, latestVersion, storeUrl}, ios: {...}, updateMessage }. Defaults are always present."
+          }
+        },
+        {
+          "name": "Update settings — app versions (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/settings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "settings"
+              ]
+            },
+            "description": "Versions must be x.y.z and latestVersion >= minVersion, otherwise 400.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maintenanceMode\": false,\n  \"maintenanceMessage\": \"\",\n  \"app\": {\n    \"android\": {\n      \"minVersion\": \"1.0.0\",\n      \"latestVersion\": \"1.1.0\",\n      \"storeUrl\": \"https://play.google.com/store/apps/details?id=com.pujaridekho\"\n    },\n    \"ios\": {\n      \"minVersion\": \"1.0.0\",\n      \"latestVersion\": \"1.0.0\",\n      \"storeUrl\": \"https://apps.apple.com/app/id0000000000\"\n    },\n    \"updateMessage\": \"A new version of Pujari Dekho is available.\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get pooja by slug — includes active audios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/poojas/satyanarayan-katha",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "poojas",
+                "satyanarayan-katha"
+              ]
+            },
+            "description": "audios: [{ _id, title, language, url, durationSec, sortOrder, isActive }] — only active clips, sorted by sortOrder."
+          }
+        },
+        {
+          "name": "Get festival by slug — includes active audios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/festivals/:slug",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "festivals",
+                ":slug"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Upload audio clip (admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/uploads/audio",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "uploads",
+                "audio"
+              ]
+            },
+            "description": "MP3 / M4A, max 10 MB. Returns { url, durationSec } (duration from Cloudinary). Save the clip with PATCH /admin/poojas/:id { audios: [...] }.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update pooja audios (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/poojas/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "poojas",
+                ":id"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"audios\": [\n    {\n      \"title\": \"Satyanarayan Katha ka mahatva\",\n      \"language\": \"hi\",\n      \"url\": \"https://res.cloudinary.com/…/katha.mp3\",\n      \"durationSec\": 245,\n      \"sortOrder\": 0,\n      \"isActive\": true\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Register device (customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/account/devices",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "devices"
+              ]
+            },
+            "description": "Upsert by token (moves the token to this customer if it was registered by someone else); updates lastSeenAt. Response: { success, data: { token } }.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<fcm-token>\",\n  \"platform\": \"android\",\n  \"appVersion\": \"1.2.0\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Remove device on logout (customer)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/account/devices/<fcm-token>",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "account",
+                "devices",
+                "<fcm-token>"
+              ]
+            },
+            "description": "URL-encode the token. Only removes the caller's own token.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send push (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/push",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "push"
+              ]
+            },
+            "description": "audience.type: all | city (city: 'Noida') | customer (customerId). Title ≤ 60, message ≤ 180, link must be a site path. Sent in 500-token batches; dead tokens are removed.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"audience\": {\n    \"type\": \"customer\",\n    \"customerId\": \"<customerId>\"\n  },\n  \"title\": \"Diwali Lakshmi Puja\",\n  \"message\": \"Book your Diwali puja now — limited muhurat slots.\",\n  \"link\": \"/poojas/diwali-office-puja\",\n  \"imageUrl\": \"\",\n  \"saveInApp\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Push history (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/push",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "push"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search customers for push (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/push/customers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "push",
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "8299584240"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve / reject cancellation request (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/bookings/:id/cancel-request",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "bookings",
+                ":id",
+                "cancel-request"
+              ]
+            },
+            "description": "Approve → booking cancelled. Sends 'Booking cancelled' or 'Cancellation not approved'.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\",\n  \"note\": \"Refund initiated\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Approve / reject reschedule request (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/bookings/:id/reschedule-request",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "bookings",
+                ":id",
+                "reschedule-request"
+              ]
+            },
+            "description": "Approve → poojaDate/poojaTime set to the requested ones and reminders re-armed. Sends 'Booking rescheduled' or 'Reschedule not approved'.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\"\n}"
             }
           }
         }
