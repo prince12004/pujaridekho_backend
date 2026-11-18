@@ -3,6 +3,7 @@ import { BlogModel } from "../../models/blog.model.js";
 import { FestivalModel } from "../../models/festival.model.js";
 import { PageModel } from "../../models/page.model.js";
 import { PoojaModel } from "../../models/pooja.model.js";
+import { PoojaCategoryModel } from "../../models/pooja-category.model.js";
 import { ProductModel } from "../../models/product.model.js";
 import { ReviewModel } from "../../models/review.model.js";
 import { SeoFooterGroupModel } from "../../models/seo-footer-group.model.js";
@@ -356,7 +357,7 @@ export function invalidateFooterCache() {
 
 export interface PublicFooterGroup {
   key: string;
-  kind: "links" | "tags" | "poojas" | "blogs" | "text";
+  kind: "links" | "tags" | "categories" | "poojas" | "blogs" | "text";
   title: string;
   body?: string;
   links: { label: string; url: string }[];
@@ -379,6 +380,11 @@ export async function getPublicFooter(): Promise<PublicFooterGroup[]> {
       if (group.body?.trim()) data.push({ key: group.key, kind, title: group.title, body: group.body.trim(), links: [] });
       continue;
     }
+    if (kind === "categories") {
+      // Expands into one column per pooja category (kind "links" on the site).
+      for (const column of await buildCategoryColumns(group.key, limit)) data.push(column);
+      continue;
+    }
     let links: { label: string; url: string }[] = [];
     if (kind === "poojas") {
       const poojas = await PoojaModel.find({ status: "published" })
@@ -397,10 +403,46 @@ export async function getPublicFooter(): Promise<PublicFooterGroup[]> {
         if (await isLiveUrl(l.url)) links.push({ label: l.label, url: l.url });
       }
     }
-    if (links.length) data.push({ key: group.key, kind, title: group.title, links });
+    // A hand-made column with a single live link looks broken — wait until
+    // at least two of its pages are live (e.g. city pages being published).
+    const minLinks = kind === "links" ? 2 : 1;
+    if (links.length >= minLinks) data.push({ key: group.key, kind, title: group.title, links });
   }
   footerCache = { at: Date.now(), data };
   return data;
+}
+
+async function buildCategoryColumns(baseKey: string, maxColumns: number): Promise<PublicFooterGroup[]> {
+  const [poojas, categories] = await Promise.all([
+    PoojaModel.find({ status: "published" }).sort({ sortOrder: 1, createdAt: 1 }).select("name slug category").lean(),
+    PoojaCategoryModel.find().select("name slug sortOrder").lean(),
+  ]);
+  const byCategory = new Map<string, { label: string; url: string }[]>();
+  const uncategorised: { label: string; url: string }[] = [];
+  for (const p of poojas) {
+    const link = { label: p.name, url: `/poojas/${p.slug}` };
+    if (p.category) {
+      const key = String(p.category);
+      if (!byCategory.has(key)) byCategory.set(key, []);
+      byCategory.get(key)!.push(link);
+    } else uncategorised.push(link);
+  }
+  const ranked = categories
+    .filter((c) => byCategory.has(String(c._id)))
+    .sort((a, b) => byCategory.get(String(b._id))!.length - byCategory.get(String(a._id))!.length || (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const columns = Math.max(1, maxColumns);
+  // Leave the last column for "More Pujas" when there are more categories than columns.
+  const shown = ranked.length > columns ? ranked.slice(0, columns - 1) : ranked;
+  const rest = ranked.filter((c) => !shown.includes(c)).flatMap((c) => byCategory.get(String(c._id))!);
+  const out: PublicFooterGroup[] = shown.map((c) => ({
+    key: `${baseKey}-${c.slug}`,
+    kind: "links" as const,
+    title: c.name,
+    links: byCategory.get(String(c._id))!,
+  }));
+  const more = [...rest, ...uncategorised];
+  if (more.length) out.push({ key: `${baseKey}-more`, kind: "links", title: "More Pujas", links: more });
+  return out;
 }
 
 export async function getActiveRedirects() {

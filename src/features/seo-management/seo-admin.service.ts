@@ -333,7 +333,7 @@ export interface FooterGroupInput {
   key: string;
   title: string;
   isActive?: boolean;
-  kind?: "links" | "tags" | "poojas" | "blogs" | "text";
+  kind?: "links" | "tags" | "categories" | "poojas" | "blogs" | "text";
   body?: string;
   limit?: number;
   links: { label: string; url: string; isActive?: boolean }[];

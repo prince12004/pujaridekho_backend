@@ -166,7 +166,7 @@ const footerSchema = z.object({
       key: z.string().trim().min(1),
       title: z.string().trim().min(1),
       isActive: z.boolean().optional(),
-      kind: z.enum(["links", "tags", "poojas", "blogs", "text"]).optional(),
+      kind: z.enum(["links", "tags", "categories", "poojas", "blogs", "text"]).optional(),
       body: z.string().trim().max(1200).optional(),
       limit: z.number().int().min(1).max(30).optional(),
       links: z.array(z.object({ label: z.string().trim().min(1), url: z.string().trim().min(1), isActive: z.boolean().optional() })).default([]),
