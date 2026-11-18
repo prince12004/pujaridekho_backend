@@ -47,6 +47,8 @@ const seoSettingsSchema = new Schema(
     },
     footer: {
       blurb: String,
+      bookButtonLabel: String,
+      bookButtonUrl: String,
       newsletterTitle: String,
       newsletterText: String,
       trustBadges: { type: [String], default: undefined },

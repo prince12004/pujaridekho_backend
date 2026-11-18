@@ -35,7 +35,21 @@ export async function buildDefaultFooterGroups() {
   for (const link of STARTER_COMPANY_LINKS) {
     companyLinks.push({ ...link, isActive: link.url.startsWith("/pages/") ? await internalPathExists(link.url) : true });
   }
+  // Popular Searches: the directory, the city pages and the top published
+  // poojas. Links to pages that aren't live yet are hidden on the website.
+  const topPoojas = await PoojaModel.find({ status: "published" })
+    .sort({ featured: -1, popular: -1, sortOrder: 1, createdAt: 1 })
+    .limit(6)
+    .select("name slug")
+    .lean();
+  const searchLinks = [
+    { label: "All Locations", url: "/seo-pages", isActive: true },
+    ...SEED_CITIES.map((c) => ({ label: `Pandit in ${c.name}`, url: `/pandit-in-${c.slug}`, isActive: true })),
+    ...topPoojas.map((p) => ({ label: p.name, url: `/poojas/${p.slug}`, isActive: true })),
+    { label: "Office Puja", url: "/office-puja", isActive: true },
+  ];
   return [
+    { key: "popular-searches", title: "Popular Searches", kind: "tags" as const, isActive: true, links: searchLinks },
     ...STARTER_FOOTER_TEXT_BLOCKS.map((b) => ({ ...b, kind: "text" as const, isActive: true, links: [] })),
     { key: "popular-pujas", title: "Popular Pujas", kind: "poojas" as const, limit: 12, isActive: true, links: [] },
     {

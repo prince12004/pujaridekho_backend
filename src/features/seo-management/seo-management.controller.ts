@@ -166,7 +166,7 @@ const footerSchema = z.object({
       key: z.string().trim().min(1),
       title: z.string().trim().min(1),
       isActive: z.boolean().optional(),
-      kind: z.enum(["links", "poojas", "blogs", "text"]).optional(),
+      kind: z.enum(["links", "tags", "poojas", "blogs", "text"]).optional(),
       body: z.string().trim().max(1200).optional(),
       limit: z.number().int().min(1).max(30).optional(),
       links: z.array(z.object({ label: z.string().trim().min(1), url: z.string().trim().min(1), isActive: z.boolean().optional() })).default([]),
@@ -232,6 +232,12 @@ const settingsSchema = z.object({
   footer: z
     .object({
       blurb: z.string().max(600).optional(),
+      bookButtonLabel: z.string().max(40).optional(),
+      bookButtonUrl: z
+        .string()
+        .max(300)
+        .refine((v) => !v || /^(\/|https?:\/\/)/.test(v), "Button link must start with / or http")
+        .optional(),
       newsletterTitle: z.string().max(120).optional(),
       newsletterText: z.string().max(300).optional(),
       trustBadges: z.array(z.string().trim().max(80)).max(6).optional(),

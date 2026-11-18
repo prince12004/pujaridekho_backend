@@ -356,7 +356,7 @@ export function invalidateFooterCache() {
 
 export interface PublicFooterGroup {
   key: string;
-  kind: "links" | "poojas" | "blogs" | "text";
+  kind: "links" | "tags" | "poojas" | "blogs" | "text";
   title: string;
   body?: string;
   links: { label: string; url: string }[];
