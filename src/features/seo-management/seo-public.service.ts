@@ -124,7 +124,8 @@ export async function getPublicPageBySlug(slug: string) {
   // ---- Breadcrumbs (only link ancestors that actually have a live page)
   const breadcrumbs: { name: string; path?: string }[] = [];
   if (page.pageType === "service") {
-    breadcrumbs.push({ name: "Puja Services", path: "/seo-pages" });
+    // Region hubs such as "pandit-in-delhi-ncr" sit under Locations.
+    breadcrumbs.push({ name: page.slug.startsWith("pandit-in-") ? "Locations" : "Puja Services", path: "/seo-pages" });
   } else if (page.pageType === "office_location") {
     const officeHub = await SeoPageModel.findOne({ slug: "office-puja", status: "published" }).select("slug name").lean();
     breadcrumbs.push(officeHub ? { name: "Office Puja", path: "/office-puja" } : { name: "Locations", path: "/seo-pages" });
@@ -431,7 +432,12 @@ export async function getPublicFooter(): Promise<PublicFooterGroup[]> {
     if (kind === "cities") {
       // "Pandit in <city>" for every served city, then the directory link last.
       const cityLinks = (await getCityLinks()).slice(0, limit);
-      const cityColumn = [...cityLinks, { label: group.body?.trim() || "All SEO Pages", url: "/seo-pages" }];
+      // Optional hand-picked links shown first (e.g. "Pandit in Delhi NCR").
+      const extra: { label: string; url: string }[] = [];
+      for (const l of group.links ?? []) {
+        if (l.isActive !== false && (await isLiveUrl(l.url))) extra.push({ label: l.label, url: l.url });
+      }
+      const cityColumn = [...extra, ...cityLinks, { label: group.body?.trim() || "All SEO Pages", url: "/seo-pages" }];
       if (cityLinks.length) data.push({ key: group.key, kind: "links", title: group.title, links: cityColumn });
       continue;
     }

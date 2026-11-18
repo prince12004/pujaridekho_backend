@@ -343,7 +343,7 @@ export async function saveFooterGroups(groups: FooterGroupInput[]) {
   const problems: string[] = [];
   for (const group of groups) {
     if (group.kind === "text" && !group.body?.trim()) problems.push(`"${group.title}" needs some text`);
-    if (group.kind && group.kind !== "links" && group.kind !== "tags") continue;
+    if (group.kind && group.kind !== "links" && group.kind !== "tags" && group.kind !== "cities") continue;
     for (const link of group.links) {
       if (link.isActive !== false && !(await isLiveUrl(link.url))) problems.push(`"${link.label}" → ${link.url} is not a live page`);
     }
@@ -366,7 +366,7 @@ export async function saveFooterGroups(groups: FooterGroupInput[]) {
           kind: group.kind ?? "links",
           body: group.body,
           limit: group.limit ?? 12,
-          links: group.kind && group.kind !== "links" && group.kind !== "tags" ? [] : group.links,
+          links: group.kind && group.kind !== "links" && group.kind !== "tags" && group.kind !== "cities" ? [] : group.links,
         },
       },
       { upsert: true },

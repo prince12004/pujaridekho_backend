@@ -4,7 +4,7 @@ import { Schema, model, type InferSchemaType } from "mongoose";
 //   links  — a hand-made list of links (ordered by array position)
 //   tags   — a hand-made list shown as pill links beside the logo (e.g. Popular Searches)
 //   cities — "Pandit in <city>" for every served city + an "All SEO Pages" link last
-//            (body = label of that last link)
+//            (body = label of that last link; any `links` are shown first)
 //   categories — one column per pooja category, built from published poojas
 //            (biggest categories first; `limit` = max columns, the rest go in "More Pujas")
 //   poojas — links generated from published poojas (featured/popular first)
