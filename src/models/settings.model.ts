@@ -46,6 +46,19 @@ const settingsSchema = new Schema(
     // Defaults apply even to the existing settings document, so GET /settings
     // never returns a null "app" object.
     app: { type: appSettingsSchema, default: () => ({}) },
+    // Added on top of the live database counts shown on the homepage / About
+    // page (e.g. pujas done offline before the platform). Editable in admin.
+    statsOffsets: {
+      type: new Schema(
+        {
+          verifiedPandits: { type: Number, default: 5, min: 0 },
+          poojas: { type: Number, default: 1000, min: 0 },
+          families: { type: Number, default: 0, min: 0 },
+        },
+        { _id: false },
+      ),
+      default: () => ({}),
+    },
   },
   { timestamps: true },
 );

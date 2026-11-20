@@ -4,6 +4,7 @@ import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
 import { recordAuditLog } from "../../lib/audit.js";
 import { getOrCreateSettings } from "../settings/settings.service.js";
+import { clearSiteStatsCache } from "../stats/stats.service.js";
 
 const socialLinksSchema = z.object({
   facebook: z.string().optional(),
@@ -52,6 +53,13 @@ const settingsSchema = z.object({
   maintenanceMode: z.boolean().optional(),
   maintenanceMessage: z.string().optional(),
   app: appSettingsSchema.optional(),
+  statsOffsets: z
+    .object({
+      verifiedPandits: z.number().int().min(0).max(100000),
+      poojas: z.number().int().min(0).max(10000000),
+      families: z.number().int().min(0).max(10000000),
+    })
+    .optional(),
 });
 
 export const getAdminSettings = asyncHandler(async (_req: Request, res: Response) => {
@@ -63,6 +71,7 @@ export const patchAdminSettings = asyncHandler(async (req: Request, res: Respons
   const settings = await getOrCreateSettings();
   Object.assign(settings, input);
   await settings.save();
+  clearSiteStatsCache();
   await recordAuditLog(req, req.admin!, {
     action: "update",
     entityType: "Settings",
