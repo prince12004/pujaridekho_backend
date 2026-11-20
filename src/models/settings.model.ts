@@ -53,7 +53,7 @@ const settingsSchema = new Schema(
         {
           verifiedPandits: { type: Number, default: 5, min: 0 },
           poojas: { type: Number, default: 1000, min: 0 },
-          families: { type: Number, default: 0, min: 0 },
+          families: { type: Number, default: 1000, min: 0 },
         },
         { _id: false },
       ),
