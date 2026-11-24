@@ -47,13 +47,14 @@ const settingsSchema = new Schema(
     // never returns a null "app" object.
     app: { type: appSettingsSchema, default: () => ({}) },
     // Added on top of the live database counts shown on the homepage / About
-    // page (e.g. pujas done offline before the platform). Editable in admin.
+    // page. Only use a number you can evidence (e.g. documented offline pujas) —
+    // these figures appear in ads and must survive a "show me" request.
     statsOffsets: {
       type: new Schema(
         {
-          verifiedPandits: { type: Number, default: 5, min: 0 },
-          poojas: { type: Number, default: 1000, min: 0 },
-          families: { type: Number, default: 1000, min: 0 },
+          verifiedPandits: { type: Number, default: 0, min: 0 },
+          poojas: { type: Number, default: 0, min: 0 },
+          families: { type: Number, default: 0, min: 0 },
         },
         { _id: false },
       ),
