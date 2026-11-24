@@ -46,6 +46,7 @@ import { paymentsRouter } from "../features/payments/payments.routes.js";
 import { bookingsRouter } from "../features/bookings/bookings.routes.js";
 import { settingsRouter } from "../features/settings/settings.routes.js";
 import { statsRouter } from "../features/stats/stats.routes.js";
+import { adminTeamRouter, teamRouter } from "../features/team/team.routes.js";
 import { adminSettingsRouter } from "../features/admin-settings/admin-settings.routes.js";
 import { homepageBannerRouter } from "../features/homepage-banner/homepage-banner.routes.js";
 import { adminHomepageBannerRouter } from "../features/admin-homepage-banner/admin-homepage-banner.routes.js";
@@ -124,6 +125,7 @@ apiRouter.use("/admin/leads", adminLeadsRouter);
 apiRouter.use("/admin/seo-management", adminSeoManagementRouter);
 apiRouter.use("/admin/uploads", adminUploadsRouter);
 apiRouter.use("/admin/push", adminPushRouter);
+apiRouter.use("/admin/team", adminTeamRouter);
 
 // External CRM app integration — website API key auth, not admin JWT.
 apiRouter.use("/crm", crmRouter);
@@ -157,6 +159,7 @@ apiRouter.use("/payments", paymentsRouter);
 apiRouter.use("/bookings", bookingsRouter);
 apiRouter.use("/settings", settingsRouter);
 apiRouter.use("/stats", statsRouter);
+apiRouter.use("/team", teamRouter);
 apiRouter.use("/homepage-banner", homepageBannerRouter);
 apiRouter.use("/pages", pagesRouter);
 apiRouter.use("/seo", seoRouter);
