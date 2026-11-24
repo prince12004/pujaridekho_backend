@@ -16,7 +16,7 @@ teamRouter.get(
   asyncHandler(async (_req: Request, res: Response) => {
     const members = await TeamMemberModel.find({ isActive: true })
       .sort({ sortOrder: 1, createdAt: 1 })
-      .select("name designation bio photo photoPosition featured")
+      .select("name designation bio group photo photoPosition featured")
       .lean();
     sendSuccess(res, members);
   }),
@@ -30,6 +30,7 @@ const memberSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(80),
   designation: z.string().trim().min(1, "Designation is required").max(80),
   bio: z.string().trim().max(240, "Keep the bio under 240 characters").default(""),
+  group: z.enum(["leadership", "advisor"]).default("leadership"),
   photo: z
     .string()
     .trim()

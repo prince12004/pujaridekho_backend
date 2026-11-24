@@ -6,6 +6,8 @@ const teamMemberSchema = new Schema(
     name: { type: String, required: true, trim: true },
     designation: { type: String, required: true, trim: true },
     bio: { type: String, trim: true, default: "", maxlength: 240 },
+    // Shown as separate rows on the About page.
+    group: { type: String, enum: ["leadership", "advisor"], default: "leadership" },
     // Portrait photo (4:5 works best). Uploaded via the media library, or a
     // site path such as /team/<name>.jpg.
     photo: { type: String, trim: true, default: "" },
