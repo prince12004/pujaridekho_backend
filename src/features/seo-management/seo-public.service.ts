@@ -430,14 +430,15 @@ export async function getPublicFooter(): Promise<PublicFooterGroup[]> {
       continue;
     }
     if (kind === "cities") {
-      // "Pandit in <city>" for every served city, then the directory link last.
+      // "Pandit in <city>" for every served city. (The "All SEO Pages" directory
+      // link is no longer shown in the footer; /seo-pages itself stays live.)
       const cityLinks = (await getCityLinks()).slice(0, limit);
       // Optional hand-picked links shown first (e.g. "Pandit in Delhi NCR").
       const extra: { label: string; url: string }[] = [];
       for (const l of group.links ?? []) {
         if (l.isActive !== false && (await isLiveUrl(l.url))) extra.push({ label: l.label, url: l.url });
       }
-      const cityColumn = [...extra, ...cityLinks, { label: group.body?.trim() || "All SEO Pages", url: "/seo-pages" }];
+      const cityColumn = [...extra, ...cityLinks];
       if (cityLinks.length) data.push({ key: group.key, kind: "links", title: group.title, links: cityColumn });
       continue;
     }
