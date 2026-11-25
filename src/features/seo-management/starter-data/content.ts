@@ -536,7 +536,7 @@ export const SEED_PAGES: SeedPage[] = [
       },
       {
         question: "Which cities do you cover for office puja?",
-        answer: "Noida, Greater Noida, Greater Noida West, Ghaziabad, Delhi and Gurugram.",
+        answer: "Noida, Greater Noida (including Greater Noida West), Ghaziabad, Delhi and Gurugram.",
       },
     ],
     services: BUSINESS_SERVICES,
@@ -606,7 +606,7 @@ export const SEED_PAGES: SeedPage[] = [
       },
       {
         question: "Which cities are covered?",
-        answer: "Noida, Greater Noida, Greater Noida West, Ghaziabad, Delhi and Gurugram.",
+        answer: "Noida, Greater Noida (including Greater Noida West), Ghaziabad, Delhi and Gurugram.",
       },
     ],
     services: BUSINESS_SERVICES,

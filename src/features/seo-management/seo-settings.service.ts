@@ -60,12 +60,12 @@ export const DEFAULT_SEO_SETTINGS = {
   },
   footer: {
     blurb:
-      "PujariDekho connects families and businesses across Noida, Greater Noida, Greater Noida West, Ghaziabad, Delhi and Gurugram with verified, experienced pandits for every ritual — with the price shown before you book.",
+      "PujariDekho connects families and businesses across Noida, Greater Noida (including Greater Noida West), Ghaziabad, Delhi and Gurugram with verified, experienced pandits for every ritual — with the price shown before you book.",
     bookButtonLabel: "Book Pandit Ji",
     bookButtonUrl: "/poojas",
     newsletterTitle: "Subscribe to Our Newsletter",
     newsletterText: "Vidhi guides, festival muhurat dates and special offers — straight to your inbox.",
-    trustBadges: ["Verified & Experienced Pandits", "Secure & Encrypted Payments", "Trusted by Thousands of Families", "24/7 Customer Support"],
+    trustBadges: ["Verified & Experienced Pandits", "Secure & Encrypted Payments", "Trusted by Families Across Delhi NCR", "Call & WhatsApp Support"],
     copyright: "© {year} PujariDekho. All rights reserved.",
     showAllLocationsLink: true,
   },

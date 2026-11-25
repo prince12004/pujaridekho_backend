@@ -14,7 +14,7 @@ export const STARTER_FOOTER_TEXT_BLOCKS = [
   {
     key: "about-pandit-near-me",
     title: "Pandit Ji Near Me",
-    body: "Looking for a pandit near you in Delhi NCR? PujariDekho serves homes, societies, offices and shops across Noida, Greater Noida, Greater Noida West, Ghaziabad, Delhi and Gurugram. See all locations on our SEO directory page.",
+    body: "Looking for a pandit near you in Delhi NCR? PujariDekho serves homes, societies, offices and shops across Noida, Greater Noida (including Greater Noida West), Ghaziabad, Delhi and Gurugram. See all locations on our SEO directory page.",
   },
   {
     key: "about-muhurat",
