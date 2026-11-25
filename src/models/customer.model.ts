@@ -26,7 +26,10 @@ const customerSchema = new Schema(
     city: { type: String },
     photo: { type: String },
     addresses: { type: [addressSchema], default: [] },
-    status: { type: String, enum: ["active", "blocked"], default: "active" },
+    // "deleted" = the customer deleted their account: personal data is erased and
+    // login is refused, while bookings / orders stay for accounting records.
+    status: { type: String, enum: ["active", "blocked", "deleted"], default: "active" },
+    deletedAt: { type: Date },
     lastLoginAt: { type: Date },
     adminNotes: { type: String },
   },

@@ -1,5 +1,5 @@
 import { ApiError } from "../../lib/api-error.js";
-import { onOrderStatusChange } from "../../lib/booking-events.js";
+import { notifyOrderEvent, onOrderStatusChange } from "../../lib/booking-events.js";
 import { OrderModel } from "../../models/order.model.js";
 
 export interface ListOrdersQuery {
@@ -7,6 +7,8 @@ export interface ListOrdersQuery {
   limit?: number;
   search?: string;
   status?: string;
+  /** "requested" → only orders with a pending customer cancellation request. */
+  cancelRequest?: string;
 }
 
 export async function listOrders(query: ListOrdersQuery) {
@@ -15,6 +17,7 @@ export async function listOrders(query: ListOrdersQuery) {
 
   const filter: Record<string, unknown> = {};
   if (query.status) filter.status = query.status;
+  if (query.cancelRequest === "requested") filter["cancelRequest.status"] = "requested";
   if (query.search) {
     filter.$or = [
       { orderId: { $regex: query.search, $options: "i" } },
@@ -54,4 +57,24 @@ export async function updateOrderStatus(id: string, status: string, note?: strin
 export async function deleteOrder(id: string) {
   const order = await getOrderById(id);
   await order.deleteOne();
+}
+
+/** Approve (cancels the order) or reject a customer's cancellation request. */
+export async function resolveOrderCancelRequest(id: string, decision: "approve" | "reject", note?: string) {
+  const order = await getOrderById(id);
+  if (!order.cancelRequest || order.cancelRequest.status !== "requested") {
+    throw ApiError.badRequest("This order has no pending cancellation request");
+  }
+  order.cancelRequest.status = decision === "approve" ? "approved" : "rejected";
+  order.cancelRequest.resolvedAt = new Date();
+  order.cancelRequest.resolutionNote = note;
+  if (decision === "approve") {
+    order.status = "cancelled";
+    order.timeline.push({ status: "cancelled", note: note || "Cancellation request approved", changedAt: new Date() });
+  } else {
+    order.timeline.push({ status: order.status, note: note || "Cancellation request rejected", changedAt: new Date() });
+  }
+  await order.save();
+  await notifyOrderEvent(order, decision === "approve" ? "cancel_approved" : "cancel_rejected", { paid: order.paymentStatus === "paid" });
+  return order;
 }

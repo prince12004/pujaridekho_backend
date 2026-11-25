@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { OtpModel, type OTP_PURPOSES } from "../models/otp.model.js";
+import { env } from "../config/env.js";
 import { ApiError } from "./api-error.js";
 
 const OTP_TTL_MINUTES = 5;
@@ -15,7 +16,19 @@ function generateOtpCode() {
   return crypto.randomInt(100000, 999999).toString();
 }
 
+/** The configured test account (login only), which always uses the fixed OTP. */
+const TEST_LOGIN_MOBILES = new Set(env.TEST_LOGIN_MOBILE.split(",").map((m) => m.trim()).filter(Boolean));
+
+function isTestLogin(mobile: string, purpose: OtpPurpose) {
+  return purpose === "login" && TEST_LOGIN_MOBILES.has(mobile);
+}
+
 export async function requestOtp(mobile: string, purpose: OtpPurpose) {
+  // Test number: no cooldown / send limits, nothing stored — the OTP is always the fixed one.
+  if (isTestLogin(mobile, purpose)) {
+    return { expiresAt: new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000), devOtp: env.TEST_LOGIN_OTP };
+  }
+
   const lastSent = await OtpModel.findOne({ mobile, purpose }).sort({ createdAt: -1 });
   if (lastSent) {
     const secondsSinceLastSend = (Date.now() - lastSent.createdAt.getTime()) / 1000;
@@ -53,6 +66,10 @@ export async function generateReachedOtp(): Promise<{ plain: string; hash: strin
 }
 
 export async function consumeOtp(mobile: string, purpose: OtpPurpose, code: string) {
+  if (isTestLogin(mobile, purpose)) {
+    if (code !== env.TEST_LOGIN_OTP) throw ApiError.badRequest("Incorrect OTP");
+    return;
+  }
   const record = await OtpModel.findOne({ mobile, purpose, consumed: false }).sort({ createdAt: -1 });
   if (!record) throw ApiError.badRequest("No active OTP request found — please request a new OTP");
 

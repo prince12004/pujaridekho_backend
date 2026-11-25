@@ -24,6 +24,21 @@ const shippingAddressSchema = new Schema(
   { _id: false },
 );
 
+export const ORDER_CANCEL_ELIGIBLE_STATUSES = ["pending", "confirmed", "processing"] as const;
+
+// Customer-raised cancellation request, reviewed by admin (same flow as puja bookings).
+const orderCancelRequestSchema = new Schema(
+  {
+    reason: { type: String, required: true },
+    notes: { type: String },
+    status: { type: String, enum: ["requested", "approved", "rejected"], default: "requested" },
+    requestedAt: { type: Date, default: Date.now },
+    resolvedAt: { type: Date },
+    resolutionNote: { type: String },
+  },
+  { _id: false },
+);
+
 const orderSchema = new Schema(
   {
     orderId: { type: String, required: true, unique: true },
@@ -43,11 +58,13 @@ const orderSchema = new Schema(
     status: { type: String, enum: ORDER_STATUSES, default: "pending" },
     createdByAdmin: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
     timeline: [{ status: String, note: String, changedAt: { type: Date, default: Date.now } }],
+    cancelRequest: { type: orderCancelRequestSchema, default: null },
   },
   { timestamps: true },
 );
 
 orderSchema.index({ status: 1, createdAt: -1 });
+orderSchema.index({ "cancelRequest.status": 1 });
 
 export type OrderDocument = InferSchemaType<typeof orderSchema>;
 export const OrderModel = model("Order", orderSchema);

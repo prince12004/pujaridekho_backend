@@ -190,9 +190,13 @@ export async function onBookingStatusChange(booking: BookingLike, from: string |
 
 // ---------------------------------------------------------------- Orders
 
-export type OrderEvent = "confirmed" | "shipped" | "delivered";
+export type OrderEvent = "confirmed" | "shipped" | "delivered" | "cancel_approved" | "cancel_rejected";
 
-export async function notifyOrderEvent(order: { _id: unknown; orderId: string; customer?: unknown }, event: OrderEvent) {
+export async function notifyOrderEvent(
+  order: { _id: unknown; orderId: string; customer?: unknown },
+  event: OrderEvent,
+  extra: { paid?: boolean } = {},
+) {
   try {
     const customer = refId(order.customer);
     if (!customer) return;
@@ -200,6 +204,11 @@ export async function notifyOrderEvent(order: { _id: unknown; orderId: string; c
       confirmed: { title: "Order confirmed", message: `Order ${order.orderId} is confirmed.` },
       shipped: { title: "Order shipped", message: `Your samagri order ${order.orderId} is on the way.` },
       delivered: { title: "Order delivered", message: `Order ${order.orderId} was delivered.` },
+      cancel_approved: {
+        title: "Order cancelled",
+        message: `Your order ${order.orderId} is cancelled.${extra.paid ? " Your refund will be processed by our team." : ""}`,
+      },
+      cancel_rejected: { title: "Cancellation not approved", message: `Our team will contact you about order ${order.orderId}.` },
     }[event];
     await notifyCustomer({
       customer,

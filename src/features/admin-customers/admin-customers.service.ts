@@ -57,6 +57,7 @@ export async function createCustomer(input: Record<string, unknown>) {
 
 export async function updateCustomer(id: string, input: Record<string, unknown>) {
   const customer = await getCustomerById(id);
+  if (customer.status === "deleted") throw ApiError.badRequest("This customer deleted their account — it can't be edited");
   Object.assign(customer, input);
   await customer.save();
   return customer;

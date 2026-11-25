@@ -8,6 +8,14 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   API_VERSION: z.string().default("v1"),
   MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
+  // Fixed login for testing (app store review, QA): these mobile numbers
+  // (comma-separated) always log in with TEST_LOGIN_OTP. Set TEST_LOGIN_MOBILE=""
+  // to switch it off.
+  TEST_LOGIN_MOBILE: z
+    .string()
+    .regex(/^([6-9]\d{9}(\s*,\s*[6-9]\d{9})*)?$/, "TEST_LOGIN_MOBILE must be 10-digit mobile numbers separated by commas, or empty")
+    .default("9876234567"),
+  TEST_LOGIN_OTP: z.string().regex(/^\d{4,6}$/, "TEST_LOGIN_OTP must be 4–6 digits").default("123456"),
   CLIENT_URL: z.string().url().default("http://localhost:3000"),
   API_PUBLIC_URL: z.string().url().default("http://localhost:4000"),
   JWT_ACCESS_SECRET: z.string().min(16, "JWT_ACCESS_SECRET must be at least 16 characters"),

@@ -4,13 +4,14 @@ import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
 import { recordAuditLog } from "../../lib/audit.js";
 import { ORDER_STATUSES } from "../../models/order.model.js";
-import { deleteOrder, getOrderById, listOrders, updateOrderStatus } from "./admin-orders.service.js";
+import { deleteOrder, getOrderById, listOrders, resolveOrderCancelRequest, updateOrderStatus } from "./admin-orders.service.js";
 
 const listQuerySchema = z.object({
   page: z.coerce.number().optional(),
   limit: z.coerce.number().optional(),
   search: z.string().optional(),
   status: z.string().optional(),
+  cancelRequest: z.string().optional(),
 });
 
 export const getOrders = asyncHandler(async (req: Request, res: Response) => {
@@ -46,4 +47,18 @@ export const removeOrder = asyncHandler(async (req: Request, res: Response) => {
     description: `Deleted order ${order.orderId}`,
   });
   sendSuccess(res, null, "Order deleted");
+});
+
+const decisionSchema = z.object({ decision: z.enum(["approve", "reject"]), note: z.string().trim().max(500).optional() });
+
+export const patchOrderCancelRequest = asyncHandler(async (req: Request, res: Response) => {
+  const { decision, note } = decisionSchema.parse(req.body);
+  const order = await resolveOrderCancelRequest(req.params.id, decision, note);
+  await recordAuditLog(req, req.admin!, {
+    action: "update",
+    entityType: "Order",
+    entityId: order._id.toString(),
+    description: `Cancellation request for order ${order.orderId} ${decision === "approve" ? "approved" : "rejected"}`,
+  });
+  sendSuccess(res, order, decision === "approve" ? "Order cancelled" : "Cancellation request rejected");
 });

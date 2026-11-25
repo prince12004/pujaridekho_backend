@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { asyncHandler } from "../../lib/async-handler.js";
 import { sendSuccess } from "../../lib/api-response.js";
-import { getMyProfile, updateMyProfile } from "./account-profile.service.js";
+import { deleteMyAccount, getMyProfile, updateMyProfile } from "./account-profile.service.js";
 
 export const getProfile = asyncHandler(async (req: Request, res: Response) => {
   sendSuccess(res, await getMyProfile(req.customer!.id));
@@ -21,4 +21,13 @@ const updateSchema = z.object({
 export const patchProfile = asyncHandler(async (req: Request, res: Response) => {
   const input = updateSchema.parse(req.body);
   sendSuccess(res, await updateMyProfile(req.customer!.id, input), "Profile updated");
+});
+
+// The client must send { confirm: "DELETE" } so an accidental call can't erase an account.
+const deleteSchema = z.object({ confirm: z.literal("DELETE", { message: 'Type "DELETE" to confirm' }) });
+
+export const removeAccount = asyncHandler(async (req: Request, res: Response) => {
+  deleteSchema.parse(req.body);
+  await deleteMyAccount(req.customer!.id);
+  sendSuccess(res, null, "Your account has been deleted");
 });
