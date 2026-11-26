@@ -23,6 +23,8 @@ const includedItemSchema = new Schema(
     category: { type: String },
     arrangedBy: { type: String, default: "PujariDekho" },
     required: { type: Boolean, default: true },
+    // Photo shown next to the item in the "Include Samagri" list.
+    image: { type: String, trim: true, default: "" },
   },
   { _id: false },
 );

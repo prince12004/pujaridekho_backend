@@ -20,6 +20,12 @@ const includedItemSchema = z.object({
   category: z.string().optional(),
   arrangedBy: z.string().optional(),
   required: z.boolean().optional(),
+  image: z
+    .string()
+    .trim()
+    .max(1000)
+    .refine((v) => !v || /^(https?:\/\/|\/)/.test(v), "Image must be an uploaded image URL")
+    .optional(),
 });
 
 const samagriTemplateSchema = z.object({
