@@ -13,6 +13,8 @@ import { SeoRedirectModel } from "../../models/seo-redirect.model.js";
 import { STATIC_PUBLIC_ROUTES, isLiveUrl } from "./seo-content.js";
 import { findServiceCityForPageSlug, getCityLinks, getServiceCities } from "./seo-cities.js";
 import { getSeoSettings } from "./seo-settings.service.js";
+import { PanditModel } from "../../models/pandit.model.js";
+import { panditSlug } from "../pandits/pandits.service.js";
 
 type Id = Types.ObjectId;
 
@@ -541,6 +543,9 @@ export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   for (const p of blogs) entries.push({ path: `/blog/${p.slug}`, lastModified: p.updatedAt, changeFrequency: "monthly", priority: 0.6 });
   for (const p of products) entries.push({ path: `/products/${p.slug}`, lastModified: p.updatedAt, changeFrequency: "weekly", priority: 0.5 });
   for (const p of cmsPages) entries.push({ path: `/pages/${p.slug}`, lastModified: p.updatedAt, changeFrequency: "monthly", priority: 0.4 });
+  // Public pandit profiles (/pandits/<slug>)
+  const pandits = await PanditModel.find({ accountStatus: "active", verificationStatus: "verified" }).select("fullName updatedAt").lean();
+  for (const p of pandits) entries.push({ path: `/pandits/${panditSlug(p.fullName)}`, lastModified: p.updatedAt, changeFrequency: "monthly", priority: 0.6 });
   for (const p of seoPages.filter((sp) => isEligible(sp))) {
     entries.push({
       path: path(p.slug),

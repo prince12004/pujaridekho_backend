@@ -57,7 +57,10 @@ export async function getSiteStats(): Promise<SiteStats> {
   const offsets = settings.statsOffsets ?? { verifiedPandits: 0, poojas: 0, families: 0 };
 
   // Real customer reviews first; published testimonials only until reviews exist.
-  const ratingSource = reviewAgg[0]?.n ? { agg: reviewAgg[0], source: "reviews" as const } : testimonialAgg[0]?.n ? { agg: testimonialAgg[0], source: "testimonials" as const } : null;
+  // Only real, approved customer reviews count as a rating (testimonials are
+  // curated quotes, not a verifiable rating).
+  void testimonialAgg;
+  const ratingSource = reviewAgg[0]?.n ? { agg: reviewAgg[0], source: "reviews" as const } : null;
 
   const data: SiteStats = {
     verifiedPandits: pandits + (offsets.verifiedPandits ?? 0),
