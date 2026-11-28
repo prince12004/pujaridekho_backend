@@ -49,8 +49,11 @@ export async function listPublicProductCategories() {
   ]);
   const countByCategory = new Map(counts.map((c) => [String(c._id), c.count as number]));
 
-  return categories.map((category) => ({
-    ...category.toObject(),
-    itemCount: countByCategory.get(String(category._id)) ?? 0,
-  }));
+  // Empty categories are hidden from customers until they have products.
+  return categories
+    .map((category) => ({
+      ...category.toObject(),
+      itemCount: countByCategory.get(String(category._id)) ?? 0,
+    }))
+    .filter((category) => category.itemCount > 0);
 }
